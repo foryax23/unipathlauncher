@@ -48,41 +48,41 @@
 
 :root {
   --radius: 1.25rem;
-  /* Brand: navy #0f2b5b, gold #e8b84b */
-  --background: oklch(0.985 0.005 90);
-  --foreground: oklch(0.2 0.05 265);
+  /* Bridge Gateway Consulting — deep navy #0B1F3F + brass gold #B8924A on warm ivory */
+  --background: oklch(0.975 0.012 80);
+  --foreground: oklch(0.18 0.05 260);
   --surface: oklch(1 0 0);
-  --surface-muted: oklch(0.965 0.008 90);
+  --surface-muted: oklch(0.955 0.012 80);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.2 0.05 265);
+  --card-foreground: oklch(0.18 0.05 260);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.2 0.05 265);
-  --primary: oklch(0.27 0.09 265);
-  --primary-foreground: oklch(0.985 0.005 90);
-  --secondary: oklch(0.95 0.01 265);
-  --secondary-foreground: oklch(0.27 0.09 265);
-  --muted: oklch(0.95 0.008 90);
-  --muted-foreground: oklch(0.48 0.03 265);
-  --accent: oklch(0.95 0.01 265);
-  --accent-foreground: oklch(0.27 0.09 265);
-  --gold: oklch(0.81 0.13 82);
-  --gold-foreground: oklch(0.2 0.05 265);
+  --popover-foreground: oklch(0.18 0.05 260);
+  --primary: oklch(0.22 0.07 260);
+  --primary-foreground: oklch(0.98 0.012 80);
+  --secondary: oklch(0.94 0.015 260);
+  --secondary-foreground: oklch(0.22 0.07 260);
+  --muted: oklch(0.945 0.012 80);
+  --muted-foreground: oklch(0.45 0.03 260);
+  --accent: oklch(0.94 0.015 260);
+  --accent-foreground: oklch(0.22 0.07 260);
+  --gold: oklch(0.68 0.10 80);
+  --gold-foreground: oklch(0.18 0.05 260);
   --destructive: oklch(0.58 0.22 27);
   --destructive-foreground: oklch(0.985 0 0);
-  --success: oklch(0.58 0.15 155);
+  --success: oklch(0.58 0.13 155);
   --success-foreground: oklch(0.985 0 0);
-  --warning: oklch(0.72 0.16 70);
-  --warning-foreground: oklch(0.2 0.05 265);
-  --border: oklch(0.9 0.012 265);
-  --input: oklch(0.92 0.01 265);
-  --ring: oklch(0.27 0.09 265);
+  --warning: oklch(0.72 0.14 70);
+  --warning-foreground: oklch(0.18 0.05 260);
+  --border: oklch(0.88 0.014 260);
+  --input: oklch(0.91 0.012 260);
+  --ring: oklch(0.22 0.07 260);
   --glass: oklch(1 0 0 / 0.6);
   --glass-border: oklch(1 0 0 / 0.4);
-  /* Warm 2026 accents */
-  --coral: oklch(68% 0.18 28);
-  --amber: oklch(80% 0.15 65);
-  --surface-warm: oklch(97% 0.03 50);
-  --gradient-warm: linear-gradient(135deg, oklch(68% 0.18 28), oklch(80% 0.15 65));
+  /* Brass accents — replace coral with brand gold range */
+  --coral: oklch(0.62 0.10 75);
+  --amber: oklch(0.78 0.11 78);
+  --surface-warm: oklch(0.965 0.018 75);
+  --gradient-warm: linear-gradient(135deg, oklch(0.22 0.07 260), oklch(0.68 0.10 80));
 }
 
 .dark {
@@ -115,10 +115,10 @@
   --ring: oklch(0.81 0.13 82);
   --glass: oklch(0.2 0.04 265 / 0.55);
   --glass-border: oklch(1 0 0 / 0.08);
-  --coral: oklch(72% 0.16 28);
-  --amber: oklch(82% 0.14 65);
-  --surface-warm: oklch(0.22 0.05 30);
-  --gradient-warm: linear-gradient(135deg, oklch(64% 0.18 28), oklch(78% 0.15 65));
+  --coral: oklch(0.70 0.10 78);
+  --amber: oklch(0.80 0.12 78);
+  --surface-warm: oklch(0.22 0.04 260);
+  --gradient-warm: linear-gradient(135deg, oklch(0.81 0.13 82), oklch(0.55 0.08 78));
 }
 
 @layer base {
