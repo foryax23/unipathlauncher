@@ -69,6 +69,8 @@ export function Hero() {
             />
           </div>
         </div>
+
+        <LiveOffersBand />
       </div>
 
       {/* Soft curve into next section */}
