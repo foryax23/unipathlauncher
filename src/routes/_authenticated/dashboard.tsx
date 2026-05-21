@@ -6,6 +6,7 @@ import { PROGRAMMES, COURSES, CAMPUSES } from "@/components/marketing/data/cours
 import { supabase } from "@/integrations/supabase/client";
 import { GraduationCap, MapPin, Sparkles, LogOut } from "lucide-react";
 import { Logo } from "@/components/marketing/Logo";
+import { VerifyEmailBanner } from "@/components/dashboard/VerifyEmailBanner";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Your shortlist · UniPath" }] }),
@@ -20,21 +21,26 @@ type Profile = {
   lat: number | null;
   lng: number | null;
   onboarding_complete: boolean;
+  email_verified_at: string | null;
 };
 
 function Dashboard() {
   const navigate = useNavigate();
   const fetchProfile = useServerFn(getMyProfile);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [email, setEmail] = useState<string>("");
 
   useEffect(() => {
-    fetchProfile({}).then((r) => {
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setEmail(session?.user.email ?? "");
+      const r = await fetchProfile({});
       if (!r.profile?.onboarding_complete) {
         navigate({ to: "/onboarding" });
         return;
       }
       setProfile(r.profile as Profile);
-    });
+    })();
   }, []);
 
   if (!profile) {
