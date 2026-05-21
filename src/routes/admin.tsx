@@ -49,7 +49,15 @@ export const Route = createFileRoute("/admin")({
       });
     }
   },
-  head: () => ({ meta: [{ title: "Admin · Bridge Gateway" }] }),
+  head: () => ({
+    meta: [
+      { title: "Admin · Bridge Gateway" },
+      { name: "description", content: "Adviser workspace for Bridge Gateway Consulting." },
+      { name: "robots", content: "noindex,nofollow" },
+      { property: "og:url", content: "/admin" },
+    ],
+    links: [{ rel: "canonical", href: "/admin" }],
+  }),
   component: AdminPage,
 });
 
