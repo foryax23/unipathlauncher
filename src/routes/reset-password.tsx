@@ -48,7 +48,20 @@ function ResetPasswordPage() {
       const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
       toast.success("Password updated. You're signed in.");
-      window.location.href = "/onboarding";
+      // Role-based redirect: admins → /admin, everyone else → /dashboard.
+      const { data: userData } = await supabase.auth.getUser();
+      const uid = userData.user?.id;
+      let dest = "/dashboard";
+      if (uid) {
+        const { data: role } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", uid)
+          .eq("role", "admin")
+          .maybeSingle();
+        if (role) dest = "/admin";
+      }
+      window.location.href = dest;
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to update password");
     } finally {
