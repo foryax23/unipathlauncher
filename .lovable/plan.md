@@ -1,45 +1,54 @@
-# Redesign inspired by UniEnrol + remove em dashes
+# Hero "Live Offers" dynamic band
 
-## What the reference shows
+Adds a cinematic strip directly under the hero match-card + image, sitting on the warm gradient just above the curve. Two stacked motion layers create constant, low-noise movement that signals "the platform is alive."
 
-Looking at the two screenshots:
-1. **Hero**: bold red→orange gradient backdrop with soft cloud curves at the bottom; centered headline ("Apply with Malaysia's Trusted Education Consultant"); compact paragraph; a white **match card** on the left with nationality selector + big red pill CTA; on the right, a cut-out student photo on a warm-toned globe with line-art landmarks (Big Ben, Sydney Opera House, plane).
-2. **Services band**: white background, small red eyebrow ("RESEARCH. ANALYSE. APPLY"), bold centered H2 ("Easy Access to Course Info & Student Services"), 3 columns each with an icon, title, copy and a text link ("Explore University →"). Below: "EXPLORE STUDY DESTINATIONS" eyebrow + a horizontal destinations row with landmark illustrations and country flags.
+## Layout
 
-Our current site already has the warm coral/amber palette, glass match card, and landmark line art — close but less punchy. The redesign aligns layout/typography/proportions to the reference while keeping our UniPath UK content.
+```
+[ hero copy + match card + student image ]
+[--- live offers ticker (top row) -------]
+[--- partner uni logo marquee (row 2) ---]
+[ soft curve into next section ]
+```
 
-## Plan
+Both rows are full-bleed within the hero container and run infinitely.
 
-### 1. Hero (`src/components/marketing/Hero.tsx`)
-- Switch backdrop to a stronger **coral→amber gradient** (similar to UniEnrol red→orange) with the soft white curve at the bottom of the section.
-- Center-align the headline + subcopy at the top on desktop (instead of left split), then place the **match card on the left** and the **student image with landmark line art on the right**, both rising into the curve.
-- Tighten copy hierarchy: eyebrow ("UK's trusted student platform"), bold 2-line H1, 1-sentence sub.
-- Keep current stats but move them under the curve in a thin band so the hero stays focused.
-- Match card: tighten to a single primary control (study level) + big red/coral pill CTA — current `HeroMatchCard` already does this, just restyle for stronger contrast and a flag-style left adornment.
+## Row 1, Live offers ticker
 
-### 2. Services / How-we-help band (`src/components/marketing/HowWeHelp.tsx`)
-- Rework to mirror the reference: small coral uppercase eyebrow, large centered H2, 3 equal columns (icon, title, body, text-link CTA). Use existing copy categories (Match courses, 1-to-1 guidance, Apply & visa).
-- Use existing tokens (`text-coral`, `bg-warm`) — no new colors.
+- A single horizontal row of glassy "offer cards" that scroll right-to-left at a steady pace (~50s loop).
+- Each card: small green pulse dot, student first name + initial, course, university, city, relative time. Example: `● Maria K., BSc Computer Science, University of Manchester, 2m ago`.
+- 10-12 hand-written realistic entries (varied subjects, regions, UK uni names) duplicated once in the DOM so the marquee loops seamlessly.
+- Eyebrow tag on the left of the row reads `LIVE, recent offers` with a pulsing dot. Sticky on desktop, sits above on mobile.
+- Pauses on hover.
 
-### 3. Destinations intro (`src/components/marketing/DestinationsGrid.tsx`)
-- Keep the grid but prepend a header block styled like the reference: coral eyebrow "EXPLORE STUDY DESTINATIONS" + bold H2 "Start your successful study journey across the UK" + 1-line sub. (Mostly already there — tighten typography to match.)
+## Row 2, Partner uni logo marquee
 
-### 4. Remove em dashes (—) sitewide
-Replace every `—` with a comma, period, or colon based on sentence flow in:
-- `src/components/marketing/*.tsx` (Hero, HeroMatchCard, HowWeHelp, WhyUs, DestinationsGrid, Courses, FAQ, HowItWorks, Testimonials)
-- `src/components/marketing/data/testimonials.ts`
-- `src/components/auth/AuthCard.tsx`
-- `src/routes/*.tsx` (index, login, signup, reset-password, courses, admin, __root, _authenticated/onboarding, _authenticated/dashboard)
-- `src/server.ts` (only if user-visible strings)
+- Slimmer row, slower scroll in the opposite direction (~70s) for parallax feel.
+- 16-20 partner UK universities as text wordmarks set in `font-editorial` (Instrument Serif italic), white at 70% opacity. Using wordmarks instead of real logos avoids trademark issues.
+- Duplicated for seamless loop, fades on both edges via a CSS mask gradient.
 
-Rule: in marketing copy default to a comma; in titles like "Sign in — UniPath" use a middle dot `·` or pipe `|` (use `·` for consistency).
+## Visual treatment
+
+- Container: thin top/bottom hairline in `white/15`, no card background, sits on the gradient.
+- Offer cards: `bg-white/12`, `backdrop-blur-md`, `ring-1 ring-white/20`, rounded-full pill shape, white text.
+- Pulse dot: 8px coral with an animated ring.
+- Edge fades via `mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent)`.
+- Respects `prefers-reduced-motion`: animation pauses, just shows the first 3 cards statically.
+
+## Files
+
+- New: `src/components/marketing/LiveOffersBand.tsx`, holds both rows + data arrays.
+- Edit: `src/components/marketing/Hero.tsx`, render `<LiveOffersBand />` inside the hero section, after the two-column grid, before the closing curve SVG. Increase hero bottom padding slightly to fit.
+- Reuse existing `marquee` keyframe in `src/styles.css` (already defined). Add one more keyframe `marquee-reverse` and a slower duration variant in the same file.
+
+## Why this fits
+
+- Reinforces the "98% offer rate, 40+ UK partners" stats already on the page with concrete, named proof.
+- Matches the warm/coral aesthetic without competing with the headline.
+- Pure CSS animation, zero runtime cost, no images/videos to load, works on all devices.
 
 ## Out of scope
-- No logo/nav restructure (we keep UniPath branding + current header).
-- No new images generated; we reuse current Picsum student photo and inline SVG landmarks.
-- No backend / auth / admin changes.
 
-## Technical notes
-- Pure presentation work in `src/components/marketing/*` + a search/replace pass for `—`.
-- All colors via existing tokens in `src/styles.css` (`--coral`, `--amber`, `--gradient-warm`, `--surface-warm`).
-- No new dependencies, no route changes.
+- No backend or real offer data, content is curated static copy.
+- No real university logos, wordmarks only.
+- No changes to other sections.

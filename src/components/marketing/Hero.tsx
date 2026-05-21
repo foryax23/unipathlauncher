@@ -1,4 +1,5 @@
 import { HeroMatchCard } from "./HeroMatchCard";
+import { LiveOffersBand } from "./LiveOffersBand";
 
 export function Hero() {
   return (
@@ -68,6 +69,8 @@ export function Hero() {
             />
           </div>
         </div>
+
+        <LiveOffersBand />
       </div>
 
       {/* Soft curve into next section */}
