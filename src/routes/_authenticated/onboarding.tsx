@@ -254,6 +254,14 @@ function OnboardingPage() {
     }
   }
 
+  if (!ready) {
+    return (
+      <div className="min-h-[100dvh] bg-background flex items-center justify-center">
+        <p className="text-sm text-muted-foreground">Loading your onboarding…</p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-[100dvh] bg-background flex flex-col safe-top">
       {/* Header */}
