@@ -21,6 +21,8 @@ export type Database = {
           created_at: string
           email: string
           id: string
+          lat: number | null
+          lng: number | null
           name: string
           phone: string
           reason: string | null
@@ -28,6 +30,7 @@ export type Database = {
           start_year: string
           study_level: string
           subject: string
+          user_id: string | null
         }
         Insert: {
           city: string
@@ -35,6 +38,8 @@ export type Database = {
           created_at?: string
           email: string
           id?: string
+          lat?: number | null
+          lng?: number | null
           name: string
           phone: string
           reason?: string | null
@@ -42,6 +47,7 @@ export type Database = {
           start_year: string
           study_level: string
           subject: string
+          user_id?: string | null
         }
         Update: {
           city?: string
@@ -49,6 +55,8 @@ export type Database = {
           created_at?: string
           email?: string
           id?: string
+          lat?: number | null
+          lng?: number | null
           name?: string
           phone?: string
           reason?: string | null
@@ -56,6 +64,64 @@ export type Database = {
           start_year?: string
           study_level?: string
           subject?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          lat: number | null
+          lng: number | null
+          onboarding_complete: boolean
+          phone: string | null
+          reason: string | null
+          start_year: string | null
+          study_level: string | null
+          subject: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          onboarding_complete?: boolean
+          phone?: string | null
+          reason?: string | null
+          start_year?: string | null
+          study_level?: string | null
+          subject?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          onboarding_complete?: boolean
+          phone?: string | null
+          reason?: string | null
+          start_year?: string | null
+          study_level?: string | null
+          subject?: string | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }

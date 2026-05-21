@@ -1,65 +1,65 @@
-## UniPath — UK university lead-gen funnel
+## UniPath v2 — Auth, Interactive Onboarding, Mobile-First Polish
 
-A single long-scroll landing page built into this TanStack Start app, with course data extracted from your uploaded PDF (May/June 2026 intake), leads persisted in Lovable Cloud, and a password-gated admin panel.
+### 1. Typography refresh (2026 / Apple feel)
+Swap `Instrument Serif` + `Work Sans` for a modern Apple-adjacent stack:
+- **Display**: `Instrument Serif` → **`Geist` (or `Inter Display`)** for headings, tightened tracking (`-0.04em`), large optical sizing.
+- **Body**: `Work Sans` → **`Geist` / `Inter`** with `font-feature-settings: "cv11","ss01","ss03"` for SF-like glyphs.
+- **Mono accents**: `Geist Mono` for stats / form helpers.
+- Keep gold + navy palette but soften with frosted-glass surfaces (`backdrop-blur`, `oklch` translucency) — very visionOS / iOS 18.
+- Add fluid type scale via `clamp()` and tighter line-heights on headings.
 
-### Brand & design system
-- Name: **UniPath**, custom inline SVG logo (graduation cap + upward arrow path mark)
-- Tokens added to `src/styles.css` (oklch):
-  - Primary navy `#0f2b5b`, accent gold `#e8b84b`, paper/ink surfaces, ring/border, muted
-  - Full light + dark variants; sun/moon toggle in header (persists in `localStorage`)
-- Typography: Google Fonts `Instrument Serif` (headings) + `Work Sans` (body), with preconnect in `__root.tsx` head
-- British English copy throughout
-- No purple gradients, no blob shapes, no coloured icon circles — editorial Oxbridge-meets-SaaS feel
+### 2. Full course indexing
+Re-parse the PDF and expand `src/components/marketing/data/courses.ts` from 8 categories → **all programmes** with: title, level (Foundation/UG/PG/Top-up), partner institution, intake months, mode, city. Add a searchable `/courses` route with filters (subject, level, city, intake). Power the LeadForm subject dropdown from the same source of truth.
 
-### Page structure (`src/routes/index.tsx` + section components)
-All sections live in `src/components/sections/` and compose into the single landing route. Smooth-scroll nav via `scroll-margin-top` + anchor links.
+### 3. Authentication
+- Email/password **+ Google** (via Lovable broker `lovable.auth.signInWithOAuth("google")`), enabled with `configure_social_auth`.
+- Auto-confirm OFF (email verification required).
+- New routes:
+  - `/login` (sign-in + Google)
+  - `/signup` (kicks into onboarding)
+  - `/reset-password`
+  - `_authenticated/` layout for gated pages
+- `profiles` table (id → auth.users, name, phone, city, country, lat, lng, subject, study_level, start_year, reason, avatar_url, onboarding_complete) with RLS (user sees/edits own). Trigger to auto-create profile on signup.
 
-1. **Header** — logo, anchor nav (How, Courses, Stories, FAQ), theme toggle, primary CTA
-2. **Hero** — full-bleed campus image (picsum seed `cambridge-quad`), animated subtle gradient overlay, H1, sub, two CTAs, stats bar
-3. **How it works** — large `01 / 02 / 03` numerals, alternating editorial text+image rows
-4. **Course categories** — 8 cards driven by PDF data, grouped into UK student-facing subject buckets:
-   - Business & Finance, Health & Social Care, Public Health, Computer Science, Law, Engineering & Tech, Arts & Design, Education
-   - Each card lists 2–3 real partner institutions extracted from the PDF (e.g. LSC/CCCU, University of Suffolk, University of Bolton, GBS, Arden, London Met, Mont Rose, Staffordshire, Leeds Trinity, William College)
-   - Click pre-selects subject in the form and scrolls to it
-5. **Social proof** — 3 testimonials (Aisha 19 Manchester, Daniel 22 Birmingham, Priya 24 London), star ratings, partner institution text-badge row, "Featured in" strip
-6. **Lead capture** — 3-step form with progress bar:
-   - Step 1 About You · Step 2 Your Studies (subject/level/start year) · Step 3 Your Goals (reason, source, GDPR consent)
-   - Zod validation, inline errors, smooth step transitions, success state with personalised thank-you
-7. **FAQ** — 6 accordion items (UCAS, fees, loans, Clearing, entry requirements, international students)
-8. **Sticky mobile CTA** — appears after hero on <768px
-9. **Footer** — logo, Privacy/Terms/Contact, Instagram/TikTok/LinkedIn icons, reassurance line
+### 4. Interactive onboarding (mobile-first)
+Route: `/_authenticated/onboarding` — full-screen, swipeable, step-indicator at top, large tap targets (≥56px), thumb-zone CTAs at bottom, haptic-style micro animations.
 
-### Lead storage — Lovable Cloud
-- Table `leads` (RLS enabled):
-  - `id uuid pk`, `created_at`, `name`, `email`, `phone`, `city`, `subject`, `study_level`, `start_year`, `reason`, `source`, `consent bool`
-  - INSERT policy: `WITH CHECK (true)` for `anon` (public form)
-  - SELECT policy: only `admin` role (via `user_roles` + `has_role()`)
-- Submit path: server function `submitLead` (`src/lib/leads.functions.ts`) using `supabaseAdmin`, validates with Zod, inserts row
-- Admin path: server function `listLeads` gated by `requireSupabaseAuth` + `has_role(admin)`
+Steps:
+1. **Welcome** — name + animated greeting.
+2. **Study level** — visual card picker (Foundation / Undergrad / Postgrad / Top-up) with iconography.
+3. **Subject interest** — chip grid sourced from indexed courses, multi-select with spring animation.
+4. **Start date** — horizontal scroll month picker (May 2026 / Sept 2026 / Jan 2027).
+5. **Location (interactive)** — this is the centerpiece:
+   - Browser geolocation prompt → reverse geocode (free Nominatim/OSM API via server fn, cached).
+   - Fallback: searchable UK city autocomplete (server fn against a static UK cities list).
+   - **Interactive map preview** using **Leaflet + OpenStreetMap tiles** (no API key, free, lightweight ~40KB) showing the user's pin + nearest 3 partner campuses with distance.
+6. **Contact** — phone (UK format validation) + GDPR consent.
+7. **Summary** — animated review card → "Find my courses" CTA → personalised `/dashboard` with matched programmes.
 
-### Admin panel
-- Route: `/admin` (separate route, gated). Hash `#admin-view` on home redirects there.
-- Auth: Lovable Cloud email/password sign-in; role check via `user_roles` table (`admin` enum). The "password `unipath2025`" from your brief becomes an actual admin account you create on first run — safer than a hardcoded client-side password.
-- UI: lead count badge, sortable table (Name, Email, Phone, City, Subject, Level, Start Year, Submitted), **Export CSV** button (client-side blob download)
+Mobile optimisations: `vh` safe-area insets, momentum scroll, prefers-reduced-motion respect, single-column always, sticky progress bar, swipe-back gesture, optimistic step transitions.
 
-### Animations & UX
-- Scroll-reveal via `IntersectionObserver` hook (opacity + translateY, respects `prefers-reduced-motion`)
-- Hover lift on course cards (transform + shadow, no colour borders)
-- Tap targets ≥44px, focus rings, WCAG AA contrast verified in both themes
-- Semantic HTML5, single `<h1>`, correct heading hierarchy
-- SEO: route `head()` with title, description, og tags
+### 5. Personalised dashboard (`_authenticated/dashboard`)
+After onboarding: matched courses ranked by subject + location proximity, "Talk to an advisor" CTA, profile completeness ring, ability to edit preferences.
+
+### 6. Admin upgrades
+- `/admin` already exists; add: onboarding-completion funnel stats, source breakdown, map of lead locations (Leaflet cluster).
+
+### 7. New files / changes
+- DB migration: `profiles` table + trigger + RLS; extend `leads` link to `user_id` (nullable).
+- `supabase--configure_social_auth` → google.
+- `bun add leaflet react-leaflet` (Worker-safe, no native deps).
+- Add Geist via Google Fonts / Fontsource.
+- Routes: `login.tsx`, `signup.tsx`, `reset-password.tsx`, `_authenticated.tsx`, `_authenticated/onboarding.tsx`, `_authenticated/dashboard.tsx`, `courses.tsx`.
+- Components: `onboarding/Step*.tsx`, `onboarding/ProgressBar.tsx`, `onboarding/LocationStep.tsx` (with Leaflet), `auth/AuthCard.tsx`, `auth/GoogleButton.tsx`.
+- Server fns: `geocode.functions.ts` (reverse + forward via Nominatim with UA header + caching), `profile.functions.ts` (get/update), `match-courses.functions.ts`.
+- Tokens: rework `src/styles.css` with Geist fonts, frosted-glass surface tokens, fluid type, larger radii (`--radius: 1.25rem`).
 
 ### Technical notes
-- Stack stays TanStack Start (the project requires it — no standalone HTML file)
-- New files: `src/routes/index.tsx` (rewrite), `src/routes/admin.tsx`, `src/components/ui-marketing/*` (Header, Hero, HowItWorks, Courses, Testimonials, LeadForm, FAQ, StickyCTA, Footer, ThemeToggle, Logo), `src/components/sections/data/courses.ts` (extracted from PDF), `src/lib/leads.functions.ts`, `src/hooks/use-theme.ts`, `src/hooks/use-reveal.ts`
-- Tokens in `src/styles.css`, fonts preconnected in `__root.tsx`
-- One migration: `leads` table + `user_roles` + `app_role` enum + `has_role()` function + RLS policies
-- Enables Lovable Cloud (per your answer)
+- Lovable Cloud already enabled.
+- Email/password + Google (Lovable broker). Disable other providers we don't use.
+- All geocoding lives in server fns (avoids CORS, lets us add UA header / cache).
+- Leaflet is SSR-unsafe → render inside a `<ClientOnly>` wrapper / dynamic import guard.
+- Auth-gated server fns rely on existing `requireSupabaseAuth` + `attachSupabaseAuth` (already wired).
 
-### What I'll do on approve
-1. Enable Lovable Cloud, run migration
-2. Extract & curate course list from the PDF into `courses.ts`
-3. Build tokens, fonts, theme toggle
-4. Build sections + form + animations
-5. Build admin route with auth + CSV export
-6. QA: verify dark mode, mobile (375px), form submit round-trip, admin list
+### Open question
+Existing `LeadForm` on the landing page — keep it as a **quick lead capture** (no account needed, writes to `leads`), and the onboarding becomes the deeper authenticated flow? Or replace landing form with a "Get started" button that routes straight to signup → onboarding? Default if you don't say: **keep both** (quick form for cold visitors, signup+onboarding for committed ones).

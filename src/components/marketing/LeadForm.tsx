@@ -2,7 +2,9 @@ import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { submitLead } from "@/lib/leads.functions";
-import { SUBJECT_OPTIONS } from "./data/courses";
+import { COURSES } from "./data/courses";
+
+const SUBJECT_OPTIONS: string[] = COURSES.map((c) => c.title);
 
 const stepSchemas = [
   z.object({
@@ -203,7 +205,7 @@ export function LeadForm({ preselectedSubject }: { preselectedSubject: string | 
               className={inputCls(errors.subject)}
             >
               <option value="">Choose a subject…</option>
-              {SUBJECT_OPTIONS.map((s) => (
+              {SUBJECT_OPTIONS.map((s: string) => (
                 <option key={s}>{s}</option>
               ))}
             </select>
