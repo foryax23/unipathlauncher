@@ -15,7 +15,7 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/onboarding")({
   head: () => ({
     meta: [
-      { title: "Get matched · UniPath" },
+      { title: "Get matched · Bridge Gateway" },
       { name: "description", content: "Tell us about you and get a personalised UK university shortlist in 2 minutes." },
     ],
   }),
@@ -44,9 +44,9 @@ const EMPTY: State = {
   consent: false,
 };
 
-const STATE_KEY = "unipath:onboarding";
-const STEP_KEY = "unipath:onboarding:step";
-const LEVEL_KEY = "unipath:level";
+const STATE_KEY = "bgc:onboarding";
+const STEP_KEY = "bgc:onboarding:step";
+const LEVEL_KEY = "bgc:level";
 
 const SUBJECT_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   "business-finance": Briefcase,
@@ -256,7 +256,7 @@ function OnboardingPage() {
               className="mt-1 size-5"
             />
             <span>
-              I agree to be contacted by a UniPath adviser about UK university options.
+              I agree to be contacted by a Bridge Gateway adviser about UK university options.
               See our privacy policy.
             </span>
           </label>

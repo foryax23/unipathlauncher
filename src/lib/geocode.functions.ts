@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-const UA = "UniPath/1.0 (uk-student-leadgen)";
+const UA = "Bridge Gateway/1.0 (uk-student-leadgen)";
 
 export const reverseGeocode = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>

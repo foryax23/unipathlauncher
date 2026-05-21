@@ -1,74 +1,77 @@
-## Goals
+## Rebrand: Bridge Gateway Consulting
 
-1. **Visual redesign** of the `/admin` page — keep all current functionality (Students tab, Leads tab, filters, side sheet), just make it look more like the rest of the app (glass surfaces, rounded corners, better spacing, polished header/empty/loading states).
-2. **Unified password recovery** that works for every account, including admins.
-3. Keep the separate `/admin` sign-in form (as requested) — but make it reuse the same recovery flow.
+The uploaded logo is a minimal black arc — a bridge silhouette. I'll build the identity around that mark: the bridge as connector, gateway, passage.
 
----
+### 1. Brand identity
 
-## 1. Admin panel — visual redesign
+- **Name**: Bridge Gateway Consulting (full) / "Bridge Gateway" (short) / "BGC" (mono)
+- **Tagline**: "Your gateway to global education." (used on hero + footer)
+- **Voice**: Considered, trusted, advisory — closer to a private consulting firm than a startup. UK-English spelling.
 
-Scope: presentation only. No changes to `listLeads`, `listStudents`, `getStudent`, or RLS.
+### 2. Logo system
 
-Refresh in `src/routes/admin.tsx`:
+- Copy `user-uploads://Logo-04_OK.png` to `src/assets/bridge-gateway-logo.png` (raster, for OG/favicons)
+- Build an **SVG version** (`src/components/brand/BridgeMark.tsx`) that recreates the arc cleanly — scales crisp at any size, recolors via `currentColor`
+- Lockup component (`src/components/brand/Logo.tsx`):
+  - Arc mark + "Bridge Gateway" wordmark in serif
+  - Variants: `full` (mark + wordmark), `mark` (arc only), `stacked` (mark above wordmark)
+  - Replaces existing `src/components/marketing/Logo.tsx` usage
+- Favicon + apple-touch-icon generated from the arc mark on navy
+- OG image: arc + wordmark on navy with tagline
 
-- **Page shell**
-  - Wrap main in the same warm/aurora background used elsewhere; add a small "Admin" eyebrow + serif title + subtitle row (kept), now sitting inside a glass card header with the signed-in email + a compact "Sign out" button on the right.
-- **Tabs bar**
-  - Convert the shadcn TabsList to a pill-style glass strip; add a live count badge next to each tab label (e.g. "Students · 142", "Leads · 38").
-- **Filters row (Students)**
-  - Group search + selects inside a rounded glass card with consistent height (`h-11`), proper labels (sr-only), and a right-aligned result chip (already exists, restyle).
-  - Add a clear "Reset filters" ghost button that appears when any filter is active.
-- **Students table**
-  - Replace the flat table with a card-style table: rounded container, zebra rows, hover lift, status pill using semantic tokens (no raw `emerald-100`/`amber-100` — switch to tokens like `bg-success/10 text-success` and `bg-warning/10 text-warning`, adding them to `src/styles.css` if missing).
-  - Sticky header row, truncation with tooltips for long names/cities.
-  - Skeleton rows while loading instead of just "Loading…".
-  - Better empty state (icon + message + "Clear filters" CTA).
-- **Leads tab**
-  - Same card/table treatment, with a "Copy email" and `mailto:` action per row.
-- **Student side sheet**
-  - Replace stacked Section/Row blocks with a 2-column grid for desktop, single column on mobile; add an avatar circle with initials, copy-to-clipboard on email/phone, and a "Send password reset" button (calls `supabase.auth.resetPasswordForEmail` for that student — uses the same unified flow).
-- **Sign-in card (when logged out)**
-  - Restyle to match the marketing `AuthCard` look (glass-strong, rounded-3xl, same input styles).
-  - Add a "Forgot password?" link under the Password field → routes to `/reset-password`.
+### 3. Color palette (Navy Trust + understated gold)
 
----
+Refine the existing tokens in `src/styles.css` toward a more editorial, trustworthy palette:
 
-## 2. Unified password recovery
+- `--primary` deep navy `#0B1F3F` (oklch ~0.22 0.06 260)
+- `--gold` muted brass `#B8924A` (oklch ~0.66 0.10 80) — used sparingly as accent
+- `--background` warm ivory `#FAF7F1`
+- `--surface` pure white cards on ivory
+- `--foreground` near-black navy `#0A1628`
+- Dark mode: navy background, ivory text, gold accent
 
-The infrastructure already exists (`src/routes/reset-password.tsx` handles both request + update via `?type=recovery` hash). We extend it so it cleanly serves admins too.
+### 4. Typography
 
-Changes:
+- **Display/Serif**: Instrument Serif (already loaded) — used for headlines, brand wordmark
+- **Sans**: Geist (already loaded) — UI, body, buttons
+- Wordmark in the Logo component uses Instrument Serif with tight tracking
 
-- **`/reset-password` route**
-  - After a successful update, redirect based on role: if the user has the `admin` role → `/admin`, otherwise `/dashboard`. Today it hardcodes `/onboarding`.
-  - On the "request" mode, set `redirectTo` to `${origin}/reset-password` (unchanged) — same link works for everyone.
-  - Add subtle copy: "Works for student and adviser accounts."
-- **Admin sign-in form (`SignIn` in `admin.tsx`)**
-  - Add "Forgot password?" link under the password input → `/reset-password`.
-- **Marketing `AuthCard`**
-  - Already links to `/reset-password` — no change.
-- **Student sheet → "Send password reset" button**
-  - New small server function `sendPasswordReset({ email })` in `src/lib/admin.functions.ts`, guarded by `assertAdmin`, which calls `supabaseAdmin.auth.admin.generateLink({ type: 'recovery', email, options: { redirectTo: <origin>/reset-password } })`. This lets an admin trigger a reset email for any student without needing their password.
+### 5. Copy + metadata rebrand
 
-No new tables, no new RLS, no auth-config changes required (email auth + auto-confirm already on, recovery emails are sent by Supabase Auth by default).
+Replace every "UniPath" / "UniPathLauncher" / "Uni Path" mention across:
 
----
+- `index.html` — title, meta description, og tags, theme-color
+- `src/routes/__root.tsx` — head() title template, default meta, og:site_name
+- Every route's `head()` — `/`, `/courses`, `/login`, `/signup`, `/admin`, `/onboarding`, `/reset-password`, `/verify-email`, `/dashboard`
+- Marketing components: `Header`, `Footer`, `FAQ`, `LeadForm`, `Testimonials`, `HeroMatchCard`
+- Auth + dashboard components: `VerifyEmailBanner`, dashboard greetings
+- Email-facing copy in `reset-password` flow (subject line is configured in Cloud, but page copy says "Bridge Gateway")
 
-## 3. Files touched
+New default title: `Bridge Gateway Consulting — Your gateway to global education`
+New meta description: `Bridge Gateway Consulting helps students and families find, apply to, and succeed at universities abroad. Expert advisers. Personalised pathways.`
 
-- `src/routes/admin.tsx` — visual redesign of all sub-components, add "Forgot password?" link in `SignIn`, add "Send password reset" button in `StudentSheet`.
-- `src/routes/reset-password.tsx` — post-update role-based redirect, small copy tweak.
-- `src/lib/admin.functions.ts` — add `sendPasswordReset` server fn (admin-only).
-- `src/styles.css` — add `--success` / `--warning` tokens if not already present (used by the new status pills).
+### 6. Marketing surfaces
 
-No DB migration, no auth config change, no edge functions.
+- **Header**: new Logo lockup, nav unchanged
+- **Hero (index)**: new H1 "Cross the bridge to your future university.", subhead reinforcing tagline, primary CTA "Start your pathway", secondary "Talk to an adviser"
+- **Footer**: full lockup + tagline + "© 2026 Bridge Gateway Consulting Ltd."
+- **Testimonials/FAQ**: replace product name mentions; keep structure
 
----
+### 7. Admin + auth screens
 
-## 4. Out of scope
+- `/admin` adviser sign-in card: replace product name in header, swap logo
+- `/login`, `/signup`, `/reset-password`, `/verify-email`: new logo + brand name in header card
+- No logic changes — purely brand surface
 
-- Branded auth emails (sender domain setup) — user picked the unified flow without branded email.
-- Inviting/removing admins from the UI.
-- Metrics/overview tab.
-- CSV export.
+### Technical notes
+
+- All color changes happen in `src/styles.css` tokens — components keep using semantic classes (`bg-primary`, `text-gold`, etc.), so no per-component color edits needed.
+- The current `Logo.tsx` is replaced with a new lockup in `src/components/brand/Logo.tsx` and re-exported from the old path to avoid touching every importer.
+- No backend, auth, schema, or routing logic changes. Pure presentation + copy.
+- Custom domain `bridgegatewayconsulting.com` already configured — metadata + canonical URLs will use it.
+
+### Out of scope (ask if you want these too)
+
+- Transactional email template redesign (Cloud auth emails)
+- Print collateral / brand guidelines PDF
+- New illustrations or photography

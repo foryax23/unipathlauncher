@@ -40,7 +40,7 @@ import {
 } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
-  head: () => ({ meta: [{ title: "Admin · UniPath" }] }),
+  head: () => ({ meta: [{ title: "Admin · Bridge Gateway" }] }),
   component: AdminPage,
 });
 

@@ -7,8 +7,8 @@ import { Logo } from "@/components/marketing/Logo";
 export const Route = createFileRoute("/reset-password")({
   head: () => ({
     meta: [
-      { title: "Reset password · UniPath" },
-      { name: "description", content: "Reset your UniPath account password." },
+      { title: "Reset password · Bridge Gateway" },
+      { name: "description", content: "Reset your Bridge Gateway account password." },
     ],
   }),
   component: ResetPasswordPage,

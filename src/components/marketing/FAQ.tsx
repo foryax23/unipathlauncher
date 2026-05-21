@@ -3,7 +3,7 @@ import { useState } from "react";
 const ITEMS = [
   {
     q: "Do I need to apply through UCAS?",
-    a: "Most undergraduate applications go through UCAS, but some Foundation and direct-entry courses can be applied for directly with the university. Your UniPath adviser will tell you which route fits.",
+    a: "Most undergraduate applications go through UCAS, but some Foundation and direct-entry courses can be applied for directly with the university. Your Bridge Gateway adviser will tell you which route fits.",
   },
   {
     q: "How much are UK tuition fees?",
