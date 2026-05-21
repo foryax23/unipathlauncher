@@ -8,7 +8,7 @@ export function Footer() {
         <div>
           <Logo />
           <p className="mt-3 max-w-md text-sm text-muted-foreground">
-            Free, impartial, GDPR-compliant guidance for UK students.
+            Your gateway to global education. Expert advisers, personalised pathways.
           </p>
         </div>
         <nav aria-label="Footer">
@@ -37,7 +37,7 @@ export function Footer() {
       </div>
       <div className="border-t border-border">
         <p className="mx-auto w-full max-w-6xl px-4 py-5 text-xs text-muted-foreground sm:px-6">
-          © {new Date().getFullYear()} UniPath. All rights reserved.
+          © {new Date().getFullYear()} Bridge Gateway Consulting Ltd. All rights reserved.
         </p>
       </div>
     </footer>

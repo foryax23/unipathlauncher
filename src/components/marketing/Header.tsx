@@ -19,7 +19,7 @@ export function Header() {
           {/* subtle inner highlight for glass feel */}
           <div className="pointer-events-none absolute inset-0 rounded-full bg-gradient-to-b from-white/10 to-transparent dark:from-white/5" />
 
-          <Link to="/" className="relative flex items-center" aria-label="UniPath home">
+          <Link to="/" className="relative flex items-center" aria-label="Bridge Gateway Consulting home">
             <Logo />
           </Link>
 
