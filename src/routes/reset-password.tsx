@@ -75,6 +75,7 @@ function ResetPasswordPage() {
         <div className="mb-8 flex justify-center"><Link to="/"><Logo /></Link></div>
         <div className="glass-strong rounded-3xl p-7">
           <h1 className="text-display-md">{mode === "request" ? "Reset password" : "Set new password"}</h1>
+          <p className="mt-2 text-sm text-muted-foreground">Works for student and adviser accounts.</p>
           <form onSubmit={mode === "request" ? request : update} className="mt-6 space-y-3">
             {mode === "request" ? (
               <input
