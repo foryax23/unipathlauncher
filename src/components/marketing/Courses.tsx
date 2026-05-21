@@ -16,7 +16,7 @@ export function Courses({ onSelectSubject }: { onSelectSubject: (subject: string
             </h2>
           </div>
           <p className="max-w-sm text-sm text-muted-foreground">
-            Tap any subject to start your shortlist — we'll pre-select it on the form below.
+            Tap any subject to start your shortlist, we'll pre-select it on the form below.
           </p>
         </div>
 

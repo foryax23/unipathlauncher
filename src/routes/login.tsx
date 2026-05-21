@@ -7,7 +7,7 @@ export const Route = createFileRoute("/login")({
   }),
   head: () => ({
     meta: [
-      { title: "Sign in — UniPath" },
+      { title: "Sign in · UniPath" },
       { name: "description", content: "Sign in to your UniPath account to continue your UK university application." },
     ],
   }),

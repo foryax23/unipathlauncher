@@ -86,7 +86,7 @@ function OnboardingPage() {
         }
       } catch (err) {
         console.error("Profile fetch failed", err);
-        toast.error("Couldn't load your profile — you can still continue.");
+        toast.error("Couldn't load your profile, you can still continue.");
       } finally {
         if (!cancelled) setReady(true);
       }
@@ -119,7 +119,7 @@ function OnboardingPage() {
       body: (
         <CardGrid
           options={[
-            { id: "Foundation", label: "Foundation", desc: "Entry route — no prior degree" },
+            { id: "Foundation", label: "Foundation", desc: "Entry route, no prior degree" },
             { id: "Undergraduate", label: "Undergraduate", desc: "Bachelor's degree (BSc / BA)" },
             { id: "Top-up", label: "Top-up", desc: "Convert your HND / Level 5 to a degree" },
             { id: "Postgraduate", label: "Postgraduate", desc: "MSc, MA, MBA" },

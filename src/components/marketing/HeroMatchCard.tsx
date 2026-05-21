@@ -22,7 +22,7 @@ export function HeroMatchCard() {
   };
 
   return (
-    <div className="glass-strong rounded-3xl p-6 shadow-2xl sm:p-7">
+    <div className="rounded-3xl bg-surface p-6 shadow-2xl ring-1 ring-black/5 sm:p-7">
       <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
         Match your study path
       </p>
@@ -30,7 +30,7 @@ export function HeroMatchCard() {
         <span className="text-coral">2-minute</span> course match
       </h3>
       <p className="mt-1 text-sm text-muted-foreground">
-        Tell us what you're studying — get a UK-wide shortlist instantly.
+        Tell us what you're studying, get a UK-wide shortlist instantly.
       </p>
 
       <label className="mt-5 block">

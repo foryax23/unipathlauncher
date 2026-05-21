@@ -1,77 +1,45 @@
-## Admin Lead Inbox
+# Redesign inspired by UniEnrol + remove em dashes
 
-Upgrade `/admin` into a real adviser workspace: list of registered students (profiles + leads), search, filters, and a details panel showing everything captured in onboarding.
+## What the reference shows
 
-### 1. Auto-grant admin to fixed emails
+Looking at the two screenshots:
+1. **Hero**: bold red→orange gradient backdrop with soft cloud curves at the bottom; centered headline ("Apply with Malaysia's Trusted Education Consultant"); compact paragraph; a white **match card** on the left with nationality selector + big red pill CTA; on the right, a cut-out student photo on a warm-toned globe with line-art landmarks (Big Ben, Sydney Opera House, plane).
+2. **Services band**: white background, small red eyebrow ("RESEARCH. ANALYSE. APPLY"), bold centered H2 ("Easy Access to Course Info & Student Services"), 3 columns each with an icon, title, copy and a text link ("Explore University →"). Below: "EXPLORE STUDY DESTINATIONS" eyebrow + a horizontal destinations row with landmark illustrations and country flags.
 
-- Migration: insert `user_roles(role='admin')` for any existing `auth.users` whose email is `rodrigesg@gmail.com` or `mihaidandea13@gmail.com`.
-- Extend `handle_new_user` trigger so future signups with those emails are inserted into `user_roles` as admin automatically.
-- Lower-case comparison so casing doesn't matter.
+Our current site already has the warm coral/amber palette, glass match card, and landmark line art — close but less punchy. The redesign aligns layout/typography/proportions to the reference while keeping our UniPath UK content.
 
-### 2. New server functions (`src/lib/admin.functions.ts`)
+## Plan
 
-All gated by `requireSupabaseAuth` + admin role check (reuse pattern from `listLeads`), using `supabaseAdmin`:
+### 1. Hero (`src/components/marketing/Hero.tsx`)
+- Switch backdrop to a stronger **coral→amber gradient** (similar to UniEnrol red→orange) with the soft white curve at the bottom of the section.
+- Center-align the headline + subcopy at the top on desktop (instead of left split), then place the **match card on the left** and the **student image with landmark line art on the right**, both rising into the curve.
+- Tighten copy hierarchy: eyebrow ("UK's trusted student platform"), bold 2-line H1, 1-sentence sub.
+- Keep current stats but move them under the curve in a thin band so the hero stays focused.
+- Match card: tighten to a single primary control (study level) + big red/coral pill CTA — current `HeroMatchCard` already does this, just restyle for stronger contrast and a flag-style left adornment.
 
-- `listStudents({ search?, level?, year? })` → joined view of `profiles` + `auth.users.email` + latest matching `leads` row. Returns: id, user_id, full_name, email, phone, city, country, subject, study_level, start_year, onboarding_complete, created_at.
-- `getStudent({ userId })` → full profile + all leads submitted with that email + computed fields (location lat/lng, reason, source).
-- Keep existing `listLeads` for the anonymous-lead inbox tab.
+### 2. Services / How-we-help band (`src/components/marketing/HowWeHelp.tsx`)
+- Rework to mirror the reference: small coral uppercase eyebrow, large centered H2, 3 equal columns (icon, title, body, text-link CTA). Use existing copy categories (Match courses, 1-to-1 guidance, Apply & visa).
+- Use existing tokens (`text-coral`, `bg-warm`) — no new colors.
 
-### 3. UI rebuild (`src/routes/admin.tsx`)
+### 3. Destinations intro (`src/components/marketing/DestinationsGrid.tsx`)
+- Keep the grid but prepend a header block styled like the reference: coral eyebrow "EXPLORE STUDY DESTINATIONS" + bold H2 "Start your successful study journey across the UK" + 1-line sub. (Mostly already there — tighten typography to match.)
 
-Two tabs:
-- **Students** (default) — registered users from `profiles`.
-- **Leads** — existing anonymous lead form submissions.
+### 4. Remove em dashes (—) sitewide
+Replace every `—` with a comma, period, or colon based on sentence flow in:
+- `src/components/marketing/*.tsx` (Hero, HeroMatchCard, HowWeHelp, WhyUs, DestinationsGrid, Courses, FAQ, HowItWorks, Testimonials)
+- `src/components/marketing/data/testimonials.ts`
+- `src/components/auth/AuthCard.tsx`
+- `src/routes/*.tsx` (index, login, signup, reset-password, courses, admin, __root, _authenticated/onboarding, _authenticated/dashboard)
+- `src/server.ts` (only if user-visible strings)
 
-Students tab:
-- Toolbar: search input (name/email/city), filter selects for Subject, Study level (Foundation/Undergrad/Postgrad), Start year (2025/26/27), Onboarding status (complete/incomplete).
-- Table: Name · Email · City · Subject · Level · Year · Status · Joined. Row click opens details panel.
-- Right-hand slide-over panel (`Sheet` from shadcn) with sections:
-  - Contact: name, email, phone
-  - Location: city, country, lat/lng (mini static map link)
-  - Study plan: subject, level, start year, reason
-  - Onboarding: completion state + timestamps
-  - Related leads: any rows from `leads` matching the email
-  - CSV export of the single student
-- Filters apply client-side once data loaded; server function handles `search` for scalability.
+Rule: in marketing copy default to a comma; in titles like "Sign in — UniPath" use a middle dot `·` or pipe `|` (use `·` for consistency).
 
-### 4. Access control
+## Out of scope
+- No logo/nav restructure (we keep UniPath branding + current header).
+- No new images generated; we reuse current Picsum student photo and inline SVG landmarks.
+- No backend / auth / admin changes.
 
-- `/admin` already checks session; add explicit admin check via new `getMyAdminStatus` server fn so non-admins see a clear "Not authorised" message instead of a failed fetch.
-- All admin server fns double-check the role; never trust the client.
-
-### Technical notes
-
-```text
-src/
-├── lib/
-│   ├── admin.functions.ts        # NEW: listStudents, getStudent, getMyAdminStatus
-│   └── leads.functions.ts        # unchanged
-├── routes/
-│   └── admin.tsx                 # rewritten: tabs + students table + details sheet
-└── components/admin/
-    ├── StudentsTable.tsx         # NEW
-    ├── StudentDetailsSheet.tsx   # NEW
-    └── FiltersBar.tsx            # NEW
-supabase/migrations/
-└── <ts>_admin_emails.sql         # NEW: seed admin roles + extend trigger
-```
-
-Migration sketch:
-
-```sql
--- seed existing
-INSERT INTO public.user_roles (user_id, role)
-SELECT id, 'admin'::app_role FROM auth.users
-WHERE lower(email) IN ('rodrigesg@gmail.com','mihaidandea13@gmail.com')
-ON CONFLICT DO NOTHING;
-
--- extend trigger
-CREATE OR REPLACE FUNCTION public.handle_new_user() ...
-  INSERT INTO public.profiles (user_id, full_name) VALUES (NEW.id, ...);
-  IF lower(NEW.email) IN ('rodrigesg@gmail.com','mihaidandea13@gmail.com') THEN
-    INSERT INTO public.user_roles(user_id, role) VALUES (NEW.id, 'admin')
-    ON CONFLICT DO NOTHING;
-  END IF;
-```
-
-No schema changes to `profiles` or `leads` are required — all needed fields already exist.
+## Technical notes
+- Pure presentation work in `src/components/marketing/*` + a search/replace pass for `—`.
+- All colors via existing tokens in `src/styles.css` (`--coral`, `--amber`, `--gradient-warm`, `--surface-warm`).
+- No new dependencies, no route changes.
