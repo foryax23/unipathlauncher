@@ -8,8 +8,12 @@ export const Route = createFileRoute("/reset-password")({
   head: () => ({
     meta: [
       { title: "Reset password · Bridge Gateway" },
-      { name: "description", content: "Reset your Bridge Gateway account password." },
+      { name: "description", content: "Reset the password on your Bridge Gateway Consulting account so you can sign back in and continue your UK university application." },
+      { property: "og:title", content: "Reset password · Bridge Gateway" },
+      { property: "og:description", content: "Reset the password on your Bridge Gateway Consulting account and get back into your dashboard." },
+      { property: "og:url", content: "/reset-password" },
     ],
+    links: [{ rel: "canonical", href: "/reset-password" }],
   }),
   component: ResetPasswordPage,
 });
