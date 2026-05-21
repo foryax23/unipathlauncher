@@ -22,7 +22,7 @@ export function DestinationsGrid() {
             <Link
               key={r.id}
               to="/courses"
-              search={{ region: r.id } as never}
+              hash={r.id}
               className="group relative overflow-hidden rounded-3xl border border-border bg-surface shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl"
               style={{ minHeight: i === 0 ? 380 : 340 }}
             >
