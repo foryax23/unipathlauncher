@@ -113,3 +113,20 @@ export const getStudent = createServerFn({ method: "POST" })
       leads,
     };
   });
+
+export const sendPasswordReset = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({
+      email: z.string().email().max(255),
+      redirectTo: z.string().url().max(500),
+    }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.userId);
+    const { error } = await supabaseAdmin.auth.resetPasswordForEmail(data.email, {
+      redirectTo: data.redirectTo,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
