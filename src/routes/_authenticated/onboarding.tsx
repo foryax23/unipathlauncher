@@ -36,12 +36,13 @@ const SUBJECT_ICONS: Record<string, React.ComponentType<{ className?: string }>>
   psychology: Brain,
 };
 
-export function OnboardingPage() {
+function OnboardingPage() {
   const navigate = useNavigate();
   const update = useServerFn(updateMyProfile);
   const fetchProfile = useServerFn(getMyProfile);
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
+  const [ready, setReady] = useState(false);
   const [s, setS] = useState<State>({
     full_name: "",
     study_level: "",
@@ -54,22 +55,46 @@ export function OnboardingPage() {
   });
 
   useEffect(() => {
-    fetchProfile({}).then((r) => {
-      if (r.profile) {
-        setS((prev) => ({
-          ...prev,
-          full_name: r.profile?.full_name ?? "",
-          study_level: r.profile?.study_level ?? "",
-          subject: r.profile?.subject ?? "",
-          start_year: r.profile?.start_year ?? "",
-          phone: r.profile?.phone ?? "",
-          location: r.profile?.lat && r.profile?.lng
-            ? { lat: r.profile.lat, lng: r.profile.lng, city: r.profile.city }
-            : null,
-        }));
-        if (r.profile.onboarding_complete) navigate({ to: "/dashboard" });
+    let cancelled = false;
+    (async () => {
+      // Wait for the browser session to hydrate before calling the protected fn.
+      await supabase.auth.getSession();
+      try {
+        const r = await fetchProfile({});
+        if (cancelled) return;
+        // Pull any hero pre-selection (study level) from sessionStorage.
+        const preLevel = typeof window !== "undefined" ? sessionStorage.getItem("unipath:level") : null;
+        if (r.profile) {
+          setS((prev) => ({
+            ...prev,
+            full_name: r.profile?.full_name ?? prev.full_name,
+            study_level: r.profile?.study_level ?? preLevel ?? "",
+            subject: r.profile?.subject ?? "",
+            start_year: r.profile?.start_year ?? "",
+            phone: r.profile?.phone ?? "",
+            location:
+              r.profile?.lat != null && r.profile?.lng != null
+                ? { lat: r.profile.lat, lng: r.profile.lng, city: r.profile.city }
+                : null,
+          }));
+          if (r.profile.onboarding_complete) {
+            navigate({ to: "/dashboard" });
+            return;
+          }
+        } else if (preLevel) {
+          setS((prev) => ({ ...prev, study_level: preLevel }));
+        }
+      } catch (err) {
+        console.error("Profile fetch failed", err);
+        toast.error("Couldn't load your profile — you can still continue.");
+      } finally {
+        if (!cancelled) setReady(true);
       }
-    });
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const steps = [
