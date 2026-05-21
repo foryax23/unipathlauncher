@@ -73,6 +73,9 @@ function Dashboard() {
       </header>
 
       <main className="mx-auto max-w-5xl px-4 py-10 pb-24">
+        {email && (
+          <VerifyEmailBanner email={email} verifiedAt={profile.email_verified_at} />
+        )}
         <div className="rounded-3xl aurora glass-strong p-6 sm:p-10">
           <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
             Your personalised shortlist
