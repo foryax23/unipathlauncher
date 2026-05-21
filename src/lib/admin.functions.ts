@@ -95,7 +95,7 @@ export const getStudent = createServerFn({ method: "POST" })
     if (pErr) throw new Error(pErr.message);
 
     const email = userRes?.user?.email ?? null;
-    let leads: Array<Record<string, unknown>> = [];
+    let leads: any[] = [];
     if (email) {
       const { data: leadRows } = await supabaseAdmin
         .from("leads")
