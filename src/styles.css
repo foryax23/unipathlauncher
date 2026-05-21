@@ -26,6 +26,9 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-gold: var(--gold);
   --color-gold-foreground: var(--gold-foreground);
+  --color-coral: var(--coral);
+  --color-amber: var(--amber);
+  --color-warm: var(--surface-warm);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
@@ -67,6 +70,11 @@
   --ring: oklch(0.27 0.09 265);
   --glass: oklch(1 0 0 / 0.6);
   --glass-border: oklch(1 0 0 / 0.4);
+  /* Warm 2026 accents */
+  --coral: oklch(68% 0.18 28);
+  --amber: oklch(80% 0.15 65);
+  --surface-warm: oklch(97% 0.03 50);
+  --gradient-warm: linear-gradient(135deg, oklch(68% 0.18 28), oklch(80% 0.15 65));
 }
 
 .dark {
@@ -95,6 +103,10 @@
   --ring: oklch(0.81 0.13 82);
   --glass: oklch(0.2 0.04 265 / 0.55);
   --glass-border: oklch(1 0 0 / 0.08);
+  --coral: oklch(72% 0.16 28);
+  --amber: oklch(82% 0.14 65);
+  --surface-warm: oklch(0.22 0.05 30);
+  --gradient-warm: linear-gradient(135deg, oklch(64% 0.18 28), oklch(78% 0.15 65));
 }
 
 @layer base {
@@ -185,4 +197,26 @@
   .safe-bottom { padding-bottom: max(env(safe-area-inset-bottom), 1rem); }
   .safe-top { padding-top: max(env(safe-area-inset-top), 1rem); }
   .tap { min-height: 44px; min-width: 44px; }
+
+  .bg-warm { background-color: var(--surface-warm); }
+  .bg-gradient-warm { background-image: var(--gradient-warm); }
+  .text-coral { color: var(--coral); }
+  .bg-coral { background-color: var(--coral); }
+  .bg-amber { background-color: var(--amber); }
+  .shadow-coral\/30 { --tw-shadow-color: color-mix(in oklab, var(--coral) 30%, transparent); }
+
+  .hero-warm {
+    background:
+      radial-gradient(80% 60% at 90% 10%, color-mix(in oklab, var(--amber) 55%, transparent), transparent 60%),
+      radial-gradient(70% 70% at 5% 90%, color-mix(in oklab, var(--coral) 35%, transparent), transparent 60%),
+      var(--surface-warm);
+  }
+
+  .marquee-track {
+    animation: marquee 50s linear infinite;
+  }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
 }

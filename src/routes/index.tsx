@@ -1,56 +1,41 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
 import { Header } from "@/components/marketing/Header";
 import { Hero } from "@/components/marketing/Hero";
-import { HowItWorks } from "@/components/marketing/HowItWorks";
-import { Courses } from "@/components/marketing/Courses";
-import { Testimonials } from "@/components/marketing/Testimonials";
-import { LeadForm } from "@/components/marketing/LeadForm";
+import { DestinationsGrid } from "@/components/marketing/DestinationsGrid";
+import { HowWeHelp } from "@/components/marketing/HowWeHelp";
+import { WhyUs } from "@/components/marketing/WhyUs";
+import { StatsBand } from "@/components/marketing/StatsBand";
+import { TestimonialsMarquee } from "@/components/marketing/TestimonialsMarquee";
 import { FAQ } from "@/components/marketing/FAQ";
+import { FinalCTA } from "@/components/marketing/FinalCTA";
 import { StickyCTA } from "@/components/marketing/StickyCTA";
 import { Footer } from "@/components/marketing/Footer";
 
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "UniPath — Apply to UK universities with confidence" },
+      { name: "description", content: "Discover, compare and apply to 40+ UK universities. Free expert guidance on courses, scholarships and visas — all in one place." },
+      { property: "og:title", content: "UniPath — Apply to UK universities with confidence" },
+      { property: "og:description", content: "The UK's modern way to apply to university. Get a personalised shortlist in 2 minutes." },
+    ],
+  }),
   component: Index,
 });
 
 function Index() {
-  const [preselected, setPreselected] = useState<string | null>(null);
-
-  const selectSubject = (subject: string) => {
-    setPreselected(subject);
-    if (typeof document !== "undefined") {
-      document.getElementById("apply")?.scrollIntoView({ behavior: "smooth" });
-    }
-  };
-
   return (
     <>
       <Header />
       <main>
         <Hero />
-        <HowItWorks />
-        <Courses onSelectSubject={selectSubject} />
-        <Testimonials />
-
-        <section id="apply" className="border-t border-border bg-surface-muted">
-          <div className="mx-auto w-full max-w-3xl px-4 py-24 sm:px-6 lg:py-32">
-            <div className="mb-12 text-center">
-              <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
-                Free shortlist
-              </p>
-              <h2 className="mt-4 font-serif text-4xl text-foreground sm:text-5xl">
-                Get your free university shortlist.
-              </h2>
-              <p className="mt-4 text-muted-foreground">
-                Three quick steps. A real adviser will be in touch within 24 hours.
-              </p>
-            </div>
-            <LeadForm preselectedSubject={preselected} />
-          </div>
-        </section>
-
+        <DestinationsGrid />
+        <HowWeHelp />
+        <WhyUs />
+        <StatsBand />
+        <TestimonialsMarquee />
         <FAQ />
+        <FinalCTA />
       </main>
       <Footer />
       <StickyCTA />

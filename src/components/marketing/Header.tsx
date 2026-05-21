@@ -3,10 +3,10 @@ import { Logo } from "./Logo";
 import { ThemeToggle } from "./ThemeToggle";
 
 const NAV = [
-  { href: "/#how", label: "How it works" },
   { href: "/courses", label: "Courses" },
+  { href: "/#how", label: "How it works" },
+  { href: "/#destinations", label: "Destinations" },
   { href: "/#stories", label: "Stories" },
-  { href: "/#faq", label: "FAQ" },
 ];
 
 export function Header() {
@@ -34,15 +34,15 @@ export function Header() {
           <ThemeToggle />
           <Link
             to="/login"
-            className="hidden h-10 items-center text-sm text-muted-foreground hover:text-foreground sm:inline-flex"
+            className="hidden h-10 items-center rounded-full border border-border px-4 text-sm font-medium text-foreground hover:bg-accent sm:inline-flex"
           >
             Sign in
           </Link>
           <Link
             to="/signup"
-            className="tap inline-flex h-11 items-center justify-center rounded-full bg-primary px-5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+            className="tap inline-flex h-11 items-center justify-center rounded-full bg-gradient-warm px-5 text-sm font-semibold text-white shadow-md shadow-coral/30 transition-transform hover:-translate-y-0.5"
           >
-            Get started
+            Get matched
           </Link>
         </div>
       </div>

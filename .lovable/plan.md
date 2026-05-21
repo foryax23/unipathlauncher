@@ -1,65 +1,85 @@
-## UniPath v2 — Auth, Interactive Onboarding, Mobile-First Polish
 
-### 1. Typography refresh (2026 / Apple feel)
-Swap `Instrument Serif` + `Work Sans` for a modern Apple-adjacent stack:
-- **Display**: `Instrument Serif` → **`Geist` (or `Inter Display`)** for headings, tightened tracking (`-0.04em`), large optical sizing.
-- **Body**: `Work Sans` → **`Geist` / `Inter`** with `font-feature-settings: "cv11","ss01","ss03"` for SF-like glyphs.
-- **Mono accents**: `Geist Mono` for stats / form helpers.
-- Keep gold + navy palette but soften with frosted-glass surfaces (`backdrop-blur`, `oklch` translucency) — very visionOS / iOS 18.
-- Add fluid type scale via `clamp()` and tighter line-heights on headings.
+# UniPath v3 — UniEnrol-inspired refresh
 
-### 2. Full course indexing
-Re-parse the PDF and expand `src/components/marketing/data/courses.ts` from 8 categories → **all programmes** with: title, level (Foundation/UG/PG/Top-up), partner institution, intake months, mode, city. Add a searchable `/courses` route with filters (subject, level, city, intake). Power the LeadForm subject dropdown from the same source of truth.
+Goal: borrow the structural choices that make unienrol.com convert (warm gradient hero with hand-drawn skyline + lifestyle photo, inline "match me" capture card, country destination cards with fees/rankings, feature stack with screenshots, big trust stats, scrolling testimonials), but reskin to our UK-only, Apple-2026 aesthetic (Geist, OKLCH, glass surfaces) and wire to the existing Lovable Cloud setup.
 
-### 3. Authentication
-- Email/password **+ Google** (via Lovable broker `lovable.auth.signInWithOAuth("google")`), enabled with `configure_social_auth`.
-- Auto-confirm OFF (email verification required).
-- New routes:
-  - `/login` (sign-in + Google)
-  - `/signup` (kicks into onboarding)
-  - `/reset-password`
-  - `_authenticated/` layout for gated pages
-- `profiles` table (id → auth.users, name, phone, city, country, lat, lng, subject, study_level, start_year, reason, avatar_url, onboarding_complete) with RLS (user sees/edits own). Trigger to auto-create profile on signup.
+## Visual direction
 
-### 4. Interactive onboarding (mobile-first)
-Route: `/_authenticated/onboarding` — full-screen, swipeable, step-indicator at top, large tap targets (≥56px), thumb-zone CTAs at bottom, haptic-style micro animations.
+- Keep Geist Sans/Mono. Soften palette toward a warm coral→amber gradient hero (à la UniEnrol) layered over our current navy as secondary, gold as accent.
+- Hero composition: left = oversized headline + subhead + inline capture card; right = collage of UK landmarks line art (Big Ben, Tower Bridge, Edinburgh Castle) behind a student photo, with curved gradient sweeps.
+- Section eyebrows in uppercase Geist Mono (small, tracked), large serif-free headlines, generous whitespace.
+- Reuse existing `--glass-*` and gradient tokens; add `--gradient-warm`, `--surface-warm` in `src/styles.css`.
 
-Steps:
-1. **Welcome** — name + animated greeting.
-2. **Study level** — visual card picker (Foundation / Undergrad / Postgrad / Top-up) with iconography.
-3. **Subject interest** — chip grid sourced from indexed courses, multi-select with spring animation.
-4. **Start date** — horizontal scroll month picker (May 2026 / Sept 2026 / Jan 2027).
-5. **Location (interactive)** — this is the centerpiece:
-   - Browser geolocation prompt → reverse geocode (free Nominatim/OSM API via server fn, cached).
-   - Fallback: searchable UK city autocomplete (server fn against a static UK cities list).
-   - **Interactive map preview** using **Leaflet + OpenStreetMap tiles** (no API key, free, lightweight ~40KB) showing the user's pin + nearest 3 partner campuses with distance.
-6. **Contact** — phone (UK format validation) + GDPR consent.
-7. **Summary** — animated review card → "Find my courses" CTA → personalised `/dashboard` with matched programmes.
+## New homepage structure (`src/routes/index.tsx`)
 
-Mobile optimisations: `vh` safe-area insets, momentum scroll, prefers-reduced-motion respect, single-column always, sticky progress bar, swipe-back gesture, optimistic step transitions.
+1. **Hero** — Headline "Apply to the UK's leading universities with confidence." + inline **MatchCard**: study-level select → "Start my free match" CTA (deep-links into `/onboarding` with prefilled level). Trust strip: "Covers A-Level • BTEC • IB • Access • International Foundation".
+2. **Quick services row** (3 icon cards): 40+ UK Institutions • Free 1-to-1 Consultation • Clearing & Visa Support.
+3. **Explore study destinations (UK regions)** — England, Scotland, Wales, Northern Ireland, London. Each card: outline map, flag/crest, "X universities in Russell Group", tuition from £, living cost from £/mo, partner logos strip on hover. Click → `/courses?region=...`.
+4. **How we help** — 5-step feature stack with screenshot mockups (alternating left/right):
+   - Personalised Course Recommendations
+   - University Research Checklist
+   - Course Comparison Table
+   - Parent/Guardian Guest Access
+   - Application & Visa Support
+5. **Why students prefer us** — 3 big visual cards (Direct access to 40+ UK unis, Save with scholarships, Expert UK advisors).
+6. **Stats band** — 98% offer rate · 40+ partner institutions · 10+ years guidance · £2M+ scholarships secured.
+7. **Testimonials carousel** — auto-scrolling row of student cards with avatar, quote, programme, partner-uni logo. Pull 4-6 fictional UK examples.
+8. **FAQ** (existing) — keep.
+9. **Final CTA band** — "Find your course in 2 minutes" → `/onboarding`.
+10. **Footer** (existing) — keep, refine spacing.
 
-### 5. Personalised dashboard (`_authenticated/dashboard`)
-After onboarding: matched courses ranked by subject + location proximity, "Talk to an advisor" CTA, profile completeness ring, ability to edit preferences.
+Sticky mobile CTA stays.
 
-### 6. Admin upgrades
-- `/admin` already exists; add: onboarding-completion funnel stats, source breakdown, map of lead locations (Leaflet cluster).
+## New components (under `src/components/marketing/`)
 
-### 7. New files / changes
-- DB migration: `profiles` table + trigger + RLS; extend `leads` link to `user_id` (nullable).
-- `supabase--configure_social_auth` → google.
-- `bun add leaflet react-leaflet` (Worker-safe, no native deps).
-- Add Geist via Google Fonts / Fontsource.
-- Routes: `login.tsx`, `signup.tsx`, `reset-password.tsx`, `_authenticated.tsx`, `_authenticated/onboarding.tsx`, `_authenticated/dashboard.tsx`, `courses.tsx`.
-- Components: `onboarding/Step*.tsx`, `onboarding/ProgressBar.tsx`, `onboarding/LocationStep.tsx` (with Leaflet), `auth/AuthCard.tsx`, `auth/GoogleButton.tsx`.
-- Server fns: `geocode.functions.ts` (reverse + forward via Nominatim with UA header + caching), `profile.functions.ts` (get/update), `match-courses.functions.ts`.
-- Tokens: rework `src/styles.css` with Geist fonts, frosted-glass surface tokens, fluid type, larger radii (`--radius: 1.25rem`).
+- `HeroMatchCard.tsx` — inline level picker + CTA, frosted glass.
+- `DestinationsGrid.tsx` + `DestinationCard.tsx` — UK region cards with hover partner-logos rail.
+- `HowWeHelp.tsx` — 5-row alternating feature stack; uses picsum dashboard mockups for now.
+- `WhyUs.tsx` — 3 large image cards.
+- `StatsBand.tsx` — 4-up animated counters.
+- `TestimonialsMarquee.tsx` — replace current `Testimonials.tsx` with horizontal auto-scroll (CSS `@keyframes`, pause on hover, prefers-reduced-motion safe).
+- `FinalCTA.tsx`.
 
-### Technical notes
-- Lovable Cloud already enabled.
-- Email/password + Google (Lovable broker). Disable other providers we don't use.
-- All geocoding lives in server fns (avoids CORS, lets us add UA header / cache).
-- Leaflet is SSR-unsafe → render inside a `<ClientOnly>` wrapper / dynamic import guard.
-- Auth-gated server fns rely on existing `requireSupabaseAuth` + `attachSupabaseAuth` (already wired).
+## Data
 
-### Open question
-Existing `LeadForm` on the landing page — keep it as a **quick lead capture** (no account needed, writes to `leads`), and the onboarding becomes the deeper authenticated flow? Or replace landing form with a "Get started" button that routes straight to signup → onboarding? Default if you don't say: **keep both** (quick form for cold visitors, signup+onboarding for committed ones).
+- Add `src/components/marketing/data/regions.ts` — UK regions with cost/ranking metadata and which `PROGRAMMES` map to them.
+- Add `src/components/marketing/data/testimonials.ts` — 6 UK student testimonials.
+- Keep `courses.ts` as source of truth; tag entries by `region` for destination filtering.
+
+## Header / nav
+
+Restructure `Header.tsx` to: **Courses** · **How it works** · **About** · **For Parents** · `Login` (pill) · `Get matched` (primary). Mobile drawer mirrors.
+
+## Login page polish
+
+`/login` (current route) — apply warm gradient backdrop + glass card so it matches the new hero language. No logic changes.
+
+## Onboarding & dashboard
+
+No structural change this round — just prefill `studyLevel` from hero MatchCard via search param, and restyle step shells to match the warm surface tokens.
+
+## Token additions (`src/styles.css`)
+
+```
+--warm-50:  oklch(98% 0.02 40);
+--warm-100: oklch(95% 0.05 35);
+--coral:    oklch(68% 0.18 28);
+--amber:    oklch(78% 0.15 65);
+--gradient-warm: linear-gradient(135deg, var(--coral), var(--amber));
+--surface-warm: color-mix(in oklab, var(--warm-50) 85%, white);
+```
+
+Dark mode: warm gradient remains, surfaces shift to deep plum/navy.
+
+## Out of scope
+
+- No new DB migrations.
+- No new server functions (existing `leads`, `profile`, `geocode` unchanged).
+- No new auth providers.
+- Real partner logos / photography — placeholder via `picsum.photos` seeds + inline SVG line-art landmarks; user can swap later.
+
+## Files
+
+**New**: `src/components/marketing/HeroMatchCard.tsx`, `DestinationsGrid.tsx`, `DestinationCard.tsx`, `HowWeHelp.tsx`, `WhyUs.tsx`, `StatsBand.tsx`, `TestimonialsMarquee.tsx`, `FinalCTA.tsx`, `data/regions.ts`, `data/testimonials.ts`.
+**Edited**: `src/routes/index.tsx` (recompose), `Header.tsx`, `Hero.tsx` (replace), `styles.css` (warm tokens + marquee keyframes), `routes/login.tsx` (backdrop only).
+**Removed**: old `Testimonials.tsx` (superseded by marquee).
