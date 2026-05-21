@@ -11,7 +11,7 @@ export function AuthCard({ mode }: { mode: Mode }) {
   const navigate = useNavigate();
   // /login validates ?redirect; /signup ignores unknown search params safely.
   const search = useSearch({ strict: false }) as { redirect?: string };
-  const dest = search?.redirect && search.redirect.startsWith("/") ? search.redirect : "/onboarding";
+  const dest = search?.redirect && search.redirect.startsWith("/") ? search.redirect : "/dashboard";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
