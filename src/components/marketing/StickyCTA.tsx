@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "@tanstack/react-router";
 
 export function StickyCTA() {
   const [show, setShow] = useState(false);
@@ -14,17 +15,17 @@ export function StickyCTA() {
         show ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-6 opacity-0"
       } transition-all duration-300`}
       role="region"
-      aria-label="Apply now"
+      aria-label="Get matched"
     >
       <p className="text-sm font-medium text-foreground">
-        Ready to find your university?
+        Find your UK course
       </p>
-      <a
-        href="#apply"
-        className="inline-flex h-11 items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground"
+      <Link
+        to="/signup"
+        className="inline-flex h-11 items-center justify-center rounded-full bg-gradient-warm px-5 text-sm font-semibold text-white"
       >
-        Apply now
-      </a>
+        Match me →
+      </Link>
     </div>
   );
 }
