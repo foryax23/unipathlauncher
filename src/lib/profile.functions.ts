@@ -34,10 +34,10 @@ export const updateMyProfile = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => profileSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
+    // Upsert so onboarding works even if the auto-create trigger didn't fire.
     const { data: row, error } = await supabase
       .from("profiles")
-      .update(data)
-      .eq("user_id", userId)
+      .upsert({ user_id: userId, ...data }, { onConflict: "user_id" })
       .select()
       .maybeSingle();
     if (error) throw new Error(error.message);
