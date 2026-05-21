@@ -1,74 +1,74 @@
-### Pre-auth onboarding → auto-create account → dashboard
+## Goals
 
-Today users must sign up BEFORE the 6-step onboarding form. We will flip this: onboarding runs publicly (no login), state is saved on-device, and the account is created automatically in the last step. Users land in the dashboard immediately with a verify-email reminder.
+1. **Visual redesign** of the `/admin` page — keep all current functionality (Students tab, Leads tab, filters, side sheet), just make it look more like the rest of the app (glass surfaces, rounded corners, better spacing, polished header/empty/loading states).
+2. **Unified password recovery** that works for every account, including admins.
+3. Keep the separate `/admin` sign-in form (as requested) — but make it reuse the same recovery flow.
 
-#### Flow change
+---
 
-```text
-BEFORE: Hero CTA → /signup → /onboarding (6 steps) → /dashboard
-AFTER:  Hero CTA → /onboarding (6 steps + account step) → /dashboard
-```
+## 1. Admin panel — visual redesign
 
-#### What we will build
+Scope: presentation only. No changes to `listLeads`, `listStudents`, `getStudent`, or RLS.
 
-1. **Make onboarding public**
-   - Create a new top-level public route: `src/routes/onboarding.tsx` (no auth gate).
-   - Delete `src/routes/_authenticated/onboarding.tsx` (its protected version). Edit-preferences from the dashboard will reuse the same public route — it stays usable for signed-in users too.
+Refresh in `src/routes/admin.tsx`:
 
-2. **On-device persistence (cookies-like)**
-   - Persist the entire onboarding state in `localStorage` under the key `unipath:onboarding` (JSON blob with all fields).
-   - Auto-save on every field change. Auto-restore on mount, so refreshing, closing the tab, or returning later picks up exactly where the user left off — on the same device.
-   - Also remember the last visited step (`unipath:onboarding:step`).
-   - Already signed-in users who return: prefill from their saved profile and skip to the dashboard if onboarding is already complete.
+- **Page shell**
+  - Wrap main in the same warm/aurora background used elsewhere; add a small "Admin" eyebrow + serif title + subtitle row (kept), now sitting inside a glass card header with the signed-in email + a compact "Sign out" button on the right.
+- **Tabs bar**
+  - Convert the shadcn TabsList to a pill-style glass strip; add a live count badge next to each tab label (e.g. "Students · 142", "Leads · 38").
+- **Filters row (Students)**
+  - Group search + selects inside a rounded glass card with consistent height (`h-11`), proper labels (sr-only), and a right-aligned result chip (already exists, restyle).
+  - Add a clear "Reset filters" ghost button that appears when any filter is active.
+- **Students table**
+  - Replace the flat table with a card-style table: rounded container, zebra rows, hover lift, status pill using semantic tokens (no raw `emerald-100`/`amber-100` — switch to tokens like `bg-success/10 text-success` and `bg-warning/10 text-warning`, adding them to `src/styles.css` if missing).
+  - Sticky header row, truncation with tooltips for long names/cities.
+  - Skeleton rows while loading instead of just "Loading…".
+  - Better empty state (icon + message + "Clear filters" CTA).
+- **Leads tab**
+  - Same card/table treatment, with a "Copy email" and `mailto:` action per row.
+- **Student side sheet**
+  - Replace stacked Section/Row blocks with a 2-column grid for desktop, single column on mobile; add an avatar circle with initials, copy-to-clipboard on email/phone, and a "Send password reset" button (calls `supabase.auth.resetPasswordForEmail` for that student — uses the same unified flow).
+- **Sign-in card (when logged out)**
+  - Restyle to match the marketing `AuthCard` look (glass-strong, rounded-3xl, same input styles).
+  - Add a "Forgot password?" link under the Password field → routes to `/reset-password`.
 
-3. **Add a final "Create your account" step**
-   - 7th step at the end of the wizard: email + password fields and a "Continue with Google" button.
-   - On Google: opens the Lovable OAuth broker, with `redirect_uri` back to `/onboarding`. After the redirect the wizard auto-detects the session, saves the profile, clears localStorage, and navigates to `/dashboard`.
-   - On email/password: calls `supabase.auth.signUp({ email, password })`. With email auto-confirm enabled, a session is returned immediately → save profile → clear local state → `/dashboard`.
-   - If the email is already registered, we transparently fall back to `signInWithPassword` (so a returning user who re-onboards just gets logged in).
+---
 
-4. **Enable email auto-confirm**
-   - Use `supabase--configure_auth` with `auto_confirm_email: true` so the new account becomes an active session instantly. This is what unlocks "straight to dashboard".
-   - We keep `password_hibp_enabled: true` for safety.
+## 2. Unified password recovery
 
-5. **"Confirm your email" reminder on the dashboard**
-   - Add a new profile column `email_verified_at timestamptz` (separate from Supabase's `email_confirmed_at` so we can model an explicit user click even with auto-confirm on).
-   - On the dashboard, show a soft yellow banner: "Verify your email to secure your account" with a "Send verification link" button.
-   - The button calls `supabase.auth.resend({ type: 'signup', email })` which sends an auth confirmation email (we already have auth email templates infra). When the user clicks the link, a public `/verify-email` route reads the recovery hash, marks `email_verified_at = now()`, and redirects to the dashboard.
-   - Banner hides once `email_verified_at` is set OR once the user dismisses it (dismissal stored in `localStorage`).
+The infrastructure already exists (`src/routes/reset-password.tsx` handles both request + update via `?type=recovery` hash). We extend it so it cleanly serves admins too.
 
-6. **Hero CTA wiring**
-   - `HeroMatchCard` → `navigate({ to: "/onboarding" })` instead of `/signup`. The selected study level is already passed via `sessionStorage` and the onboarding wizard already reads it — we just move the key to `localStorage` so it survives a full browser restart.
+Changes:
 
-7. **Existing `/signup` and `/login` stay**
-   - `/login` keeps working for returning users (lands on `/dashboard`).
-   - `/signup` becomes a thin wrapper that redirects to `/onboarding` (so any external links still work).
+- **`/reset-password` route**
+  - After a successful update, redirect based on role: if the user has the `admin` role → `/admin`, otherwise `/dashboard`. Today it hardcodes `/onboarding`.
+  - On the "request" mode, set `redirectTo` to `${origin}/reset-password` (unchanged) — same link works for everyone.
+  - Add subtle copy: "Works for student and adviser accounts."
+- **Admin sign-in form (`SignIn` in `admin.tsx`)**
+  - Add "Forgot password?" link under the password input → `/reset-password`.
+- **Marketing `AuthCard`**
+  - Already links to `/reset-password` — no change.
+- **Student sheet → "Send password reset" button**
+  - New small server function `sendPasswordReset({ email })` in `src/lib/admin.functions.ts`, guarded by `assertAdmin`, which calls `supabaseAdmin.auth.admin.generateLink({ type: 'recovery', email, options: { redirectTo: <origin>/reset-password } })`. This lets an admin trigger a reset email for any student without needing their password.
 
-#### Technical details
+No new tables, no new RLS, no auth-config changes required (email auth + auto-confirm already on, recovery emails are sent by Supabase Auth by default).
 
-- **New file:** `src/routes/onboarding.tsx` (public). Built from the existing protected onboarding, plus a 7th "account" step and a `useEffect` localStorage sync.
-- **Deleted:** `src/routes/_authenticated/onboarding.tsx`.
-- **Edited:**
-  - `src/components/marketing/HeroMatchCard.tsx` — redirect target.
-  - `src/routes/signup.tsx` — redirect to `/onboarding`.
-  - `src/routes/_authenticated/dashboard.tsx` — add VerifyEmailBanner, remove the "redirect to onboarding if incomplete" loop (incomplete profiles only happen for accounts created via `/login` without finishing onboarding; we'll handle by redirecting unfinished users to `/onboarding`, which now works without auth too).
-- **New file:** `src/components/dashboard/VerifyEmailBanner.tsx`.
-- **New file:** `src/routes/verify-email.tsx` — public route that marks `email_verified_at` and bounces to dashboard.
-- **DB migration:** add `email_verified_at timestamptz` column to `profiles`. RLS already covers user-scoped reads/updates.
-- **Server fn:** add `markEmailVerified()` in `src/lib/profile.functions.ts` (uses `requireSupabaseAuth`, sets `email_verified_at = now()`).
-- **Auth config:** call `supabase--configure_auth` with `auto_confirm_email: true`, `password_hibp_enabled: true`, `disable_signup: false`, `external_anonymous_users_enabled: false`.
+---
 
-#### Edge cases handled
+## 3. Files touched
 
-- Returning visitor on same device: onboarding fields restored from localStorage.
-- Returning visitor on a new device: must log in; profile data already in the DB is loaded by the wizard / dashboard.
-- User abandons mid-wizard: state stays in localStorage; next visit resumes at the same step.
-- User completes onboarding without registering, then closes the tab: data is safe in localStorage and replays on next visit.
-- Google sign-in path: after OAuth redirect, the wizard detects the session, persists the profile, and forwards to the dashboard.
-- Duplicate email at the account step: transparent fallback to sign-in.
+- `src/routes/admin.tsx` — visual redesign of all sub-components, add "Forgot password?" link in `SignIn`, add "Send password reset" button in `StudentSheet`.
+- `src/routes/reset-password.tsx` — post-update role-based redirect, small copy tweak.
+- `src/lib/admin.functions.ts` — add `sendPasswordReset` server fn (admin-only).
+- `src/styles.css` — add `--success` / `--warning` tokens if not already present (used by the new status pills).
 
-#### Out of scope
+No DB migration, no auth config change, no edge functions.
 
-- Real email verification with a dedicated link is included via `supabase.auth.resend`. We do NOT change the auth email templates beyond what's already scaffolded.
-- No password strength meter UI changes.
-- No changes to admin or courses routes.
+---
+
+## 4. Out of scope
+
+- Branded auth emails (sender domain setup) — user picked the unified flow without branded email.
+- Inviting/removing admins from the UI.
+- Metrics/overview tab.
+- CSV export.

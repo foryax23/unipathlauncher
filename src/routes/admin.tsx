@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,6 +7,7 @@ import {
   getMyAdminStatus,
   listStudents,
   getStudent,
+  sendPasswordReset,
 } from "@/lib/admin.functions";
 import { Header } from "@/components/marketing/Header";
 import { Footer } from "@/components/marketing/Footer";
@@ -26,6 +27,17 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
+import { toast } from "sonner";
+import {
+  Copy,
+  KeyRound,
+  LogOut,
+  Mail,
+  MapPin,
+  RotateCcw,
+  Search,
+  UserRound,
+} from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin · UniPath" }] }),
@@ -50,20 +62,18 @@ function AdminPage() {
   return (
     <>
       <Header />
-      <main className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6">
-        <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
-          Admin
-        </p>
-        <h1 className="mt-3 font-serif text-4xl text-foreground sm:text-5xl">
-          Adviser inbox
-        </h1>
-        {checking ? (
-          <p className="mt-8 text-muted-foreground">Checking session…</p>
-        ) : email ? (
-          <AdminWorkspace signedInEmail={email} />
-        ) : (
-          <SignIn />
-        )}
+      <main className="hero-warm min-h-[calc(100vh-4rem)]">
+        <div className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6">
+          {checking ? (
+            <div className="glass-strong mt-10 rounded-3xl p-10 text-muted-foreground">
+              Checking session…
+            </div>
+          ) : email ? (
+            <AdminWorkspace signedInEmail={email} />
+          ) : (
+            <SignIn />
+          )}
+        </div>
       </main>
       <Footer />
     </>
@@ -86,45 +96,46 @@ function SignIn() {
   };
 
   return (
-    <form
-      onSubmit={onSubmit}
-      className="mt-10 max-w-md rounded-2xl border border-border bg-surface p-8 shadow-sm"
-    >
-      <h2 className="font-serif text-2xl text-foreground">Adviser sign in</h2>
-      <p className="mt-2 text-sm text-muted-foreground">
-        Sign in with your adviser email.
-      </p>
-      <div className="mt-6 space-y-4">
-        <label className="block text-sm font-medium text-foreground">
-          Email
+    <div className="mx-auto mt-10 w-full max-w-md">
+      <div className="glass-strong rounded-3xl p-7 shadow-xl">
+        <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Admin</p>
+        <h1 className="mt-2 font-serif text-3xl text-foreground">Adviser sign in</h1>
+        <p className="mt-2 text-sm text-muted-foreground">Sign in with your adviser email.</p>
+        <form onSubmit={onSubmit} className="mt-6 space-y-3">
           <input
             type="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="mt-1 h-12 w-full rounded-lg border border-border bg-background px-3.5 text-sm"
+            placeholder="Email"
+            autoComplete="email"
+            className="tap w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-ring"
           />
-        </label>
-        <label className="block text-sm font-medium text-foreground">
-          Password
           <input
             type="password"
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="mt-1 h-12 w-full rounded-lg border border-border bg-background px-3.5 text-sm"
+            placeholder="Password"
+            autoComplete="current-password"
+            className="tap w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-ring"
           />
-        </label>
+          {error && <p className="text-sm text-destructive">{error}</p>}
+          <button
+            type="submit"
+            disabled={busy}
+            className="tap w-full rounded-2xl bg-primary px-4 py-3 text-sm font-medium text-primary-foreground transition hover:opacity-90 disabled:opacity-50"
+          >
+            {busy ? "Signing in…" : "Sign in"}
+          </button>
+        </form>
+        <div className="mt-5 text-center text-xs text-muted-foreground">
+          <Link to="/reset-password" className="underline-offset-4 hover:underline">
+            Forgot password?
+          </Link>
+        </div>
       </div>
-      {error && <p className="mt-4 text-sm text-destructive">{error}</p>}
-      <button
-        type="submit"
-        disabled={busy}
-        className="mt-6 inline-flex h-12 w-full items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground disabled:opacity-60"
-      >
-        {busy ? "Signing in…" : "Sign in"}
-      </button>
-    </form>
+    </div>
   );
 }
 
@@ -143,11 +154,15 @@ function AdminWorkspace({ signedInEmail }: { signedInEmail: string }) {
   }, [checkAdmin]);
 
   if (isAdmin === null) {
-    return <p className="mt-10 text-muted-foreground">Verifying access…</p>;
+    return (
+      <div className="glass-strong mt-10 rounded-3xl p-10 text-muted-foreground">
+        Verifying access…
+      </div>
+    );
   }
   if (!isAdmin) {
     return (
-      <div className="mt-10 rounded-2xl border border-border bg-surface p-8">
+      <div className="glass-strong mx-auto mt-10 max-w-md rounded-3xl p-8 text-center">
         <h2 className="font-serif text-2xl text-foreground">Not authorised</h2>
         <p className="mt-2 text-sm text-muted-foreground">
           {signedInEmail} doesn't have admin access. Contact the team to be added.
@@ -155,33 +170,42 @@ function AdminWorkspace({ signedInEmail }: { signedInEmail: string }) {
         <button
           type="button"
           onClick={() => supabase.auth.signOut()}
-          className="mt-6 inline-flex h-11 items-center rounded-full bg-primary px-5 text-sm font-medium text-primary-foreground"
+          className="mt-6 inline-flex h-11 items-center gap-2 rounded-full bg-primary px-5 text-sm font-medium text-primary-foreground"
         >
-          Sign out
+          <LogOut className="h-4 w-4" /> Sign out
         </button>
       </div>
     );
   }
 
   return (
-    <div className="mt-8">
-      <div className="mb-6 flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
-          Signed in as <span className="text-foreground">{signedInEmail}</span>
-        </p>
-        <button
-          type="button"
-          onClick={() => supabase.auth.signOut()}
-          className="inline-flex h-10 items-center rounded-full border border-border bg-surface px-4 text-sm font-medium text-foreground hover:bg-muted"
-        >
-          Sign out
-        </button>
+    <div>
+      {/* Header card */}
+      <div className="glass-strong flex flex-col gap-4 rounded-3xl px-6 py-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Admin</p>
+          <h1 className="mt-1 font-serif text-3xl text-foreground sm:text-4xl">
+            Adviser inbox
+          </h1>
+        </div>
+        <div className="flex items-center gap-3 text-sm">
+          <span className="hidden text-muted-foreground sm:inline">
+            Signed in as <span className="text-foreground">{signedInEmail}</span>
+          </span>
+          <button
+            type="button"
+            onClick={() => supabase.auth.signOut()}
+            className="inline-flex h-10 items-center gap-1.5 rounded-full border border-border bg-surface px-4 text-sm font-medium text-foreground hover:bg-muted"
+          >
+            <LogOut className="h-4 w-4" /> Sign out
+          </button>
+        </div>
       </div>
 
-      <Tabs defaultValue="students">
-        <TabsList>
-          <TabsTrigger value="students">Students</TabsTrigger>
-          <TabsTrigger value="leads">Leads</TabsTrigger>
+      <Tabs defaultValue="students" className="mt-6">
+        <TabsList className="glass rounded-full p-1">
+          <TabsTrigger value="students" className="rounded-full px-5">Students</TabsTrigger>
+          <TabsTrigger value="leads" className="rounded-full px-5">Leads</TabsTrigger>
         </TabsList>
         <TabsContent value="students" className="mt-6">
           <StudentsTab />
@@ -245,99 +269,134 @@ function StudentsTab() {
     });
   }, [students, search, level, year, status]);
 
+  const hasFilter = search || level !== "all" || year !== "all" || status !== "all";
+  const resetFilters = () => {
+    setSearch("");
+    setLevel("all");
+    setYear("all");
+    setStatus("all");
+  };
+
   return (
     <div>
-      <div className="flex flex-wrap gap-3">
-        <Input
-          placeholder="Search name, email, city, subject…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="h-11 max-w-sm"
-        />
-        <Select value={level} onValueChange={setLevel}>
-          <SelectTrigger className="h-11 w-[170px]"><SelectValue placeholder="Level" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All levels</SelectItem>
-            <SelectItem value="Foundation">Foundation</SelectItem>
-            <SelectItem value="Undergraduate">Undergraduate</SelectItem>
-            <SelectItem value="Postgraduate">Postgraduate</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={year} onValueChange={setYear}>
-          <SelectTrigger className="h-11 w-[150px]"><SelectValue placeholder="Year" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All years</SelectItem>
-            <SelectItem value="2025">2025</SelectItem>
-            <SelectItem value="2026">2026</SelectItem>
-            <SelectItem value="2027">2027</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={status} onValueChange={setStatus}>
-          <SelectTrigger className="h-11 w-[180px]"><SelectValue placeholder="Status" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All statuses</SelectItem>
-            <SelectItem value="complete">Onboarding complete</SelectItem>
-            <SelectItem value="incomplete">Incomplete</SelectItem>
-          </SelectContent>
-        </Select>
-        <span className="ml-auto inline-flex h-11 items-center rounded-full bg-gold px-4 text-sm font-semibold text-gold-foreground">
-          {students ? `${filtered.length} of ${students.length}` : "Loading…"}
-        </span>
+      <div className="glass rounded-2xl p-4">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative max-w-sm flex-1">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search name, email, city, subject…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="h-11 pl-9"
+            />
+          </div>
+          <Select value={level} onValueChange={setLevel}>
+            <SelectTrigger className="h-11 w-[170px]"><SelectValue placeholder="Level" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All levels</SelectItem>
+              <SelectItem value="Foundation">Foundation</SelectItem>
+              <SelectItem value="Undergraduate">Undergraduate</SelectItem>
+              <SelectItem value="Postgraduate">Postgraduate</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={year} onValueChange={setYear}>
+            <SelectTrigger className="h-11 w-[150px]"><SelectValue placeholder="Year" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All years</SelectItem>
+              <SelectItem value="2025">2025</SelectItem>
+              <SelectItem value="2026">2026</SelectItem>
+              <SelectItem value="2027">2027</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={status} onValueChange={setStatus}>
+            <SelectTrigger className="h-11 w-[180px]"><SelectValue placeholder="Status" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All statuses</SelectItem>
+              <SelectItem value="complete">Onboarding complete</SelectItem>
+              <SelectItem value="incomplete">Incomplete</SelectItem>
+            </SelectContent>
+          </Select>
+          {hasFilter && (
+            <button
+              type="button"
+              onClick={resetFilters}
+              className="inline-flex h-11 items-center gap-1.5 rounded-full px-3 text-sm text-muted-foreground hover:text-foreground"
+            >
+              <RotateCcw className="h-4 w-4" /> Reset
+            </button>
+          )}
+          <span className="ml-auto inline-flex h-11 items-center rounded-full bg-gold px-4 text-sm font-semibold text-gold-foreground">
+            {students ? `${filtered.length} of ${students.length}` : "Loading…"}
+          </span>
+        </div>
       </div>
 
       {error && (
-        <p className="mt-6 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+        <p className="mt-6 rounded-2xl border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
           {error}
         </p>
       )}
 
-      <div className="mt-6 overflow-x-auto rounded-xl border border-border bg-surface">
-        <table className="min-w-full text-sm">
-          <thead className="bg-muted/60 text-left text-xs uppercase tracking-wider text-muted-foreground">
-            <tr>
-              {["Name", "Email", "City", "Subject", "Level", "Year", "Status", "Joined"].map((h) => (
-                <th key={h} className="px-4 py-3 font-medium">{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {students && filtered.length === 0 && (
+      <div className="mt-6 overflow-hidden rounded-2xl border border-border bg-surface shadow-sm">
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-sm">
+            <thead className="sticky top-0 bg-muted/60 text-left text-xs uppercase tracking-wider text-muted-foreground">
               <tr>
-                <td colSpan={8} className="px-4 py-10 text-center text-muted-foreground">
-                  No students match these filters.
-                </td>
+                {["Name", "Email", "City", "Subject", "Level", "Year", "Status", "Joined"].map((h) => (
+                  <th key={h} className="px-4 py-3 font-medium">{h}</th>
+                ))}
               </tr>
-            )}
-            {filtered.map((st) => (
-              <tr
-                key={st.id}
-                onClick={() => setSelected(st)}
-                className="cursor-pointer text-foreground transition hover:bg-muted/40"
-              >
-                <td className="px-4 py-3 font-medium">{st.full_name ?? "–"}</td>
-                <td className="px-4 py-3">{st.email ?? "–"}</td>
-                <td className="px-4 py-3">{st.city ?? "–"}</td>
-                <td className="px-4 py-3">{st.subject ?? "–"}</td>
-                <td className="px-4 py-3">{st.study_level ?? "–"}</td>
-                <td className="px-4 py-3">{st.start_year ?? "–"}</td>
-                <td className="px-4 py-3">
-                  <span
-                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                      st.onboarding_complete
-                        ? "bg-emerald-100 text-emerald-800"
-                        : "bg-amber-100 text-amber-800"
-                    }`}
-                  >
-                    {st.onboarding_complete ? "Complete" : "Incomplete"}
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-muted-foreground">
-                  {new Date(st.created_at).toLocaleDateString("en-GB")}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {!students && (
+                <SkeletonRows columns={8} rows={6} />
+              )}
+              {students && filtered.length === 0 && (
+                <tr>
+                  <td colSpan={8} className="px-4 py-14 text-center">
+                    <div className="mx-auto flex max-w-xs flex-col items-center gap-3 text-muted-foreground">
+                      <UserRound className="h-8 w-8 opacity-50" />
+                      <p>No students match these filters.</p>
+                      {hasFilter && (
+                        <button
+                          type="button"
+                          onClick={resetFilters}
+                          className="inline-flex h-9 items-center rounded-full border border-border bg-background px-4 text-xs font-medium text-foreground hover:bg-muted"
+                        >
+                          Clear filters
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              )}
+              {filtered.map((st) => (
+                <tr
+                  key={st.id}
+                  onClick={() => setSelected(st)}
+                  className="cursor-pointer text-foreground transition hover:bg-muted/40"
+                >
+                  <td className="max-w-[220px] truncate px-4 py-3 font-medium" title={st.full_name ?? ""}>
+                    {st.full_name ?? "–"}
+                  </td>
+                  <td className="max-w-[240px] truncate px-4 py-3" title={st.email ?? ""}>
+                    {st.email ?? "–"}
+                  </td>
+                  <td className="px-4 py-3">{st.city ?? "–"}</td>
+                  <td className="px-4 py-3">{st.subject ?? "–"}</td>
+                  <td className="px-4 py-3">{st.study_level ?? "–"}</td>
+                  <td className="px-4 py-3">{st.start_year ?? "–"}</td>
+                  <td className="px-4 py-3">
+                    <StatusPill complete={st.onboarding_complete} />
+                  </td>
+                  <td className="px-4 py-3 text-muted-foreground">
+                    {new Date(st.created_at).toLocaleDateString("en-GB")}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <StudentSheet
@@ -348,6 +407,49 @@ function StudentsTab() {
   );
 }
 
+function StatusPill({ complete }: { complete: boolean }) {
+  return complete ? (
+    <span className="inline-flex items-center rounded-full bg-success/15 px-2.5 py-0.5 text-xs font-medium text-success">
+      Complete
+    </span>
+  ) : (
+    <span className="inline-flex items-center rounded-full bg-warning/20 px-2.5 py-0.5 text-xs font-medium text-warning-foreground">
+      Incomplete
+    </span>
+  );
+}
+
+function SkeletonRows({ columns, rows }: { columns: number; rows: number }) {
+  return (
+    <>
+      {Array.from({ length: rows }).map((_, r) => (
+        <tr key={r}>
+          {Array.from({ length: columns }).map((__, c) => (
+            <td key={c} className="px-4 py-3">
+              <div className="h-3.5 w-full max-w-[140px] animate-pulse rounded bg-muted" />
+            </td>
+          ))}
+        </tr>
+      ))}
+    </>
+  );
+}
+
+function copy(text: string | null | undefined, label = "Copied") {
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(
+    () => toast.success(`${label}: ${text}`),
+    () => toast.error("Copy failed"),
+  );
+}
+
+function initialsOf(name?: string | null, email?: string | null) {
+  const src = (name || email || "?").trim();
+  const parts = src.split(/\s+/);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return src.slice(0, 2).toUpperCase();
+}
+
 function StudentSheet({
   userId,
   onClose,
@@ -356,8 +458,10 @@ function StudentSheet({
   onClose: () => void;
 }) {
   const fetchStudent = useServerFn(getStudent);
+  const sendReset = useServerFn(sendPasswordReset);
   const [data, setData] = useState<Awaited<ReturnType<typeof fetchStudent>> | null>(null);
   const [loading, setLoading] = useState(false);
+  const [sendingReset, setSendingReset] = useState(false);
 
   useEffect(() => {
     if (!userId) {
@@ -377,64 +481,122 @@ function StudentSheet({
 
   const p = data?.profile;
 
+  const handleSendReset = async () => {
+    if (!data?.email) return;
+    setSendingReset(true);
+    try {
+      await sendReset({
+        data: { email: data.email, redirectTo: window.location.origin + "/reset-password" },
+      });
+      toast.success(`Reset link sent to ${data.email}`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to send reset link");
+    } finally {
+      setSendingReset(false);
+    }
+  };
+
   return (
     <Sheet open={!!userId} onOpenChange={(o) => !o && onClose()}>
       <SheetContent className="w-full overflow-y-auto sm:max-w-xl">
         <SheetHeader>
-          <SheetTitle className="font-serif text-2xl">
-            {p?.full_name ?? "Student"}
-          </SheetTitle>
-          <SheetDescription>{data?.email ?? ""}</SheetDescription>
+          <div className="flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/70 text-sm font-semibold text-primary-foreground">
+              {initialsOf(p?.full_name, data?.email)}
+            </div>
+            <div className="min-w-0">
+              <SheetTitle className="truncate font-serif text-2xl">
+                {p?.full_name ?? "Student"}
+              </SheetTitle>
+              <SheetDescription className="truncate">{data?.email ?? ""}</SheetDescription>
+            </div>
+          </div>
         </SheetHeader>
 
         {loading && <p className="mt-8 text-sm text-muted-foreground">Loading…</p>}
 
         {data && !loading && (
           <div className="mt-6 space-y-6 text-sm">
-            <Section title="Contact">
-              <Row k="Full name" v={p?.full_name} />
-              <Row k="Email" v={data.email} />
-              <Row k="Phone" v={p?.phone} />
-            </Section>
-
-            <Section title="Location">
-              <Row k="City" v={p?.city} />
-              <Row k="Country" v={p?.country} />
-              {p?.lat && p?.lng && (
-                <Row
-                  k="Coordinates"
-                  v={
-                    <a
-                      className="text-primary underline"
-                      target="_blank"
-                      rel="noreferrer"
-                      href={`https://www.google.com/maps?q=${p.lat},${p.lng}`}
-                    >
-                      {p.lat.toFixed(4)}, {p.lng.toFixed(4)}
-                    </a>
-                  }
-                />
+            <div className="flex flex-wrap gap-2">
+              {data.email && (
+                <>
+                  <a
+                    href={`mailto:${data.email}`}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-full border border-border bg-surface px-3 text-xs font-medium text-foreground hover:bg-muted"
+                  >
+                    <Mail className="h-3.5 w-3.5" /> Email
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => copy(data.email, "Email")}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-full border border-border bg-surface px-3 text-xs font-medium text-foreground hover:bg-muted"
+                  >
+                    <Copy className="h-3.5 w-3.5" /> Copy email
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSendReset}
+                    disabled={sendingReset}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-full bg-primary px-3 text-xs font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50"
+                  >
+                    <KeyRound className="h-3.5 w-3.5" />
+                    {sendingReset ? "Sending…" : "Send password reset"}
+                  </button>
+                </>
               )}
-            </Section>
+            </div>
 
-            <Section title="Study plan">
-              <Row k="Subject" v={p?.subject} />
-              <Row k="Level" v={p?.study_level} />
-              <Row k="Start year" v={p?.start_year} />
-              <Row k="Reason / notes" v={p?.reason} />
-            </Section>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Section title="Contact">
+                <Row k="Full name" v={p?.full_name} />
+                <Row k="Email" v={data.email} />
+                <Row k="Phone" v={p?.phone} />
+              </Section>
 
-            <Section title="Account">
-              <Row k="Onboarding" v={p?.onboarding_complete ? "Complete" : "Incomplete"} />
-              <Row
-                k="Joined"
-                v={data.createdAt ? new Date(data.createdAt).toLocaleString("en-GB") : "–"}
-              />
-              <Row
-                k="Last sign-in"
-                v={data.lastSignInAt ? new Date(data.lastSignInAt).toLocaleString("en-GB") : "–"}
-              />
-            </Section>
+              <Section title="Location">
+                <Row k="City" v={p?.city} />
+                <Row k="Country" v={p?.country} />
+                {p?.lat && p?.lng && (
+                  <Row
+                    k="Map"
+                    v={
+                      <a
+                        className="inline-flex items-center gap-1 text-primary underline"
+                        target="_blank"
+                        rel="noreferrer"
+                        href={`https://www.google.com/maps?q=${p.lat},${p.lng}`}
+                      >
+                        <MapPin className="h-3 w-3" /> Open
+                      </a>
+                    }
+                  />
+                )}
+              </Section>
+
+              <Section title="Study plan">
+                <Row k="Subject" v={p?.subject} />
+                <Row k="Level" v={p?.study_level} />
+                <Row k="Start year" v={p?.start_year} />
+              </Section>
+
+              <Section title="Account">
+                <Row k="Onboarding" v={p?.onboarding_complete ? "Complete" : "Incomplete"} />
+                <Row
+                  k="Joined"
+                  v={data.createdAt ? new Date(data.createdAt).toLocaleDateString("en-GB") : "–"}
+                />
+                <Row
+                  k="Last sign-in"
+                  v={data.lastSignInAt ? new Date(data.lastSignInAt).toLocaleDateString("en-GB") : "–"}
+                />
+              </Section>
+            </div>
+
+            {p?.reason && (
+              <Section title="Notes">
+                <p className="text-foreground">{p.reason}</p>
+              </Section>
+            )}
 
             {data.leads.length > 0 && (
               <Section title={`Lead submissions (${data.leads.length})`}>
@@ -528,57 +690,84 @@ function LeadsTab() {
 
   return (
     <div>
-      <div className="flex flex-wrap items-center gap-3">
-        <Input
-          placeholder="Search leads…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="h-11 max-w-sm"
-        />
-        <span className="ml-auto inline-flex h-11 items-center rounded-full bg-gold px-4 text-sm font-semibold text-gold-foreground">
-          {leads ? `${filtered.length} leads` : "Loading…"}
-        </span>
+      <div className="glass rounded-2xl p-4">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative max-w-sm flex-1">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search leads…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="h-11 pl-9"
+            />
+          </div>
+          <span className="ml-auto inline-flex h-11 items-center rounded-full bg-gold px-4 text-sm font-semibold text-gold-foreground">
+            {leads ? `${filtered.length} leads` : "Loading…"}
+          </span>
+        </div>
       </div>
 
       {error && (
-        <p className="mt-6 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+        <p className="mt-6 rounded-2xl border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
           {error}
         </p>
       )}
 
-      <div className="mt-6 overflow-x-auto rounded-xl border border-border bg-surface">
-        <table className="min-w-full text-sm">
-          <thead className="bg-muted/60 text-left text-xs uppercase tracking-wider text-muted-foreground">
-            <tr>
-              {["Name", "Email", "Phone", "City", "Subject", "Level", "Year", "Submitted"].map((h) => (
-                <th key={h} className="px-4 py-3 font-medium">{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {leads && filtered.length === 0 && (
+      <div className="mt-6 overflow-hidden rounded-2xl border border-border bg-surface shadow-sm">
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-sm">
+            <thead className="bg-muted/60 text-left text-xs uppercase tracking-wider text-muted-foreground">
               <tr>
-                <td colSpan={8} className="px-4 py-10 text-center text-muted-foreground">
-                  No leads.
-                </td>
+                {["Name", "Email", "Phone", "City", "Subject", "Level", "Year", "Submitted", ""].map((h, i) => (
+                  <th key={i} className="px-4 py-3 font-medium">{h}</th>
+                ))}
               </tr>
-            )}
-            {filtered.map((l) => (
-              <tr key={l.id} className="text-foreground">
-                <td className="px-4 py-3 font-medium">{l.name}</td>
-                <td className="px-4 py-3">{l.email}</td>
-                <td className="px-4 py-3">{l.phone}</td>
-                <td className="px-4 py-3">{l.city}</td>
-                <td className="px-4 py-3">{l.subject}</td>
-                <td className="px-4 py-3">{l.study_level}</td>
-                <td className="px-4 py-3">{l.start_year}</td>
-                <td className="px-4 py-3 text-muted-foreground">
-                  {new Date(l.created_at).toLocaleString("en-GB")}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {!leads && <SkeletonRows columns={9} rows={5} />}
+              {leads && filtered.length === 0 && (
+                <tr>
+                  <td colSpan={9} className="px-4 py-14 text-center text-muted-foreground">
+                    No leads.
+                  </td>
+                </tr>
+              )}
+              {filtered.map((l) => (
+                <tr key={l.id} className="text-foreground hover:bg-muted/40">
+                  <td className="px-4 py-3 font-medium">{l.name}</td>
+                  <td className="px-4 py-3">{l.email}</td>
+                  <td className="px-4 py-3">{l.phone}</td>
+                  <td className="px-4 py-3">{l.city}</td>
+                  <td className="px-4 py-3">{l.subject}</td>
+                  <td className="px-4 py-3">{l.study_level}</td>
+                  <td className="px-4 py-3">{l.start_year}</td>
+                  <td className="px-4 py-3 text-muted-foreground">
+                    {new Date(l.created_at).toLocaleDateString("en-GB")}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <div className="inline-flex gap-1">
+                      <a
+                        href={`mailto:${l.email}`}
+                        title="Email"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"
+                      >
+                        <Mail className="h-3.5 w-3.5" />
+                      </a>
+                      <button
+                        type="button"
+                        onClick={() => copy(l.email, "Email")}
+                        title="Copy email"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"
+                      >
+                        <Copy className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
