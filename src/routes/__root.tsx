@@ -82,7 +82,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "Free, impartial guidance for UK students. Find the right university, course, and funding path — in minutes.",
       },
-      { property: "og:title", content: "UniPath — UK University Guidance" },
+      { property: "og:title", content: "UniPath — Your UK University Journey Starts Here" },
       {
         property: "og:description",
         content:
@@ -90,6 +90,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "UniPath — Your UK University Journey Starts Here" },
+      { name: "description", content: "UniPath Guidance is a lead generation website for UK university applicants." },
+      { property: "og:description", content: "UniPath Guidance is a lead generation website for UK university applicants." },
+      { name: "twitter:description", content: "UniPath Guidance is a lead generation website for UK university applicants." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7f10bfa6-9646-4ea4-a5e6-467a41751bdf/id-preview-502cf1bb--e1ce152e-7d61-4e1b-b76d-81a3c53fbae6.lovable.app-1779376377080.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7f10bfa6-9646-4ea4-a5e6-467a41751bdf/id-preview-502cf1bb--e1ce152e-7d61-4e1b-b76d-81a3c53fbae6.lovable.app-1779376377080.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
