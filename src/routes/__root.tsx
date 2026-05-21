@@ -76,13 +76,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "UniPath — Your UK University Journey Starts Here" },
+      { title: "UniPath · Your UK University Journey Starts Here" },
       {
         name: "description",
         content:
-          "Free, impartial guidance for UK students. Find the right university, course, and funding path — in minutes.",
+          "Free, impartial guidance for UK students. Find the right university, course, and funding path, in minutes.",
       },
-      { property: "og:title", content: "UniPath — Your UK University Journey Starts Here" },
+      { property: "og:title", content: "UniPath, Your UK University Journey Starts Here" },
       {
         property: "og:description",
         content:
@@ -90,7 +90,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "UniPath — Your UK University Journey Starts Here" },
+      { name: "twitter:title", content: "UniPath, Your UK University Journey Starts Here" },
       { name: "description", content: "UniPath Guidance is a lead generation website for UK university applicants." },
       { property: "og:description", content: "UniPath Guidance is a lead generation website for UK university applicants." },
       { name: "twitter:description", content: "UniPath Guidance is a lead generation website for UK university applicants." },

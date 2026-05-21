@@ -20,7 +20,7 @@ const TESTIMONIALS = [
     age: 24,
     city: "London",
     quote:
-      "Honest, warm guidance — no pressure. I ended up at a university I'd never have considered on my own.",
+      "Honest, warm guidance, no pressure. I ended up at a university I'd never have considered on my own.",
   },
 ];
 

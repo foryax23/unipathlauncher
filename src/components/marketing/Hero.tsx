@@ -21,7 +21,7 @@ export function Hero() {
           </h1>
           <p className="mt-6 max-w-xl text-lg text-muted-foreground sm:text-xl">
             Discover, compare and apply to 40+ UK partner institutions.
-            Free expert guidance on courses, scholarships and visas — all in one place.
+            Free expert guidance on courses, scholarships and visas, all in one place.
           </p>
 
           <div className="mt-8 lg:hidden">

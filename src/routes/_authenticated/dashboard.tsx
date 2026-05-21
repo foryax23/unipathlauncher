@@ -8,7 +8,7 @@ import { GraduationCap, MapPin, Sparkles, LogOut } from "lucide-react";
 import { Logo } from "@/components/marketing/Logo";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
-  head: () => ({ meta: [{ title: "Your shortlist — UniPath" }] }),
+  head: () => ({ meta: [{ title: "Your shortlist · UniPath" }] }),
   component: Dashboard,
 });
 
@@ -72,7 +72,7 @@ function Dashboard() {
             Your personalised shortlist
           </p>
           <h1 className="mt-3 text-display-lg text-foreground">
-            Hi {profile.full_name?.split(" ")[0] ?? "there"} —
+            Hi {profile.full_name?.split(" ")[0] ?? "there"} -
             <br />
             here are the best {subjectTitle.toLowerCase()} routes for you.
           </h1>

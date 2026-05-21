@@ -21,7 +21,7 @@ const STEPS = [
     n: "03",
     title: "Get expert guidance",
     body:
-      "Receive a tailored shortlist, application tips, and funding options — with a real adviser on call.",
+      "Receive a tailored shortlist, application tips, and funding options, with a real adviser on call.",
     img: "https://picsum.photos/seed/uk-adviser-meeting/900/700",
     alt: "A university adviser meeting with a prospective student",
   },

@@ -1,7 +1,7 @@
 const ITEMS = [
   {
     title: "Direct access to 40+ UK universities",
-    body: "Official partnerships with leading UK institutions — book counselling, arrange campus tours and apply online, free.",
+    body: "Official partnerships with leading UK institutions, book counselling, arrange campus tours and apply online, free.",
     cta: "Browse universities",
     href: "/courses",
     img: "uk-university-campus-students",

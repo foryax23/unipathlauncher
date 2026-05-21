@@ -30,7 +30,7 @@ export function HeroMatchCard() {
         <span className="text-coral">2-minute</span> course match
       </h3>
       <p className="mt-1 text-sm text-muted-foreground">
-        Tell us what you're studying — get a UK-wide shortlist instantly.
+        Tell us what you're studying, get a UK-wide shortlist instantly.
       </p>
 
       <label className="mt-5 block">

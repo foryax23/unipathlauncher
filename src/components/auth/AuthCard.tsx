@@ -43,7 +43,7 @@ export function AuthCard({ mode }: { mode: Mode }) {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
           if ((error as { code?: string }).code === "email_not_confirmed") {
-            toast.error("Please confirm your email — check your inbox for the link.");
+            toast.error("Please confirm your email, check your inbox for the link.");
           } else {
             toast.error(error.message);
           }
@@ -70,7 +70,7 @@ export function AuthCard({ mode }: { mode: Mode }) {
         return;
       }
       if (!result.redirected) {
-        // Tokens already set on supabase client — go straight in.
+        // Tokens already set on supabase client, go straight in.
         navigate({ to: dest });
       }
     } catch (err) {

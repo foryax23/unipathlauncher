@@ -314,12 +314,12 @@ function StudentsTab() {
                 onClick={() => setSelected(st)}
                 className="cursor-pointer text-foreground transition hover:bg-muted/40"
               >
-                <td className="px-4 py-3 font-medium">{st.full_name ?? "—"}</td>
-                <td className="px-4 py-3">{st.email ?? "—"}</td>
-                <td className="px-4 py-3">{st.city ?? "—"}</td>
-                <td className="px-4 py-3">{st.subject ?? "—"}</td>
-                <td className="px-4 py-3">{st.study_level ?? "—"}</td>
-                <td className="px-4 py-3">{st.start_year ?? "—"}</td>
+                <td className="px-4 py-3 font-medium">{st.full_name ?? "–"}</td>
+                <td className="px-4 py-3">{st.email ?? "–"}</td>
+                <td className="px-4 py-3">{st.city ?? "–"}</td>
+                <td className="px-4 py-3">{st.subject ?? "–"}</td>
+                <td className="px-4 py-3">{st.study_level ?? "–"}</td>
+                <td className="px-4 py-3">{st.start_year ?? "–"}</td>
                 <td className="px-4 py-3">
                   <span
                     className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
@@ -428,11 +428,11 @@ function StudentSheet({
               <Row k="Onboarding" v={p?.onboarding_complete ? "Complete" : "Incomplete"} />
               <Row
                 k="Joined"
-                v={data.createdAt ? new Date(data.createdAt).toLocaleString("en-GB") : "—"}
+                v={data.createdAt ? new Date(data.createdAt).toLocaleString("en-GB") : "–"}
               />
               <Row
                 k="Last sign-in"
-                v={data.lastSignInAt ? new Date(data.lastSignInAt).toLocaleString("en-GB") : "—"}
+                v={data.lastSignInAt ? new Date(data.lastSignInAt).toLocaleString("en-GB") : "–"}
               />
             </Section>
 
@@ -482,7 +482,7 @@ function Row({ k, v }: { k: string; v: React.ReactNode }) {
   return (
     <div className="flex justify-between gap-4">
       <span className="text-muted-foreground">{k}</span>
-      <span className="text-right text-foreground">{v || "—"}</span>
+      <span className="text-right text-foreground">{v || "–"}</span>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 const FEATURES = [
   {
     eyebrow: "Personalised recommendations",
-    title: "Know which unis fit you — instantly.",
+    title: "Know which unis fit you, instantly.",
     body: "Our tech scans 40+ UK universities to check entry requirements, location, fees, ranking and scholarship eligibility against your profile, so you don't have to.",
     bullets: ["Entry requirement check", "Budget estimate", "Course eligibility", "Ranking match"],
     img: "ui-uni-recommendations-dashboard",
@@ -16,21 +16,21 @@ const FEATURES = [
   {
     eyebrow: "Course comparison",
     title: "Compare shortlisted courses side-by-side.",
-    body: "Study environment, subject ranking, entry requirements, accreditation — all in one table. Plus a fit analysis based on your budget and goals.",
+    body: "Study environment, subject ranking, entry requirements, accreditation, all in one table. Plus a fit analysis based on your budget and goals.",
     bullets: ["Side-by-side metrics", "Fit-score", "Scholarship flags", "City compare"],
     img: "ui-comparison-table-courses",
   },
   {
     eyebrow: "Parent / guardian access",
     title: "Keep parents in the loop with one tap.",
-    body: "Grant guest access so families can review uni details, comparisons and recommendations together — at any time.",
+    body: "Grant guest access so families can review uni details, comparisons and recommendations together, at any time.",
     bullets: ["Guest invites", "Shared notes", "Read-only mode", "Email digests"],
     img: "ui-parent-guest-dashboard",
   },
   {
     eyebrow: "Application & visa support",
     title: "Apply worry-free with end-to-end support.",
-    body: "Track UCAS deadlines, document checklists, offer acceptance, visa applications and accommodation — all from your dashboard.",
+    body: "Track UCAS deadlines, document checklists, offer acceptance, visa applications and accommodation, all from your dashboard.",
     bullets: ["UCAS tracking", "Document review", "Visa support", "Accommodation"],
     img: "ui-application-tracker-uk",
   },

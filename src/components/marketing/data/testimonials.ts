@@ -45,7 +45,7 @@ export const TESTIMONIALS: Testimonial[] = [
   {
     name: "Ella Thompson",
     quote:
-      "My consultant tracked every deadline. I never felt lost — and I'm starting at my dream uni in Edinburgh.",
+      "My consultant tracked every deadline. I never felt lost, and I'm starting at my dream uni in Edinburgh.",
     programme: "MA Psychology",
     uni: "University of Edinburgh",
     avatarSeed: "ella-scottish-student",

@@ -11,7 +11,7 @@ const ITEMS = [
   },
   {
     q: "Can I get a student loan?",
-    a: "Yes — eligible UK students can apply for Tuition Fee Loans and Maintenance Loans from Student Finance England (or the equivalent in Scotland, Wales and Northern Ireland).",
+    a: "Yes, eligible UK students can apply for Tuition Fee Loans and Maintenance Loans from Student Finance England (or the equivalent in Scotland, Wales and Northern Ireland).",
   },
   {
     q: "What is Clearing and can it help me?",

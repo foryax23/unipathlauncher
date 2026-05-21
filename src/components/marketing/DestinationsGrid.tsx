@@ -13,7 +13,7 @@ export function DestinationsGrid() {
             Start your successful study journey across the UK
           </h2>
           <p className="mt-4 text-muted-foreground">
-            Find the city, university and course that fits you best — from London to Edinburgh.
+            Find the city, university and course that fits you best, from London to Edinburgh.
           </p>
         </div>
 
