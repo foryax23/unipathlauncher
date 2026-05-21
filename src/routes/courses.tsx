@@ -10,6 +10,23 @@ export const Route = createFileRoute("/courses")({
     meta: [
       { title: "Browse UK university courses · Bridge Gateway" },
       { name: "description", content: "Search the full catalogue of UK foundation, undergraduate, top-up and postgraduate courses across our partner universities." },
+      { property: "og:title", content: "Browse UK university courses · Bridge Gateway" },
+      { property: "og:description", content: "Search the full catalogue of UK foundation, undergraduate, top-up and postgraduate courses across our partner universities." },
+      { property: "og:url", content: "/courses" },
+    ],
+    links: [{ rel: "canonical", href: "/courses" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: "UK university courses",
+          description:
+            "Catalogue of UK foundation, undergraduate, top-up and postgraduate courses offered through Bridge Gateway Consulting.",
+          url: "https://bridgegatewayconsulting.com/courses",
+        }),
+      },
     ],
   }),
   component: CoursesPage,

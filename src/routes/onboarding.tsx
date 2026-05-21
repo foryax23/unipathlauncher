@@ -17,7 +17,11 @@ export const Route = createFileRoute("/onboarding")({
     meta: [
       { title: "Get matched · Bridge Gateway" },
       { name: "description", content: "Tell us about you and get a personalised UK university shortlist in 2 minutes." },
+      { property: "og:title", content: "Get matched · Bridge Gateway" },
+      { property: "og:description", content: "Answer a few questions and get a personalised UK university shortlist in 2 minutes." },
+      { property: "og:url", content: "/onboarding" },
     ],
+    links: [{ rel: "canonical", href: "/onboarding" }],
   }),
   component: OnboardingPage,
 });

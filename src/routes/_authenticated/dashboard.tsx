@@ -9,7 +9,15 @@ import { Logo } from "@/components/marketing/Logo";
 import { VerifyEmailBanner } from "@/components/dashboard/VerifyEmailBanner";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
-  head: () => ({ meta: [{ title: "Your shortlist · Bridge Gateway" }] }),
+  head: () => ({
+    meta: [
+      { title: "Your shortlist · Bridge Gateway" },
+      { name: "description", content: "Your personalised UK university shortlist and adviser updates." },
+      { name: "robots", content: "noindex,nofollow" },
+      { property: "og:url", content: "/dashboard" },
+    ],
+    links: [{ rel: "canonical", href: "/dashboard" }],
+  }),
   component: Dashboard,
 });
 

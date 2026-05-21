@@ -1,0 +1,11 @@
+# Bridge Gateway Consulting
+
+> Education consultancy helping students find, apply to, and succeed at UK universities with free, impartial adviser guidance.
+
+Bridge Gateway Consulting matches students with UK foundation, undergraduate, top-up and postgraduate courses across partner universities. Advisers help with course selection, applications, scholarships and visas.
+
+## Pages
+
+- [Home](/): Overview, services, destinations, testimonials and FAQs.
+- [Courses](/courses): Searchable catalogue of UK courses by subject, level and city.
+- [Get matched](/onboarding): 2-minute questionnaire that returns a personalised university shortlist.
