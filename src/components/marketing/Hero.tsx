@@ -1,4 +1,5 @@
 import { HeroMatchCard } from "./HeroMatchCard";
+import { LiveOffersBand } from "./LiveOffersBand";
 
 export function Hero() {
   return (
