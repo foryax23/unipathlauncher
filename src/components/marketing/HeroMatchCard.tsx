@@ -15,7 +15,10 @@ export function HeroMatchCard() {
   const [level, setLevel] = useState(LEVELS[0].value);
 
   const start = () => {
-    navigate({ to: "/signup", search: { level } as never });
+    if (typeof window !== "undefined") {
+      try { sessionStorage.setItem("unipath:level", level); } catch { /* noop */ }
+    }
+    navigate({ to: "/signup" });
   };
 
   return (
