@@ -106,6 +106,10 @@
   --gold-foreground: oklch(0.15 0.04 265);
   --destructive: oklch(0.65 0.2 27);
   --destructive-foreground: oklch(0.985 0 0);
+  --success: oklch(0.7 0.15 155);
+  --success-foreground: oklch(0.15 0.04 265);
+  --warning: oklch(0.78 0.15 70);
+  --warning-foreground: oklch(0.15 0.04 265);
   --border: oklch(1 0 0 / 12%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.81 0.13 82);
