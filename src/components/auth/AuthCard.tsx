@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { Logo } from "@/components/marketing/Logo";
@@ -9,6 +9,10 @@ type Mode = "login" | "signup";
 
 export function AuthCard({ mode }: { mode: Mode }) {
   const navigate = useNavigate();
+  // /login validates ?redirect; /signup ignores unknown search params safely.
+  const search = useSearch({ strict: false }) as { redirect?: string };
+  const dest = search?.redirect && search.redirect.startsWith("/") ? search.redirect : "/onboarding";
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
@@ -19,21 +23,33 @@ export function AuthCard({ mode }: { mode: Mode }) {
     setLoading(true);
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
-            emailRedirectTo: window.location.origin + "/onboarding",
+            emailRedirectTo: window.location.origin + dest,
             data: { full_name: fullName },
           },
         });
         if (error) throw error;
-        toast.success("Check your email to confirm your account.");
-        navigate({ to: "/login" });
+        // With auto-confirm enabled, a session is returned immediately.
+        if (data.session) {
+          navigate({ to: dest });
+        } else {
+          toast.success("Check your email to confirm your account.");
+          navigate({ to: "/login" });
+        }
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        navigate({ to: "/onboarding" });
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+          if ((error as { code?: string }).code === "email_not_confirmed") {
+            toast.error("Please confirm your email — check your inbox for the link.");
+          } else {
+            toast.error(error.message);
+          }
+          return;
+        }
+        if (data.session) navigate({ to: dest });
       }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Something went wrong");
@@ -46,12 +62,19 @@ export function AuthCard({ mode }: { mode: Mode }) {
     setLoading(true);
     try {
       const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin + "/onboarding",
+        redirect_uri: window.location.origin + dest,
       });
       if (result.error) {
         toast.error("Google sign-in failed. Please try email instead.");
+        setLoading(false);
+        return;
       }
-    } finally {
+      if (!result.redirected) {
+        // Tokens already set on supabase client — go straight in.
+        navigate({ to: dest });
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Google sign-in failed");
       setLoading(false);
     }
   };
