@@ -26,6 +26,9 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-gold: var(--gold);
   --color-gold-foreground: var(--gold-foreground);
+  --color-coral: var(--coral);
+  --color-amber: var(--amber);
+  --color-warm: var(--surface-warm);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
@@ -67,6 +70,11 @@
   --ring: oklch(0.27 0.09 265);
   --glass: oklch(1 0 0 / 0.6);
   --glass-border: oklch(1 0 0 / 0.4);
+  /* Warm 2026 accents */
+  --coral: oklch(68% 0.18 28);
+  --amber: oklch(80% 0.15 65);
+  --surface-warm: oklch(97% 0.03 50);
+  --gradient-warm: linear-gradient(135deg, oklch(68% 0.18 28), oklch(80% 0.15 65));
 }
 
 .dark {
