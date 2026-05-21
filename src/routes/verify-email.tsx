@@ -6,7 +6,15 @@ import { markEmailVerified } from "@/lib/profile.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/verify-email")({
-  head: () => ({ meta: [{ title: "Verifying… · Bridge Gateway" }] }),
+  head: () => ({
+    meta: [
+      { title: "Verifying email · Bridge Gateway" },
+      { name: "description", content: "Confirming your email address for Bridge Gateway Consulting." },
+      { name: "robots", content: "noindex,nofollow" },
+      { property: "og:url", content: "/verify-email" },
+    ],
+    links: [{ rel: "canonical", href: "/verify-email" }],
+  }),
   component: VerifyEmailPage,
 });
 
