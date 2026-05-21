@@ -76,29 +76,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "bridgegatewayconsulting" },
+      { title: "Bridge Gateway Consulting — Apply to UK universities with confidence" },
       {
         name: "description",
         content:
-          "Free, impartial guidance for UK students. Find the right university, course, and funding path, in minutes.",
-      },
-      { property: "og:title", content: "bridgegatewayconsulting" },
-      {
-        property: "og:description",
-        content:
-          "Free, impartial guidance helping UK students choose the right university and course.",
+          "Bridge Gateway Consulting helps students and families find, apply to, and succeed at UK universities. Free, impartial guidance from expert advisers.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://bridgegatewayconsulting.com/" },
       { property: "og:site_name", content: "Bridge Gateway Consulting" },
       { property: "fb:app_id", content: "0" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "bridgegatewayconsulting" },
-      { name: "description", content: "Apply now to best universities around UK!" },
-      { property: "og:description", content: "Apply now to best universities around UK!" },
-      { name: "twitter:description", content: "Apply now to best universities around UK!" },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7f10bfa6-9646-4ea4-a5e6-467a41751bdf/id-preview-502cf1bb--e1ce152e-7d61-4e1b-b76d-81a3c53fbae6.lovable.app-1779376377080.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7f10bfa6-9646-4ea4-a5e6-467a41751bdf/id-preview-502cf1bb--e1ce152e-7d61-4e1b-b76d-81a3c53fbae6.lovable.app-1779376377080.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -109,7 +96,29 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: "https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap",
       },
     ],
-    scripts: [{ children: themeBootstrap }],
+    scripts: [
+      { children: themeBootstrap },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "Bridge Gateway Consulting",
+          url: "https://bridgegatewayconsulting.com",
+          description:
+            "Education consultancy helping students apply to UK universities with expert, impartial guidance.",
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "Bridge Gateway Consulting",
+          url: "https://bridgegatewayconsulting.com",
+        }),
+      },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
