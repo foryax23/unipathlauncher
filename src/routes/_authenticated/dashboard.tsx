@@ -6,6 +6,7 @@ import { PROGRAMMES, COURSES, CAMPUSES } from "@/components/marketing/data/cours
 import { supabase } from "@/integrations/supabase/client";
 import { GraduationCap, MapPin, Sparkles, LogOut } from "lucide-react";
 import { Logo } from "@/components/marketing/Logo";
+import { VerifyEmailBanner } from "@/components/dashboard/VerifyEmailBanner";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Your shortlist · UniPath" }] }),
@@ -20,21 +21,26 @@ type Profile = {
   lat: number | null;
   lng: number | null;
   onboarding_complete: boolean;
+  email_verified_at: string | null;
 };
 
 function Dashboard() {
   const navigate = useNavigate();
   const fetchProfile = useServerFn(getMyProfile);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [email, setEmail] = useState<string>("");
 
   useEffect(() => {
-    fetchProfile({}).then((r) => {
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setEmail(session?.user.email ?? "");
+      const r = await fetchProfile({});
       if (!r.profile?.onboarding_complete) {
         navigate({ to: "/onboarding" });
         return;
       }
       setProfile(r.profile as Profile);
-    });
+    })();
   }, []);
 
   if (!profile) {
@@ -67,6 +73,9 @@ function Dashboard() {
       </header>
 
       <main className="mx-auto max-w-5xl px-4 py-10 pb-24">
+        {email && (
+          <VerifyEmailBanner email={email} verifiedAt={profile.email_verified_at} />
+        )}
         <div className="rounded-3xl aurora glass-strong p-6 sm:p-10">
           <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
             Your personalised shortlist
