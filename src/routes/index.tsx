@@ -30,6 +30,7 @@ function Index() {
       <Header />
       <main>
         <Hero />
+        <ServicesBand />
         <DestinationsGrid />
         <HowWeHelp />
         <WhyUs />
