@@ -1,35 +1,77 @@
-## Plan: make login + onboarding work reliably, then improve the next phase
+## Admin Lead Inbox
 
-### 1. Fix the actual auth/onboarding breakage
-- Add an auth-ready gate so protected pages wait for the browser session to fully restore before calling protected server functions.
-- Update `/login` and `/signup` to respect redirect-back paths and send users to `/onboarding` only after a valid session exists.
-- Make Google sign-in use the correct callback flow and preserve the intended onboarding destination.
-- Replace fragile onboarding profile updates with an upsert-style server function so onboarding still works even if the profile row was not created automatically.
-- Improve visible error messages for common auth states, especially “email not confirmed”.
+Upgrade `/admin` into a real adviser workspace: list of registered students (profiles + leads), search, filters, and a details panel showing everything captured in onboarding.
 
-### 2. Repair the onboarding flow
-- Add loading and error states before fetching the profile, instead of rendering steps while auth/server data is not ready.
-- Prefill onboarding from saved hero choices (`sessionStorage`) and existing profile data.
-- Make the location step resilient: search errors won’t block progress, device geolocation fallback stays optional, and selected location remains visible.
-- Ensure finishing onboarding saves all required fields, marks `onboarding_complete`, and routes to `/dashboard`.
+### 1. Auto-grant admin to fixed emails
 
-### 3. Improve mobile-first onboarding UX
-- Tighten the current 6-step flow for phone screens: safer sticky CTA spacing, larger tap targets, better vertical rhythm, and less risk of content being hidden behind the fixed button.
-- Add a review/final step feel without adding friction: users see their selected study level, subject, start intake, city, and phone before saving.
-- Keep the existing Apple/2026 Geist aesthetic and warm UniEnrol-inspired visual system.
+- Migration: insert `user_roles(role='admin')` for any existing `auth.users` whose email is `rodrigesg@gmail.com` or `mihaidandea13@gmail.com`.
+- Extend `handle_new_user` trigger so future signups with those emails are inserted into `user_roles` as admin automatically.
+- Lower-case comparison so casing doesn't matter.
 
-### 4. Continue the course indexing phase
-- Normalize course levels so onboarding filters match all programmes, including HNC/HND/MBA/Top-up routes.
-- Add stronger metadata to programme cards where already available in the current course index: provider, partner, location, mode, duration, and match reasons.
-- Make the dashboard match output clearer: why each course matched, nearest campus, and next action.
+### 2. New server functions (`src/lib/admin.functions.ts`)
 
-### 5. Validation after implementation
-- Test login page rendering on mobile.
-- Test protected route redirect behavior.
-- Test onboarding profile fetch/save path from authenticated state.
-- Check console/network for 401s or failed server function calls.
+All gated by `requireSupabaseAuth` + admin role check (reuse pattern from `listLeads`), using `supabaseAdmin`:
 
-## Technical notes
-- No new database tables are needed.
-- A small database migration may be needed only if the existing profile trigger is missing in the live backend, because current schema context shows the function exists but reports no active triggers.
-- Existing Lovable Cloud auth and server functions will be kept; no Edge Functions will be added.
+- `listStudents({ search?, level?, year? })` → joined view of `profiles` + `auth.users.email` + latest matching `leads` row. Returns: id, user_id, full_name, email, phone, city, country, subject, study_level, start_year, onboarding_complete, created_at.
+- `getStudent({ userId })` → full profile + all leads submitted with that email + computed fields (location lat/lng, reason, source).
+- Keep existing `listLeads` for the anonymous-lead inbox tab.
+
+### 3. UI rebuild (`src/routes/admin.tsx`)
+
+Two tabs:
+- **Students** (default) — registered users from `profiles`.
+- **Leads** — existing anonymous lead form submissions.
+
+Students tab:
+- Toolbar: search input (name/email/city), filter selects for Subject, Study level (Foundation/Undergrad/Postgrad), Start year (2025/26/27), Onboarding status (complete/incomplete).
+- Table: Name · Email · City · Subject · Level · Year · Status · Joined. Row click opens details panel.
+- Right-hand slide-over panel (`Sheet` from shadcn) with sections:
+  - Contact: name, email, phone
+  - Location: city, country, lat/lng (mini static map link)
+  - Study plan: subject, level, start year, reason
+  - Onboarding: completion state + timestamps
+  - Related leads: any rows from `leads` matching the email
+  - CSV export of the single student
+- Filters apply client-side once data loaded; server function handles `search` for scalability.
+
+### 4. Access control
+
+- `/admin` already checks session; add explicit admin check via new `getMyAdminStatus` server fn so non-admins see a clear "Not authorised" message instead of a failed fetch.
+- All admin server fns double-check the role; never trust the client.
+
+### Technical notes
+
+```text
+src/
+├── lib/
+│   ├── admin.functions.ts        # NEW: listStudents, getStudent, getMyAdminStatus
+│   └── leads.functions.ts        # unchanged
+├── routes/
+│   └── admin.tsx                 # rewritten: tabs + students table + details sheet
+└── components/admin/
+    ├── StudentsTable.tsx         # NEW
+    ├── StudentDetailsSheet.tsx   # NEW
+    └── FiltersBar.tsx            # NEW
+supabase/migrations/
+└── <ts>_admin_emails.sql         # NEW: seed admin roles + extend trigger
+```
+
+Migration sketch:
+
+```sql
+-- seed existing
+INSERT INTO public.user_roles (user_id, role)
+SELECT id, 'admin'::app_role FROM auth.users
+WHERE lower(email) IN ('rodrigesg@gmail.com','mihaidandea13@gmail.com')
+ON CONFLICT DO NOTHING;
+
+-- extend trigger
+CREATE OR REPLACE FUNCTION public.handle_new_user() ...
+  INSERT INTO public.profiles (user_id, full_name) VALUES (NEW.id, ...);
+  IF lower(NEW.email) IN ('rodrigesg@gmail.com','mihaidandea13@gmail.com') THEN
+    INSERT INTO public.user_roles(user_id, role) VALUES (NEW.id, 'admin')
+    ON CONFLICT DO NOTHING;
+  END IF;
+```
+
+No schema changes to `profiles` or `leads` are required — all needed fields already exist.
