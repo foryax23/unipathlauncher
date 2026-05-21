@@ -47,8 +47,12 @@ export const listStudents = createServerFn({ method: "POST" })
       .limit(500);
 
     if (data.search) {
-      const s = `%${data.search}%`;
-      q = q.or(`full_name.ilike.${s},city.ilike.${s},subject.ilike.${s}`);
+      // Strip PostgREST filter metacharacters to prevent filter injection
+      const safe = data.search.replace(/[,()*\\"'\n\r]/g, " ").trim();
+      if (safe) {
+        const s = `%${safe}%`;
+        q = q.or(`full_name.ilike.${s},city.ilike.${s},subject.ilike.${s}`);
+      }
     }
 
     const { data: profiles, error } = await q;
