@@ -69,31 +69,33 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 // Inline script to set the theme before paint, preventing FOUC.
-const themeBootstrap = `(function(){try{var t=localStorage.getItem('bgc-theme')||localStorage.getItem('bgc-theme');var d=t?t==='dark':window.matchMedia('(prefers-color-scheme: dark)').matches;if(d)document.documentElement.classList.add('dark');}catch(e){}})();`;
+const themeBootstrap = `(function(){try{var t=localStorage.getItem('unipath-theme');var d=t?t==='dark':window.matchMedia('(prefers-color-scheme: dark)').matches;if(d)document.documentElement.classList.add('dark');}catch(e){}})();`;
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { name: "theme-color", content: "#0B1F3F" },
-      { title: "Bridge Gateway Consulting — Your gateway to global education" },
+      { title: "bridgegatewayconsulting" },
       {
         name: "description",
         content:
-          "Bridge Gateway Consulting helps students and families find, apply to, and succeed at universities abroad. Expert advisers. Personalised pathways.",
+          "Free, impartial guidance for UK students. Find the right university, course, and funding path, in minutes.",
       },
-      { property: "og:site_name", content: "Bridge Gateway Consulting" },
-      { property: "og:title", content: "Bridge Gateway Consulting — Your gateway to global education" },
+      { property: "og:title", content: "bridgegatewayconsulting" },
       {
         property: "og:description",
         content:
-          "Expert advisers guiding students from shortlist to offer letter. Personalised pathways to universities in the UK and abroad.",
+          "Free, impartial guidance helping UK students choose the right university and course.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Bridge Gateway Consulting — Your gateway to global education" },
-      { name: "twitter:description", content: "Expert advisers guiding students from shortlist to offer letter." },
+      { name: "twitter:title", content: "bridgegatewayconsulting" },
+      { name: "description", content: "Apply now to best universities around UK!" },
+      { property: "og:description", content: "Apply now to best universities around UK!" },
+      { name: "twitter:description", content: "Apply now to best universities around UK!" },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7f10bfa6-9646-4ea4-a5e6-467a41751bdf/id-preview-502cf1bb--e1ce152e-7d61-4e1b-b76d-81a3c53fbae6.lovable.app-1779376377080.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7f10bfa6-9646-4ea4-a5e6-467a41751bdf/id-preview-502cf1bb--e1ce152e-7d61-4e1b-b76d-81a3c53fbae6.lovable.app-1779376377080.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
