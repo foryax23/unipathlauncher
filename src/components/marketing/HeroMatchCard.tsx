@@ -16,9 +16,9 @@ export function HeroMatchCard() {
 
   const start = () => {
     if (typeof window !== "undefined") {
-      try { sessionStorage.setItem("unipath:level", level); } catch { /* noop */ }
+      try { localStorage.setItem("unipath:level", level); } catch { /* noop */ }
     }
-    navigate({ to: "/signup" });
+    navigate({ to: "/onboarding" });
   };
 
   return (

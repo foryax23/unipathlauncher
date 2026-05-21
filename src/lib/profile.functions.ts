@@ -34,7 +34,6 @@ export const updateMyProfile = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => profileSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    // Upsert so onboarding works even if the auto-create trigger didn't fire.
     const { data: row, error } = await supabase
       .from("profiles")
       .upsert({ user_id: userId, ...data }, { onConflict: "user_id" })
@@ -42,4 +41,18 @@ export const updateMyProfile = createServerFn({ method: "POST" })
       .maybeSingle();
     if (error) throw new Error(error.message);
     return { profile: row };
+  });
+
+export const markEmailVerified = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const { error } = await supabase
+      .from("profiles")
+      .upsert(
+        { user_id: userId, email_verified_at: new Date().toISOString() },
+        { onConflict: "user_id" },
+      );
+    if (error) throw new Error(error.message);
+    return { ok: true };
   });
