@@ -5,7 +5,10 @@ const UA = "Bridge Gateway/1.0 (uk-student-leadgen)";
 
 export const reverseGeocode = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
-    z.object({ lat: z.number(), lng: z.number() }).parse(input),
+    z.object({
+      lat: z.number().min(-90).max(90),
+      lng: z.number().min(-180).max(180),
+    }).parse(input),
   )
   .handler(async ({ data }) => {
     try {
