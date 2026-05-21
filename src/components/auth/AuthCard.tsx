@@ -57,7 +57,7 @@ export function AuthCard({ mode }: { mode: Mode }) {
   };
 
   return (
-    <div className="min-h-screen aurora flex items-center justify-center px-4 py-12 safe-top safe-bottom">
+    <div className="min-h-screen hero-warm flex items-center justify-center px-4 py-12 safe-top safe-bottom">
       <div className="w-full max-w-md">
         <div className="mb-8 flex justify-center">
           <Link to="/"><Logo /></Link>
