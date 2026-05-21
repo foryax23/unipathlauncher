@@ -8,7 +8,7 @@ import { Search, MapPin, GraduationCap } from "lucide-react";
 export const Route = createFileRoute("/courses")({
   head: () => ({
     meta: [
-      { title: "Browse UK university courses · UniPath" },
+      { title: "Browse UK university courses · Bridge Gateway" },
       { name: "description", content: "Search the full catalogue of UK foundation, undergraduate, top-up and postgraduate courses across our partner universities." },
     ],
   }),

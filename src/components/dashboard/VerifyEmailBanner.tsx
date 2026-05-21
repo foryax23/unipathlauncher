@@ -3,7 +3,7 @@ import { Mail, X, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-const DISMISS_KEY = "unipath:verify-banner-dismissed";
+const DISMISS_KEY = "bgc:verify-banner-dismissed";
 
 export function VerifyEmailBanner({
   email, verifiedAt,

@@ -7,8 +7,8 @@ export const Route = createFileRoute("/login")({
   }),
   head: () => ({
     meta: [
-      { title: "Sign in · UniPath" },
-      { name: "description", content: "Sign in to your UniPath account to continue your UK university application." },
+      { title: "Sign in · Bridge Gateway" },
+      { name: "description", content: "Sign in to your Bridge Gateway account to continue your UK university application." },
     ],
   }),
   component: () => <AuthCard mode="login" />,

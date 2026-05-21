@@ -6,7 +6,7 @@ import { markEmailVerified } from "@/lib/profile.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/verify-email")({
-  head: () => ({ meta: [{ title: "Verifying… · UniPath" }] }),
+  head: () => ({ meta: [{ title: "Verifying… · Bridge Gateway" }] }),
   component: VerifyEmailPage,
 });
 

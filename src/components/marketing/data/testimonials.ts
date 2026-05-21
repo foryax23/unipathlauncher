@@ -11,7 +11,7 @@ export const TESTIMONIALS: Testimonial[] = [
   {
     name: "Aisha Rahman",
     quote:
-      "UniPath shortlisted three universities that perfectly matched my predicted A-Level grades. I had my offer in 11 days.",
+      "Bridge Gateway shortlisted three universities that perfectly matched my predicted A-Level grades. I had my offer in 11 days.",
     programme: "BSc Computer Science",
     uni: "University of Manchester",
     avatarSeed: "aisha-student-portrait",

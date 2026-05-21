@@ -15,7 +15,7 @@ export function useTheme() {
     if (theme === "dark") root.classList.add("dark");
     else root.classList.remove("dark");
     try {
-      localStorage.setItem("unipath-theme", theme);
+      localStorage.setItem("bgc-theme", theme);
     } catch {
       /* ignore */
     }

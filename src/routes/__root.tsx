@@ -69,7 +69,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 // Inline script to set the theme before paint, preventing FOUC.
-const themeBootstrap = `(function(){try{var t=localStorage.getItem('bgc-theme')||localStorage.getItem('unipath-theme');var d=t?t==='dark':window.matchMedia('(prefers-color-scheme: dark)').matches;if(d)document.documentElement.classList.add('dark');}catch(e){}})();`;
+const themeBootstrap = `(function(){try{var t=localStorage.getItem('bgc-theme')||localStorage.getItem('bgc-theme');var d=t?t==='dark':window.matchMedia('(prefers-color-scheme: dark)').matches;if(d)document.documentElement.classList.add('dark');}catch(e){}})();`;
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({

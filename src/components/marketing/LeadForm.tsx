@@ -283,7 +283,7 @@ export function LeadForm({ preselectedSubject }: { preselectedSubject: string | 
               className="mt-1 h-5 w-5 rounded border-border accent-primary"
             />
             <span className="text-foreground/85">
-              I agree that UniPath may contact me about my university enquiry. I
+              I agree that Bridge Gateway Consulting may contact me about my university enquiry. I
               can withdraw consent at any time. See our Privacy Policy.
             </span>
           </label>

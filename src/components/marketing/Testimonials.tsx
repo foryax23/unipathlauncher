@@ -6,7 +6,7 @@ const TESTIMONIALS = [
     age: 19,
     city: "Manchester",
     quote:
-      "UniPath cut through the noise. Within a week I had a shortlist that actually matched my grades and budget.",
+      "Bridge Gateway cut through the noise. Within a week I had a shortlist that actually matched my grades and budget.",
   },
   {
     name: "Daniel",

@@ -9,7 +9,7 @@ import { Logo } from "@/components/marketing/Logo";
 import { VerifyEmailBanner } from "@/components/dashboard/VerifyEmailBanner";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
-  head: () => ({ meta: [{ title: "Your shortlist · UniPath" }] }),
+  head: () => ({ meta: [{ title: "Your shortlist · Bridge Gateway" }] }),
   component: Dashboard,
 });
 
@@ -142,7 +142,7 @@ function Dashboard() {
             <div>
               <h3 className="text-lg font-display tracking-tight">Talk to an adviser</h3>
               <p className="mt-1 text-sm text-muted-foreground">
-                A UniPath adviser will call within 24 hours to walk you through your matches and the application process.
+                A Bridge Gateway adviser will call within 24 hours to walk you through your matches and the application process.
               </p>
             </div>
           </div>
