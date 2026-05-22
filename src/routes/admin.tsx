@@ -40,13 +40,25 @@ import {
 } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
-  beforeLoad: async ({ location }) => {
+  beforeLoad: async () => {
     const { data } = await supabase.auth.getUser();
     if (!data.user) {
       throw redirect({
         to: "/login",
-        search: { redirect: location.href },
+        search: { redirect: "/admin" },
       });
+    }
+    try {
+      const status = await getMyAdminStatus();
+      if (!status.isAdmin) {
+        throw redirect({ to: "/dashboard" });
+      }
+    } catch (err) {
+      // Re-throw TanStack redirects; otherwise treat failure as not-admin.
+      if (err && typeof err === "object" && "isRedirect" in (err as Record<string, unknown>)) {
+        throw err;
+      }
+      throw redirect({ to: "/dashboard" });
     }
   },
   head: () => ({
