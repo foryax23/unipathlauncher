@@ -11,7 +11,19 @@ export function AuthCard({ mode }: { mode: Mode }) {
   const navigate = useNavigate();
   // /login validates ?redirect; /signup ignores unknown search params safely.
   const search = useSearch({ strict: false }) as { redirect?: string };
-  const dest = search?.redirect && search.redirect.startsWith("/") ? search.redirect : "/dashboard";
+  const ALLOWED = ["/dashboard", "/admin", "/onboarding"] as const;
+  type AllowedPath = (typeof ALLOWED)[number];
+  function parseDest(raw?: string): AllowedPath {
+    if (!raw || !raw.startsWith("/")) return "/dashboard";
+    try {
+      const u = new URL(raw, "http://x");
+      const path = u.pathname as AllowedPath;
+      return (ALLOWED as readonly string[]).includes(path) ? path : "/dashboard";
+    } catch {
+      return "/dashboard";
+    }
+  }
+  const dest: AllowedPath = parseDest(search?.redirect);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
