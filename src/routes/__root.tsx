@@ -8,6 +8,7 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 import appCss from "../styles.css?url";
 
@@ -142,6 +143,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
 
   // #admin-view convenience redirect from the brief
   useEffect(() => {
@@ -149,6 +151,18 @@ function RootComponent() {
       window.location.replace("/admin");
     }
   }, []);
+
+  // Re-run route guards + invalidate queries whenever the auth session changes,
+  // so the OAuth callback lands on the correct page without a manual navigate.
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "TOKEN_REFRESHED") {
+        router.invalidate();
+        queryClient.invalidateQueries();
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [router, queryClient]);
 
   return (
     <QueryClientProvider client={queryClient}>
