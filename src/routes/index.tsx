@@ -10,7 +10,7 @@ import { TestimonialsMarquee } from "@/components/marketing/TestimonialsMarquee"
 import { FAQ } from "@/components/marketing/FAQ";
 import { FinalCTA } from "@/components/marketing/FinalCTA";
 import { StickyCTA } from "@/components/marketing/StickyCTA";
-import { PartnersMarquee } from "@/components/marketing/PartnersMarquee";
+
 import { Footer } from "@/components/marketing/Footer";
 
 export const Route = createFileRoute("/")({
