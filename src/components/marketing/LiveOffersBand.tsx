@@ -92,14 +92,15 @@ export function LiveOffersBand() {
             "linear-gradient(to right, transparent, black 8%, black 92%, transparent)",
         }}
       >
-        <div className="flex w-max items-center gap-12 marquee-track-reverse">
+        <div className="flex w-max items-center gap-10 marquee-track-reverse sm:gap-14">
           {partners.map((p, i) => (
-            <span
+            <img
               key={i}
-              className="font-editorial text-2xl italic text-white/70 sm:text-3xl"
-            >
-              {p}
-            </span>
+              src={p.src}
+              alt={p.name}
+              loading="lazy"
+              className="h-10 w-auto shrink-0 object-contain opacity-90 brightness-0 invert sm:h-12"
+            />
           ))}
         </div>
       </div>
