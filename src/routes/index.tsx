@@ -55,7 +55,7 @@ function Index() {
       <main>
         <Hero />
         <ServicesBand />
-        <PartnersMarquee />
+        
         <DestinationsGrid />
         <HowWeHelp />
         <WhyUs />
