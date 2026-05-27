@@ -1,3 +1,13 @@
+import arden from "@/assets/partners/arden.png";
+import gbs from "@/assets/partners/gbs.png";
+import lsc from "@/assets/partners/lsc.png";
+import londonMet from "@/assets/partners/london-met.png";
+import lcca from "@/assets/partners/lcca.png";
+import bolton from "@/assets/partners/bolton.png";
+import regent from "@/assets/partners/regent.png";
+import montRose from "@/assets/partners/mont-rose.png";
+import aru from "@/assets/partners/aru.png";
+
 const OFFERS = [
   { name: "Maria K.", course: "BSc Computer Science", uni: "University of Manchester", time: "2m ago" },
   { name: "James O.", course: "MEng Mechanical Engineering", uni: "Imperial College London", time: "6m ago" },
@@ -14,10 +24,15 @@ const OFFERS = [
 ];
 
 const PARTNERS = [
-  "Oxford", "Cambridge", "Imperial College", "UCL", "King's College London",
-  "LSE", "Edinburgh", "Manchester", "Warwick", "Bristol",
-  "Bath", "Durham", "Glasgow", "St Andrews", "Leeds",
-  "Birmingham", "Nottingham", "Sheffield", "Exeter", "Southampton",
+  { name: "Arden University", src: arden },
+  { name: "Global Banking School", src: gbs },
+  { name: "London School of Commerce", src: lsc },
+  { name: "London Metropolitan University", src: londonMet },
+  { name: "London College of Contemporary Arts", src: lcca },
+  { name: "University of Bolton", src: bolton },
+  { name: "Regent College London", src: regent },
+  { name: "Mont Rose College", src: montRose },
+  { name: "Anglia Ruskin University", src: aru },
 ];
 
 export function LiveOffersBand() {
