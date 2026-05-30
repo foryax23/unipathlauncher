@@ -506,7 +506,7 @@ function OnboardingPage() {
         </div>
       </header>
 
-      <main className="flex-1 px-4 pb-40 pt-8">
+      <main className="flex-1 px-4 pb-56 pt-8">
         <div className="mx-auto max-w-xl">
           <StepShell stepKey={step} direction={direction}>
             <h1 className="text-display-md text-foreground">{current.title}</h1>
@@ -516,25 +516,27 @@ function OnboardingPage() {
         </div>
       </main>
 
-      <div className="fixed inset-x-0 bottom-0 z-10 safe-bottom px-4 pb-4 pt-3 glass-strong border-t border-border">
-        <div className="mx-auto flex max-w-xl items-end gap-3">
-          <div className="shrink-0 -mt-6">
-            <Mascot mood={mood} message={current.mascotMsg} size={72} />
+      <div className="fixed inset-x-0 bottom-0 z-10 safe-bottom px-4 pb-4 pt-3">
+        <div className="mx-auto flex max-w-xl flex-col items-stretch gap-1">
+          <div className="flex justify-center pointer-events-none">
+            <Mascot mood={mood} message={current.mascotMsg} size={140} />
           </div>
-          <button
-            type="button"
-            onClick={next}
-            disabled={saving}
-            className={`tap flex-1 inline-flex items-center justify-center gap-2 rounded-2xl bg-primary px-5 py-4 text-base font-semibold text-primary-foreground transition active:scale-[0.97] ${
-              ready ? "animate-glow-pulse" : "opacity-60"
-            } ${shake ? "animate-shake-x" : ""}`}
-          >
-            {saving ? "Finishing…" : step === steps.length - 1 ? (
-              <>Finish <Check className="size-5" /></>
-            ) : (
-              <>Continue <ArrowRight className="size-5" /></>
-            )}
-          </button>
+          <div className="glass-strong rounded-2xl border border-border p-2">
+            <button
+              type="button"
+              onClick={next}
+              disabled={saving}
+              className={`tap w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-4 text-base font-semibold text-primary-foreground transition active:scale-[0.97] ${
+                ready ? "animate-glow-pulse" : "opacity-60"
+              } ${shake ? "animate-shake-x" : ""}`}
+            >
+              {saving ? "Finishing…" : step === steps.length - 1 ? (
+                <>Finish <Check className="size-5" /></>
+              ) : (
+                <>Continue <ArrowRight className="size-5" /></>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>
