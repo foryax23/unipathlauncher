@@ -2,73 +2,176 @@ import { useEffect, useState } from "react";
 
 export type Mood = "idle" | "thinking" | "happy" | "cheer" | "celebrate";
 
-export function Mascot({ mood = "idle", message }: { mood?: Mood; message?: string }) {
+export function Mascot({
+  mood = "idle",
+  message,
+  size = 72,
+}: {
+  mood?: Mood;
+  message?: string;
+  size?: number;
+}) {
   const [bump, setBump] = useState(0);
   useEffect(() => { setBump((n) => n + 1); }, [mood]);
 
   const anim =
     mood === "cheer" || mood === "celebrate"
-      ? "animate-mascot-cheer"
+      ? "animate-bridge-cheer"
       : mood === "happy"
-        ? "animate-mascot-happy"
-        : "animate-mascot-bob";
+        ? "animate-bridge-happy"
+        : mood === "thinking"
+          ? "animate-bridge-think"
+          : "animate-bridge-sway";
 
-  const tilt =
-    mood === "thinking" ? "-rotate-6" : mood === "happy" ? "rotate-2" : "rotate-0";
-
-  // Eye expression
-  const eyeY = mood === "happy" || mood === "cheer" || mood === "celebrate" ? 42 : 40;
-  const mouthD =
-    mood === "happy" || mood === "cheer" || mood === "celebrate"
-      ? "M40 64 Q50 76 60 64"
-      : mood === "thinking"
-        ? "M42 68 Q50 64 58 68"
-        : "M42 66 Q50 70 58 66";
+  const sparkle = mood === "happy" || mood === "cheer" || mood === "celebrate";
+  const smiling = mood === "happy" || mood === "cheer" || mood === "celebrate";
 
   return (
-    <div className="relative flex items-end justify-center gap-3 md:gap-4">
-      <div
-        key={bump}
-        className={`relative ${anim} ${tilt} transition-transform`}
-        style={{ width: 96, height: 96 }}
-        aria-hidden
-      >
-        {(mood === "happy" || mood === "cheer" || mood === "celebrate") && (
-          <>
-            <span className="absolute -left-2 top-2 size-2 rounded-full bg-gold animate-sparkle" />
-            <span className="absolute right-0 top-4 size-1.5 rounded-full bg-coral animate-sparkle [animation-delay:120ms]" />
-            <span className="absolute -right-2 bottom-6 size-2 rounded-full bg-primary animate-sparkle [animation-delay:240ms]" />
-          </>
-        )}
-        <svg viewBox="0 0 100 100" width="96" height="96">
-          {/* body */}
-          <ellipse cx="50" cy="58" rx="34" ry="36" fill="var(--primary)" />
-          <ellipse cx="50" cy="68" rx="24" ry="24" fill="var(--surface)" opacity="0.95" />
-          {/* ears */}
-          <polygon points="18,28 28,18 30,34" fill="var(--primary)" />
-          <polygon points="82,28 72,18 70,34" fill="var(--primary)" />
-          {/* eyes background */}
-          <circle cx="38" cy={eyeY} r="9" fill="white" />
-          <circle cx="62" cy={eyeY} r="9" fill="white" />
-          {/* pupils */}
-          <circle cx="38" cy={eyeY + 1} r="4" fill="#0B1F3F" />
-          <circle cx="62" cy={eyeY + 1} r="4" fill="#0B1F3F" />
-          <circle cx="39" cy={eyeY} r="1.4" fill="white" />
-          <circle cx="63" cy={eyeY} r="1.4" fill="white" />
-          {/* beak */}
-          <polygon points="50,52 46,58 54,58" fill="var(--gold)" />
-          {/* mouth/smile */}
-          <path d={mouthD} stroke="var(--gold)" strokeWidth="2" fill="none" strokeLinecap="round" />
-          {/* feet */}
-          <ellipse cx="40" cy="94" rx="6" ry="3" fill="var(--gold)" />
-          <ellipse cx="60" cy="94" rx="6" ry="3" fill="var(--gold)" />
-        </svg>
-      </div>
+    <div className="relative flex flex-col items-center" style={{ width: size }}>
       {message && (
-        <div className="relative mb-3 max-w-[12rem] rounded-2xl rounded-bl-sm border border-border bg-surface px-3 py-2 text-xs text-foreground shadow-sm animate-in fade-in slide-in-from-left-2 duration-300">
+        <div className="absolute -top-12 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-2xl rounded-bl-sm border border-border bg-surface px-3 py-1.5 text-[11px] font-medium text-foreground shadow-lg animate-in fade-in slide-in-from-bottom-1 duration-300 hidden sm:block">
           {message}
+          <span className="absolute -bottom-1 left-6 size-2 rotate-45 border-b border-r border-border bg-surface" />
         </div>
       )}
+      <div
+        key={bump}
+        className={`relative ${anim} will-change-transform`}
+        style={{ width: size, height: size }}
+        aria-hidden
+      >
+        {sparkle && (
+          <>
+            <span className="absolute -left-1 top-1 size-1.5 rounded-full bg-gold animate-sparkle" />
+            <span className="absolute right-0 top-3 size-1 rounded-full bg-coral animate-sparkle [animation-delay:140ms]" />
+            <span className="absolute -right-2 top-1 size-1.5 rounded-full bg-primary animate-sparkle [animation-delay:260ms]" />
+          </>
+        )}
+        <svg viewBox="0 0 120 120" width={size} height={size}>
+          <defs>
+            <linearGradient id="brass" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="oklch(0.86 0.12 82)" />
+              <stop offset="45%" stopColor="var(--gold)" />
+              <stop offset="100%" stopColor="oklch(0.48 0.08 78)" />
+            </linearGradient>
+            <linearGradient id="pylon-hi" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="oklch(0.92 0.10 82)" stopOpacity="0.7" />
+              <stop offset="40%" stopColor="oklch(0.92 0.10 82)" stopOpacity="0" />
+            </linearGradient>
+            <linearGradient id="deck" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="var(--primary)" />
+              <stop offset="100%" stopColor="oklch(0.12 0.04 260)" />
+            </linearGradient>
+            <filter id="shadow" x="-30%" y="-10%" width="160%" height="140%">
+              <feGaussianBlur in="SourceAlpha" stdDeviation="2.2" />
+              <feOffset dy="3" result="off" />
+              <feComponentTransfer><feFuncA type="linear" slope="0.35" /></feComponentTransfer>
+              <feMerge><feMergeNode /><feMergeNode in="SourceGraphic" /></feMerge>
+            </filter>
+            <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="oklch(0.95 0.14 82)" />
+              <stop offset="100%" stopColor="oklch(0.95 0.14 82 / 0)" />
+            </radialGradient>
+          </defs>
+
+          {/* Ground shadow */}
+          <ellipse cx="60" cy="108" rx="34" ry="3" fill="oklch(0.18 0.05 260 / 0.25)" />
+
+          <g filter="url(#shadow)">
+            {/* Deck (base) */}
+            <rect x="14" y="84" width="92" height="10" rx="3" fill="url(#deck)" />
+            <rect x="14" y="84" width="92" height="2" rx="1" fill="oklch(1 0 0 / 0.18)" />
+
+            {/* Suspension cables — main curves */}
+            <path
+              d="M22 84 C 40 50, 80 50, 98 84"
+              stroke="var(--gold)"
+              strokeWidth="2"
+              fill="none"
+              strokeLinecap="round"
+              opacity="0.85"
+            />
+            {/* Hanger strands */}
+            {[32, 42, 52, 60, 68, 78, 88].map((x, i) => {
+              const yTop = 50 + Math.pow((x - 60) / 38, 2) * 34;
+              return (
+                <line
+                  key={i}
+                  x1={x}
+                  y1={yTop}
+                  x2={x}
+                  y2={84}
+                  stroke="var(--gold)"
+                  strokeWidth="0.8"
+                  opacity="0.55"
+                />
+              );
+            })}
+
+            {/* Left pylon */}
+            <rect x="22" y="34" width="14" height="56" rx="3" fill="url(#brass)" />
+            <rect x="22" y="34" width="6" height="56" rx="3" fill="url(#pylon-hi)" />
+            {/* Right pylon */}
+            <rect x="84" y="34" width="14" height="56" rx="3" fill="url(#brass)" />
+            <rect x="84" y="34" width="6" height="56" rx="3" fill="url(#pylon-hi)" />
+
+            {/* Pylon caps */}
+            <polygon points="22,34 36,34 29,26" fill="var(--gold)" />
+            <polygon points="84,34 98,34 91,26" fill="var(--gold)" />
+
+            {/* Windows / eyes — left */}
+            <g className="origin-center animate-window-blink">
+              <rect x="25" y="48" width="8" height="9" rx="1.5" fill="oklch(0.98 0.08 82)" />
+              <circle cx="29" cy="52.5" r="1.6" fill="var(--primary)" />
+            </g>
+            {/* Windows / eyes — right */}
+            <g className="origin-center animate-window-blink [animation-delay:120ms]">
+              <rect x="87" y="48" width="8" height="9" rx="1.5" fill="oklch(0.98 0.08 82)" />
+              <circle cx="91" cy="52.5" r="1.6" fill="var(--primary)" />
+            </g>
+
+            {/* Lower window strips (gives depth) */}
+            <rect x="25" y="64" width="8" height="2" rx="0.5" fill="oklch(1 0 0 / 0.35)" />
+            <rect x="25" y="70" width="8" height="2" rx="0.5" fill="oklch(1 0 0 / 0.25)" />
+            <rect x="87" y="64" width="8" height="2" rx="0.5" fill="oklch(1 0 0 / 0.35)" />
+            <rect x="87" y="70" width="8" height="2" rx="0.5" fill="oklch(1 0 0 / 0.25)" />
+
+            {/* Smile / mouth — arch under deck */}
+            {smiling ? (
+              <path
+                d="M44 96 Q60 108 76 96"
+                stroke="var(--gold)"
+                strokeWidth="2.4"
+                fill="none"
+                strokeLinecap="round"
+              />
+            ) : (
+              <path
+                d="M46 99 Q60 103 74 99"
+                stroke="var(--gold)"
+                strokeWidth="2"
+                fill="none"
+                strokeLinecap="round"
+                opacity="0.85"
+              />
+            )}
+
+            {/* Flag pole + flutter flag on top */}
+            <line x1="60" y1="14" x2="60" y2="34" stroke="var(--primary)" strokeWidth="1.2" />
+            <path
+              d="M60 16 L74 19 L60 24 Z"
+              fill="var(--gold)"
+              className="origin-left animate-flag-flutter"
+              style={{ transformBox: "fill-box" }}
+            />
+          </g>
+
+          {/* Cheer glow burst */}
+          {(mood === "cheer" || mood === "celebrate") && (
+            <circle cx="60" cy="34" r="22" fill="url(#glow)" className="animate-ring-sweep" />
+          )}
+        </svg>
+      </div>
     </div>
   );
 }
