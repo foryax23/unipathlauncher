@@ -3,11 +3,12 @@ import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import {
   ArrowLeft, ArrowRight, Check, GraduationCap, Briefcase, Stethoscope,
-  Code, Scale, Wrench, Palette, BookOpen, Plane, Brain, Mail, Volume2, VolumeX,
+  Code, Scale, Wrench, Palette, BookOpen, Plane, Brain, Mail, Volume2, VolumeX, Lock,
 } from "lucide-react";
 import { LocationStep } from "@/components/onboarding/LocationStep";
 import { Mascot, type Mood } from "@/components/onboarding/Mascot";
 import { GlassSubjectCard } from "@/components/onboarding/GlassSubjectCard";
+import { PhotoChoiceCard } from "@/components/onboarding/PhotoChoiceCard";
 import { StepShell } from "@/components/onboarding/StepShell";
 import { SegmentedProgress } from "@/components/onboarding/SegmentedProgress";
 import { Confetti } from "@/components/onboarding/Confetti";
@@ -29,6 +30,16 @@ import imgEducation from "@/assets/subjects/education.jpg";
 import imgHospitality from "@/assets/subjects/hospitality-tourism.jpg";
 import imgPsychology from "@/assets/subjects/psychology.jpg";
 
+import imgLevelFoundation from "@/assets/levels/foundation.jpg";
+import imgLevelUndergrad from "@/assets/levels/undergraduate.jpg";
+import imgLevelTopup from "@/assets/levels/topup.jpg";
+import imgLevelPostgrad from "@/assets/levels/postgraduate.jpg";
+
+import imgIntakeMay from "@/assets/intakes/may-2026.jpg";
+import imgIntakeSep from "@/assets/intakes/september-2026.jpg";
+import imgIntakeJan from "@/assets/intakes/january-2027.jpg";
+import imgIntakeFlex from "@/assets/intakes/flexible.jpg";
+
 const SUBJECT_IMAGES: Record<string, string> = {
   "business-finance": imgBusiness,
   "health-social-care": imgHealth,
@@ -40,6 +51,20 @@ const SUBJECT_IMAGES: Record<string, string> = {
   education: imgEducation,
   "hospitality-tourism": imgHospitality,
   psychology: imgPsychology,
+};
+
+const LEVEL_IMAGES: Record<string, string> = {
+  Foundation: imgLevelFoundation,
+  Undergraduate: imgLevelUndergrad,
+  "Top-up": imgLevelTopup,
+  Postgraduate: imgLevelPostgrad,
+};
+
+const INTAKE_IMAGES: Record<string, string> = {
+  "May 2026": imgIntakeMay,
+  "September 2026": imgIntakeSep,
+  "January 2027": imgIntakeJan,
+  "Not sure": imgIntakeFlex,
 };
 
 export const Route = createFileRoute("/onboarding")({
