@@ -286,16 +286,22 @@ function OnboardingPage() {
       mascotMsg: s.study_level ? (LEVEL_MSGS[s.study_level] ?? "Nice pick!") : "Pick your starting block — no wrong answers.",
       ok: () => !!s.study_level,
       body: (
-        <CardGrid
-          options={[
-            { id: "Foundation", label: "Foundation", desc: "Entry route, no prior degree" },
-            { id: "Undergraduate", label: "Undergraduate", desc: "Bachelor's degree (BSc / BA)" },
-            { id: "Top-up", label: "Top-up", desc: "Convert your HND / Level 5 to a degree" },
-            { id: "Postgraduate", label: "Postgraduate", desc: "MSc, MA, MBA" },
-          ]}
-          value={s.study_level}
-          onChange={(v) => pickSelect(() => setS({ ...s, study_level: v }))}
-        />
+        <div className="stagger grid grid-cols-2 gap-3">
+          {[
+            { id: "Foundation", label: "Foundation" },
+            { id: "Undergraduate", label: "Undergraduate" },
+            { id: "Top-up", label: "Top-up" },
+            { id: "Postgraduate", label: "Postgraduate" },
+          ].map((o) => (
+            <PhotoChoiceCard
+              key={o.id}
+              title={o.label}
+              image={LEVEL_IMAGES[o.id]}
+              active={s.study_level === o.id}
+              onClick={() => pickSelect(() => setS({ ...s, study_level: o.id }))}
+            />
+          ))}
+        </div>
       ),
     },
     {
@@ -328,16 +334,22 @@ function OnboardingPage() {
       mascotMsg: s.start_year ? (START_MSGS[s.start_year] ?? "Locked in! ✨") : "When do we kick off?",
       ok: () => !!s.start_year,
       body: (
-        <CardGrid
-          options={[
-            { id: "May 2026", label: "May 2026", desc: "Spring intake" },
-            { id: "September 2026", label: "September 2026", desc: "Main UK intake" },
-            { id: "January 2027", label: "January 2027", desc: "Winter intake" },
-            { id: "Not sure", label: "I'm flexible", desc: "Show me all options" },
-          ]}
-          value={s.start_year}
-          onChange={(v) => pickSelect(() => setS({ ...s, start_year: v }))}
-        />
+        <div className="stagger grid grid-cols-2 gap-3">
+          {[
+            { id: "May 2026", label: "May 2026" },
+            { id: "September 2026", label: "September 2026" },
+            { id: "January 2027", label: "January 2027" },
+            { id: "Not sure", label: "I'm flexible" },
+          ].map((o) => (
+            <PhotoChoiceCard
+              key={o.id}
+              title={o.label}
+              image={INTAKE_IMAGES[o.id]}
+              active={s.start_year === o.id}
+              onClick={() => pickSelect(() => setS({ ...s, start_year: o.id }))}
+            />
+          ))}
+        </div>
       ),
     },
     {
