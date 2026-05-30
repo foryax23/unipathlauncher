@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { LocationStep } from "@/components/onboarding/LocationStep";
 import { Mascot, type Mood } from "@/components/onboarding/Mascot";
+import { GlassSubjectCard } from "@/components/onboarding/GlassSubjectCard";
 import { StepShell } from "@/components/onboarding/StepShell";
 import { SegmentedProgress } from "@/components/onboarding/SegmentedProgress";
 import { Confetti } from "@/components/onboarding/Confetti";
