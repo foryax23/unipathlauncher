@@ -1,58 +1,59 @@
-# Engaging Onboarding — Duolingo-style
+# Onboarding v2 — Bridge mascot + glass tiles
 
-Transform the 7-step onboarding into a delightful, mobile-first flow with playful animations, haptic-feeling micro-interactions, a friendly mascot, and celebratory feedback after each step. Desktop keeps the same flow but with calmer animation.
+Move the mascot down beside the Continue button, redraw it as a polished "Bridge" character that personifies Bridge Gateway, and restyle the step-3 subject grid as glass cards with gradient icons. Keep all existing animations and add a few new ones for the new mascot.
 
-## What changes (user-facing)
+## What changes
 
-1. **Mascot companion** — a friendly owl-style SVG character (built in code, no external assets) sits at the top of each step, reacting to user actions: idle bob, "thinking" tilt while empty, "happy" bounce + sparkles when a step is valid, "cheer" jump on Continue.
-2. **Step transitions** — swipe-style slide between steps (forward = slide-in-right, back = slide-in-left) instead of always bottom-up. Old step fades + scales out, new step springs in. Honors `prefers-reduced-motion`.
-3. **Progress bar** — segmented (one pill per step, like Duolingo's hearts/lessons row) with a fill animation when a step completes, and a soft "ping" pulse on the just-completed segment. XP-style "+1" floats up next to the bar when advancing.
-4. **Per-step interactions**:
-   - **Name**: animated cursor caret, characters pop in with a tiny scale on each keystroke (CSS only, no per-char DOM). Mascot starts waving once 2+ chars typed.
-   - **Level / Start year / Subject cards**: tap → spring scale + colored ring sweep + check-mark draw-in (SVG stroke-dashoffset). Unselected cards dim slightly. Long-press shows a subtle haptic-style wobble.
-   - **Subject grid**: stagger-in on mount (each card fades+rises with 40ms delay), icon does a small rotate on hover/tap.
-   - **Location**: pin "drops" with a bounce when coordinates resolve; ripple ring expands once.
-   - **Phone/consent**: input border animates to success-green when regex passes; consent checkbox draws its check with SVG stroke animation.
-   - **Account**: Google button has a subtle shimmer; on success the mascot does a confetti burst (CSS-only confetti, ~12 spans).
-5. **Continue button** — sticky bottom bar gets a pulsing glow when the step becomes valid (signaling "ready!"). Tap → button compresses, mascot cheers, step advances. Disabled state is greyed but the button gently shakes if tapped while invalid (cue to fill missing field).
-6. **Sound (optional, off by default)** — small mute/unmute toggle in header that, when on, plays a soft "ding" on advance and "pop" on selection (Web Audio API oscillator — no asset files). Persisted in localStorage. Default: off, so silent UX is unchanged.
-7. **Completion** — final "Finish" tap triggers a full-screen confetti + mascot celebration overlay (1.2s) before navigating to dashboard.
+### 1. Mascot relocation + redesign
+- **Position**: removed from the top of each step. New home: sits in the sticky bottom bar to the LEFT of the Continue button, ~64–72px tall on mobile, peeking just above the bar so it feels like a real companion watching the user finish each step.
+- **New character — "Archie the Bridge"**: a stylised brass-gold suspension-bridge silhouette with two pylons (the "eyes"), a soft arch (the "smile"), and a small base. Personality comes from animation, not detail — keeps it crisp at any size.
+- **Crisper rendering**: built as a clean multi-layer inline SVG using project tokens (`var(--primary)`, `var(--gold)`, `var(--surface)`):
+  - Soft drop shadow under the base (SVG `<filter>` with `feGaussianBlur` + `feOffset`).
+  - Subtle inner highlight on the pylons (linear gradient stop) for a metallic brass look.
+  - Cable strands as thin curved paths with rounded caps.
+  - Eyes are two glowing windows on each pylon (small rounded rects with a pulse).
+  - A tiny pennant/flag on top that flutters.
+- **Animations** (all gated by `prefers-reduced-motion`):
+  - `idle` → gentle sway (rotate ±1.5°) + flag flutter
+  - `thinking` → pylons blink slower, head tilts -4°
+  - `happy` → pylons sparkle, arch curves up into a smile (path morph via two SVG paths cross-faded)
+  - `cheer` → small jump + sparkle burst from the top of the bridge
+  - `celebrate` → confetti from above + sustained sparkle, used at finish
+- **Speech bubble**: stays, but anchors above the mascot in the bottom bar, max-width ~14rem, auto-hides if it would overlap the Continue button on narrow screens (<360px).
+
+### 2. Continue bar layout
+- Bottom bar becomes a 2-column grid: `[mascot 96px] [Continue button flex-1]`.
+- Continue button keeps `animate-glow-pulse` on ready, `animate-shake-x` on invalid tap.
+- Safe-area padding preserved.
+
+### 3. Step 3 — Glass subject cards
+- New `GlassSubjectCard` component used only by the subject step.
+- Visual:
+  - `backdrop-blur` glass surface (`bg-surface/60 backdrop-blur-xl border border-white/15`).
+  - Large 48×48 rounded-square icon plate with **per-subject gradient** (Business→primary→gold, Computer Science→indigo→cyan, Law→navy→brass, Engineering→slate→amber, Arts→coral→pink, Health→teal→emerald, etc.) — gradient defined per subject id in a small lookup.
+  - Icon rendered white inside the gradient plate; soft inner glow ring.
+  - Title in display font, subtle subtitle (course count or short tag).
+  - On hover/desktop: tile lifts 2px, gradient plate scales 1.05, glass border brightens.
+  - On select: gold ring around the whole tile, gradient plate emits a one-shot `ring-sweep`, a small gold check sticker pops in top-right, tile gets a stronger inner glow.
+- Stagger-in retained.
+- Mobile: 2-column; ≥sm: 3-column. Min-height 120px to feel chunky and tappable.
+
+### 4. Other steps — light polish
+- Other step bodies untouched in structure, but the Mascot no longer takes vertical space, so the form gets more room (drop `mt-6`/`mb-4` mascot wrappers, increase content top padding slightly).
 
 ## Out of scope
-
-- No changes to data model, server functions, auth flow, or step order/validation.
-- No copy rewrites beyond mascot speech bubbles.
-- No new dependencies — all animations via Tailwind keyframes + CSS + small SVG components.
-
-## Technical plan
-
-**New files**
-- `src/components/onboarding/Mascot.tsx` — SVG owl with `mood` prop (`idle | thinking | happy | cheer | celebrate`) driving CSS animation classes.
-- `src/components/onboarding/StepShell.tsx` — wraps each step body, handles enter/exit transition based on `direction` (forward/back).
-- `src/components/onboarding/SegmentedProgress.tsx` — replaces current `<div>` progress bar; renders N pills, fills the completed ones with gradient.
-- `src/components/onboarding/Confetti.tsx` — pure CSS confetti burst, mounted on cheer + completion.
-- `src/hooks/use-onboarding-sound.ts` — tiny Web Audio API helper (ding/pop), respects mute toggle and `prefers-reduced-motion`.
-
-**Edited files**
-- `src/routes/onboarding.tsx` — wire mascot + StepShell + SegmentedProgress; track `direction` state for transitions; trigger confetti on Finish; sticky button gets `is-ready` class.
-- `src/styles.css` — add keyframes: `bob`, `cheer-jump`, `sparkle`, `ring-sweep`, `check-draw`, `pin-drop`, `ripple`, `shake`, `glow-pulse`, `confetti-fall`, `pop-in`, `slide-in-from-right-spring`, `slide-out-to-left-spring`. Wrap heavy ones in `@media (prefers-reduced-motion: no-preference)`.
-
-**Reduced-motion**
-All animations gated. With reduced motion the mascot stays static, transitions become simple opacity fades, confetti is replaced with a single emoji burst.
-
-**Mobile-first**
-All animations tuned for mobile (≤480px). Desktop (≥768px) uses softer easing and shorter distances so it doesn't feel cartoonish on large screens. Mascot scales down on desktop to 64px and floats to the side instead of full-width.
+- No copy changes beyond mascot speech bubble messages.
+- No data model, no auth, no server function changes.
+- Other steps' button styles unchanged (only step 3 gets the glass treatment).
+- No new npm dependencies.
 
 ## Files touched
 
 ```
-src/routes/onboarding.tsx                          (edit)
-src/styles.css                                     (edit, append keyframes)
-src/components/onboarding/Mascot.tsx               (new)
-src/components/onboarding/StepShell.tsx            (new)
-src/components/onboarding/SegmentedProgress.tsx    (new)
-src/components/onboarding/Confetti.tsx             (new)
-src/hooks/use-onboarding-sound.ts                  (new)
+src/components/onboarding/Mascot.tsx              (rewrite — bridge character + new moods)
+src/components/onboarding/GlassSubjectCard.tsx    (new — step 3 glass tile)
+src/routes/onboarding.tsx                          (edit — move mascot into bottom bar grid; swap subject grid)
+src/styles.css                                     (edit — new keyframes: bridge-sway, flag-flutter, window-blink, smile-morph; subject gradient utilities)
 ```
 
 Approve to build.
