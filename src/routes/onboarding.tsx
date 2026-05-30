@@ -206,22 +206,15 @@ function OnboardingPage() {
         <div className="stagger grid grid-cols-2 gap-3 sm:grid-cols-3">
           {COURSES.map((c) => {
             const Icon = SUBJECT_ICONS[c.id] ?? GraduationCap;
-            const active = s.subject === c.id;
             return (
-              <button
+              <GlassSubjectCard
                 key={c.id}
-                type="button"
+                id={c.id}
+                title={c.title}
+                Icon={Icon}
+                active={s.subject === c.id}
                 onClick={() => pickSelect(() => setS({ ...s, subject: c.id }))}
-                className={`tap relative flex flex-col items-start gap-2 overflow-hidden rounded-2xl border p-4 text-left transition-all active:scale-[0.96] hover:-translate-y-0.5 ${
-                  active
-                    ? "border-primary bg-primary text-primary-foreground shadow-lg"
-                    : "border-border bg-surface hover:bg-accent"
-                }`}
-              >
-                <Icon className={`size-5 transition-transform ${active ? "scale-110" : ""}`} />
-                <span className="text-sm font-medium leading-tight">{c.title}</span>
-                {active && <span className="pointer-events-none absolute inset-0 rounded-2xl ring-2 ring-gold/50 animate-ring-sweep" />}
-              </button>
+              />
             );
           })}
         </div>
