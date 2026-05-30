@@ -18,6 +18,30 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { toast } from "sonner";
 
+import imgBusiness from "@/assets/subjects/business-finance.jpg";
+import imgHealth from "@/assets/subjects/health-social-care.jpg";
+import imgPublicHealth from "@/assets/subjects/public-health.jpg";
+import imgComputer from "@/assets/subjects/computer-science.jpg";
+import imgLaw from "@/assets/subjects/law.jpg";
+import imgEngineering from "@/assets/subjects/engineering.jpg";
+import imgArts from "@/assets/subjects/arts-design.jpg";
+import imgEducation from "@/assets/subjects/education.jpg";
+import imgHospitality from "@/assets/subjects/hospitality-tourism.jpg";
+import imgPsychology from "@/assets/subjects/psychology.jpg";
+
+const SUBJECT_IMAGES: Record<string, string> = {
+  "business-finance": imgBusiness,
+  "health-social-care": imgHealth,
+  "public-health": imgPublicHealth,
+  "computer-science": imgComputer,
+  law: imgLaw,
+  engineering: imgEngineering,
+  "arts-design": imgArts,
+  education: imgEducation,
+  "hospitality-tourism": imgHospitality,
+  psychology: imgPsychology,
+};
+
 export const Route = createFileRoute("/onboarding")({
   head: () => ({
     meta: [
@@ -239,6 +263,7 @@ function OnboardingPage() {
                 id={c.id}
                 title={c.title}
                 Icon={Icon}
+                image={SUBJECT_IMAGES[c.id]}
                 active={s.subject === c.id}
                 onClick={() => pickSelect(() => setS({ ...s, subject: c.id }))}
               />
