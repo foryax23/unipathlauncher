@@ -699,42 +699,6 @@ function OnboardingPage() {
   );
 }
 
-function CardGrid({
-  options, value, onChange,
-}: {
-  options: { id: string; label: string; desc: string }[];
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  return (
-    <div className="stagger grid gap-3">
-      {options.map((o) => {
-        const active = value === o.id;
-        return (
-          <button
-            key={o.id}
-            type="button"
-            onClick={() => onChange(o.id)}
-            className={`tap relative overflow-hidden rounded-2xl border p-4 text-left transition-all active:scale-[0.98] hover:-translate-y-0.5 ${
-              active ? "border-primary bg-primary text-primary-foreground shadow-lg" : "border-border bg-surface hover:bg-accent"
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-base font-medium">{o.label}</p>
-                <p className={`mt-0.5 text-xs ${active ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
-                  {o.desc}
-                </p>
-              </div>
-              {active && <Check className="size-5 animate-pop-in" />}
-            </div>
-            {active && <span className="pointer-events-none absolute inset-0 rounded-2xl ring-2 ring-gold/50 animate-ring-sweep" />}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
 
 function GoogleIcon() {
   return (
