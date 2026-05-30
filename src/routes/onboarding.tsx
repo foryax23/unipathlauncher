@@ -3,9 +3,14 @@ import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import {
   ArrowLeft, ArrowRight, Check, GraduationCap, Briefcase, Stethoscope,
-  Code, Scale, Wrench, Palette, BookOpen, Plane, Brain, Mail,
+  Code, Scale, Wrench, Palette, BookOpen, Plane, Brain, Mail, Volume2, VolumeX,
 } from "lucide-react";
 import { LocationStep } from "@/components/onboarding/LocationStep";
+import { Mascot, type Mood } from "@/components/onboarding/Mascot";
+import { StepShell } from "@/components/onboarding/StepShell";
+import { SegmentedProgress } from "@/components/onboarding/SegmentedProgress";
+import { Confetti } from "@/components/onboarding/Confetti";
+import { useOnboardingSound } from "@/hooks/use-onboarding-sound";
 import { COURSES } from "@/components/marketing/data/courses";
 import { updateMyProfile, getMyProfile } from "@/lib/profile.functions";
 import { supabase } from "@/integrations/supabase/client";
@@ -83,19 +88,23 @@ function OnboardingPage() {
   const navigate = useNavigate();
   const update = useServerFn(updateMyProfile);
   const fetchProfile = useServerFn(getMyProfile);
+  const sound = useOnboardingSound();
 
   const [hydrated, setHydrated] = useState(false);
   const [step, setStep] = useState(0);
+  const [direction, setDirection] = useState<1 | -1>(1);
   const [saving, setSaving] = useState(false);
   const [s, setS] = useState<State>(EMPTY);
   const [hasSession, setHasSession] = useState(false);
+  const [mood, setMood] = useState<Mood>("idle");
+  const [shake, setShake] = useState(false);
+  const [celebrate, setCelebrate] = useState(false);
   const persisting = useRef(false);
 
   // Account step
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  // Hydrate from localStorage + any existing session
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -139,7 +148,6 @@ function OnboardingPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Persist state + step on every change
   useEffect(() => {
     if (!hydrated || persisting.current) return;
     try {
@@ -148,24 +156,32 @@ function OnboardingPage() {
     } catch { /* noop */ }
   }, [s, step, hydrated]);
 
+  const pickSelect = (fn: () => void) => {
+    sound.play("pop");
+    setMood("happy");
+    fn();
+  };
+
   const steps = [
     {
       title: "What's your name?",
       hint: "We'll personalise your shortlist.",
+      mascotMsg: s.full_name.trim().length >= 2 ? `Hi ${s.full_name.split(" ")[0]}! 👋` : "Hi there!",
       ok: () => s.full_name.trim().length >= 2,
       body: (
         <input
           autoFocus
           value={s.full_name}
-          onChange={(e) => setS({ ...s, full_name: e.target.value })}
+          onChange={(e) => { setS({ ...s, full_name: e.target.value }); if (e.target.value.length >= 2) setMood("happy"); else setMood("thinking"); }}
           placeholder="Your full name"
-          className="tap w-full rounded-2xl border border-input bg-background px-4 py-4 text-base outline-none focus:ring-2 focus:ring-ring"
+          className={`tap w-full rounded-2xl border bg-background px-4 py-4 text-base outline-none transition focus:ring-2 focus:ring-ring ${s.full_name.trim().length >= 2 ? "border-success" : "border-input"}`}
         />
       ),
     },
     {
       title: "Which level suits you?",
       hint: "Pick your starting point.",
+      mascotMsg: s.study_level ? "Nice pick!" : "Tap one to choose.",
       ok: () => !!s.study_level,
       body: (
         <CardGrid
@@ -176,16 +192,17 @@ function OnboardingPage() {
             { id: "Postgraduate", label: "Postgraduate", desc: "MSc, MA, MBA" },
           ]}
           value={s.study_level}
-          onChange={(v) => setS({ ...s, study_level: v })}
+          onChange={(v) => pickSelect(() => setS({ ...s, study_level: v }))}
         />
       ),
     },
     {
       title: "What do you want to study?",
       hint: "Choose your main interest.",
+      mascotMsg: s.subject ? "Great choice!" : "What excites you?",
       ok: () => !!s.subject,
       body: (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <div className="stagger grid grid-cols-2 gap-3 sm:grid-cols-3">
           {COURSES.map((c) => {
             const Icon = SUBJECT_ICONS[c.id] ?? GraduationCap;
             const active = s.subject === c.id;
@@ -193,15 +210,16 @@ function OnboardingPage() {
               <button
                 key={c.id}
                 type="button"
-                onClick={() => setS({ ...s, subject: c.id })}
-                className={`tap flex flex-col items-start gap-2 rounded-2xl border p-4 text-left transition active:scale-[0.98] ${
+                onClick={() => pickSelect(() => setS({ ...s, subject: c.id }))}
+                className={`tap relative flex flex-col items-start gap-2 overflow-hidden rounded-2xl border p-4 text-left transition-all active:scale-[0.96] hover:-translate-y-0.5 ${
                   active
-                    ? "border-primary bg-primary text-primary-foreground"
+                    ? "border-primary bg-primary text-primary-foreground shadow-lg"
                     : "border-border bg-surface hover:bg-accent"
                 }`}
               >
-                <Icon className="size-5" />
+                <Icon className={`size-5 transition-transform ${active ? "scale-110" : ""}`} />
                 <span className="text-sm font-medium leading-tight">{c.title}</span>
+                {active && <span className="pointer-events-none absolute inset-0 rounded-2xl ring-2 ring-gold/50 animate-ring-sweep" />}
               </button>
             );
           })}
@@ -211,6 +229,7 @@ function OnboardingPage() {
     {
       title: "When do you want to start?",
       hint: "We'll match the right intake.",
+      mascotMsg: s.start_year ? "Locked in! ✨" : "Pick a date.",
       ok: () => !!s.start_year,
       body: (
         <CardGrid
@@ -221,28 +240,30 @@ function OnboardingPage() {
             { id: "Not sure", label: "I'm flexible", desc: "Show me all options" },
           ]}
           value={s.start_year}
-          onChange={(v) => setS({ ...s, start_year: v })}
+          onChange={(v) => pickSelect(() => setS({ ...s, start_year: v }))}
         />
       ),
     },
     {
       title: "Where are you based?",
       hint: "We'll find the closest campuses.",
+      mascotMsg: s.location ? `Got you in ${s.location.city ?? "your area"}!` : "Share your spot.",
       ok: () => !!s.location,
-      body: <LocationStep value={s.location} onChange={(v) => setS({ ...s, location: v })} />,
+      body: <LocationStep value={s.location} onChange={(v) => { setS({ ...s, location: v }); setMood("happy"); }} />,
     },
     {
       title: "How can an adviser reach you?",
       hint: "We call only once. Promise.",
+      mascotMsg: /^\+?[0-9 ()-]{7,}$/.test(s.phone) ? "Looks good!" : "Add your number.",
       ok: () => /^\+?[0-9 ()-]{7,}$/.test(s.phone) && s.consent,
       body: (
         <div className="space-y-4">
           <input
             type="tel"
             value={s.phone}
-            onChange={(e) => setS({ ...s, phone: e.target.value })}
+            onChange={(e) => { setS({ ...s, phone: e.target.value }); setMood(/^\+?[0-9 ()-]{7,}$/.test(e.target.value) ? "happy" : "thinking"); }}
             placeholder="UK mobile e.g. 07700 900 123"
-            className="tap w-full rounded-2xl border border-input bg-background px-4 py-4 text-base outline-none focus:ring-2 focus:ring-ring"
+            className={`tap w-full rounded-2xl border bg-background px-4 py-4 text-base outline-none transition focus:ring-2 focus:ring-ring ${/^\+?[0-9 ()-]{7,}$/.test(s.phone) ? "border-success" : "border-input"}`}
           />
           <textarea
             value={s.reason}
@@ -256,8 +277,8 @@ function OnboardingPage() {
             <input
               type="checkbox"
               checked={s.consent}
-              onChange={(e) => setS({ ...s, consent: e.target.checked })}
-              className="mt-1 size-5"
+              onChange={(e) => { setS({ ...s, consent: e.target.checked }); if (e.target.checked) sound.play("pop"); }}
+              className="mt-1 size-5 accent-primary"
             />
             <span>
               I agree to be contacted by a Bridge Gateway adviser about UK university options.
@@ -272,6 +293,7 @@ function OnboardingPage() {
       hint: hasSession
         ? "We'll save your matches and take you to your dashboard."
         : "Save your shortlist and finish in one tap.",
+      mascotMsg: hasSession ? "Let's go!" : "Almost there!",
       ok: () => hasSession || (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) && password.length >= 6),
       body: hasSession ? (
         <div className="rounded-2xl border border-border bg-surface p-5 text-sm text-muted-foreground">
@@ -325,12 +347,17 @@ function OnboardingPage() {
   ];
 
   const current = steps[step];
-  const progress = ((step + 1) / steps.length) * 100;
+  const ready = current.ok();
+
+  // Sync mood when step changes
+  useEffect(() => {
+    setMood(ready ? "happy" : "thinking");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
 
   async function handleGoogle() {
     setSaving(true);
     try {
-      // Persist before redirecting so we restore on return.
       try {
         localStorage.setItem(STATE_KEY, JSON.stringify(s));
         localStorage.setItem(STEP_KEY, String(step));
@@ -355,7 +382,6 @@ function OnboardingPage() {
   async function ensureSession(): Promise<boolean> {
     const { data: { session } } = await supabase.auth.getSession();
     if (session) return true;
-    // Try sign up first; if email exists, fall back to sign in.
     const { data: signUpData, error: signUpErr } = await supabase.auth.signUp({
       email,
       password,
@@ -402,7 +428,10 @@ function OnboardingPage() {
         localStorage.removeItem(STEP_KEY);
         localStorage.removeItem(LEVEL_KEY);
       } catch { /* noop */ }
-      navigate({ to: "/dashboard" });
+      sound.play("cheer");
+      setMood("celebrate");
+      setCelebrate(true);
+      setTimeout(() => navigate({ to: "/dashboard" }), 1200);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not save");
     } finally {
@@ -411,12 +440,29 @@ function OnboardingPage() {
   }
 
   async function next() {
-    if (!current.ok()) return;
+    if (!current.ok()) {
+      setShake(true);
+      setMood("thinking");
+      setTimeout(() => setShake(false), 450);
+      return;
+    }
     if (step < steps.length - 1) {
+      sound.play("ding");
+      setMood("cheer");
+      setDirection(1);
       setStep(step + 1);
       return;
     }
     await finishOnboarding();
+  }
+
+  function back() {
+    if (step > 0) {
+      setDirection(-1);
+      setStep(step - 1);
+    } else {
+      navigate({ to: "/" });
+    }
   }
 
   if (!hydrated) {
@@ -428,40 +474,54 @@ function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-background flex flex-col safe-top">
+    <div className="min-h-[100dvh] bg-background flex flex-col safe-top relative overflow-hidden">
+      {celebrate && <Confetti count={60} fullscreen />}
       <header className="px-4 pt-4">
-        <div className="mx-auto flex max-w-xl items-center justify-between">
+        <div className="mx-auto flex max-w-xl items-center justify-between gap-3">
           <button
             type="button"
-            onClick={() => (step > 0 ? setStep(step - 1) : navigate({ to: "/" }))}
+            onClick={back}
             className="tap inline-flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground"
+            aria-label="Back"
           >
             <ArrowLeft className="size-5" />
           </button>
           <span className="font-mono text-xs text-muted-foreground">
             {step + 1} / {steps.length}
           </span>
-          <button
-            type="button"
-            onClick={() => navigate({ to: "/" })}
-            className="text-xs text-muted-foreground hover:text-foreground"
-          >
-            Save & exit
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={sound.toggle}
+              className="tap inline-flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground"
+              aria-label={sound.enabled ? "Mute sounds" : "Enable sounds"}
+            >
+              {sound.enabled ? <Volume2 className="size-4" /> : <VolumeX className="size-4" />}
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate({ to: "/" })}
+              className="text-xs text-muted-foreground hover:text-foreground"
+            >
+              Exit
+            </button>
+          </div>
         </div>
-        <div className="mx-auto mt-3 h-1.5 max-w-xl overflow-hidden rounded-full bg-muted">
-          <div
-            className="h-full bg-gradient-to-r from-primary to-gold transition-all duration-500"
-            style={{ width: `${progress}%` }}
-          />
+        <div className="mx-auto mt-3 max-w-xl">
+          <SegmentedProgress total={steps.length} current={step} />
         </div>
       </header>
 
-      <main className="flex-1 px-4 pb-32 pt-8">
-        <div key={step} className="mx-auto max-w-xl animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <h1 className="text-display-md text-foreground">{current.title}</h1>
-          <p className="mt-2 text-sm text-muted-foreground">{current.hint}</p>
-          <div className="mt-6">{current.body}</div>
+      <main className="flex-1 px-4 pb-36 pt-6">
+        <div className="mx-auto max-w-xl">
+          <div className="mb-4 flex items-end justify-start">
+            <Mascot mood={mood} message={current.mascotMsg} />
+          </div>
+          <StepShell stepKey={step} direction={direction}>
+            <h1 className="text-display-md text-foreground">{current.title}</h1>
+            <p className="mt-2 text-sm text-muted-foreground">{current.hint}</p>
+            <div className="mt-6">{current.body}</div>
+          </StepShell>
         </div>
       </main>
 
@@ -470,8 +530,10 @@ function OnboardingPage() {
           <button
             type="button"
             onClick={next}
-            disabled={!current.ok() || saving}
-            className="tap flex-1 inline-flex items-center justify-center gap-2 rounded-2xl bg-primary px-5 py-4 text-base font-medium text-primary-foreground transition active:scale-[0.98] disabled:opacity-40"
+            disabled={saving}
+            className={`tap flex-1 inline-flex items-center justify-center gap-2 rounded-2xl bg-primary px-5 py-4 text-base font-semibold text-primary-foreground transition active:scale-[0.97] ${
+              ready ? "animate-glow-pulse" : "opacity-60"
+            } ${shake ? "animate-shake-x" : ""}`}
           >
             {saving ? "Finishing…" : step === steps.length - 1 ? (
               <>Finish <Check className="size-5" /></>
@@ -493,7 +555,7 @@ function CardGrid({
   onChange: (v: string) => void;
 }) {
   return (
-    <div className="grid gap-3">
+    <div className="stagger grid gap-3">
       {options.map((o) => {
         const active = value === o.id;
         return (
@@ -501,8 +563,8 @@ function CardGrid({
             key={o.id}
             type="button"
             onClick={() => onChange(o.id)}
-            className={`tap rounded-2xl border p-4 text-left transition active:scale-[0.99] ${
-              active ? "border-primary bg-primary text-primary-foreground" : "border-border bg-surface hover:bg-accent"
+            className={`tap relative overflow-hidden rounded-2xl border p-4 text-left transition-all active:scale-[0.98] hover:-translate-y-0.5 ${
+              active ? "border-primary bg-primary text-primary-foreground shadow-lg" : "border-border bg-surface hover:bg-accent"
             }`}
           >
             <div className="flex items-center justify-between">
@@ -512,8 +574,9 @@ function CardGrid({
                   {o.desc}
                 </p>
               </div>
-              {active && <Check className="size-5" />}
+              {active && <Check className="size-5 animate-pop-in" />}
             </div>
+            {active && <span className="pointer-events-none absolute inset-0 rounded-2xl ring-2 ring-gold/50 animate-ring-sweep" />}
           </button>
         );
       })}
