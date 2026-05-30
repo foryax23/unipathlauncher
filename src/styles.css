@@ -259,6 +259,42 @@
   .animate-mascot-happy { animation: mascot-happy 1.2s ease-in-out infinite; }
   .animate-mascot-cheer { animation: mascot-cheer 0.7s cubic-bezier(.34,1.56,.64,1); }
 
+  /* Bridge mascot — Archie */
+  @keyframes bridge-sway {
+    0%, 100% { transform: translateY(0) rotate(-1.2deg); }
+    50% { transform: translateY(-2px) rotate(1.2deg); }
+  }
+  @keyframes bridge-think {
+    0%, 100% { transform: translateY(0) rotate(-4deg); }
+    50% { transform: translateY(-1px) rotate(-2deg); }
+  }
+  @keyframes bridge-happy {
+    0%, 100% { transform: translateY(0) rotate(2deg) scale(1); }
+    50% { transform: translateY(-6px) rotate(-2deg) scale(1.04); }
+  }
+  @keyframes bridge-cheer {
+    0% { transform: translateY(0) scale(1); }
+    30% { transform: translateY(-14px) scale(1.08); }
+    60% { transform: translateY(-2px) scale(0.98); }
+    100% { transform: translateY(0) scale(1); }
+  }
+  .animate-bridge-sway { animation: bridge-sway 3.2s ease-in-out infinite; }
+  .animate-bridge-think { animation: bridge-think 2.4s ease-in-out infinite; }
+  .animate-bridge-happy { animation: bridge-happy 1.4s ease-in-out infinite; }
+  .animate-bridge-cheer { animation: bridge-cheer 0.75s cubic-bezier(.34,1.56,.64,1); }
+
+  @keyframes window-blink {
+    0%, 92%, 100% { transform: scaleY(1); }
+    96% { transform: scaleY(0.1); }
+  }
+  .animate-window-blink { animation: window-blink 4.5s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+
+  @keyframes flag-flutter {
+    0%, 100% { transform: skewY(0deg) scaleX(1); }
+    50% { transform: skewY(-8deg) scaleX(0.92); }
+  }
+  .animate-flag-flutter { animation: flag-flutter 1.6s ease-in-out infinite; }
+
   @keyframes sparkle {
     0%, 100% { transform: scale(0); opacity: 0; }
     40% { transform: scale(1.2); opacity: 1; }

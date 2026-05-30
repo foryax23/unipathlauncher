@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { LocationStep } from "@/components/onboarding/LocationStep";
 import { Mascot, type Mood } from "@/components/onboarding/Mascot";
+import { GlassSubjectCard } from "@/components/onboarding/GlassSubjectCard";
 import { StepShell } from "@/components/onboarding/StepShell";
 import { SegmentedProgress } from "@/components/onboarding/SegmentedProgress";
 import { Confetti } from "@/components/onboarding/Confetti";
@@ -205,22 +206,15 @@ function OnboardingPage() {
         <div className="stagger grid grid-cols-2 gap-3 sm:grid-cols-3">
           {COURSES.map((c) => {
             const Icon = SUBJECT_ICONS[c.id] ?? GraduationCap;
-            const active = s.subject === c.id;
             return (
-              <button
+              <GlassSubjectCard
                 key={c.id}
-                type="button"
+                id={c.id}
+                title={c.title}
+                Icon={Icon}
+                active={s.subject === c.id}
                 onClick={() => pickSelect(() => setS({ ...s, subject: c.id }))}
-                className={`tap relative flex flex-col items-start gap-2 overflow-hidden rounded-2xl border p-4 text-left transition-all active:scale-[0.96] hover:-translate-y-0.5 ${
-                  active
-                    ? "border-primary bg-primary text-primary-foreground shadow-lg"
-                    : "border-border bg-surface hover:bg-accent"
-                }`}
-              >
-                <Icon className={`size-5 transition-transform ${active ? "scale-110" : ""}`} />
-                <span className="text-sm font-medium leading-tight">{c.title}</span>
-                {active && <span className="pointer-events-none absolute inset-0 rounded-2xl ring-2 ring-gold/50 animate-ring-sweep" />}
-              </button>
+              />
             );
           })}
         </div>
@@ -512,11 +506,8 @@ function OnboardingPage() {
         </div>
       </header>
 
-      <main className="flex-1 px-4 pb-36 pt-6">
+      <main className="flex-1 px-4 pb-40 pt-8">
         <div className="mx-auto max-w-xl">
-          <div className="mb-4 flex items-end justify-start">
-            <Mascot mood={mood} message={current.mascotMsg} />
-          </div>
           <StepShell stepKey={step} direction={direction}>
             <h1 className="text-display-md text-foreground">{current.title}</h1>
             <p className="mt-2 text-sm text-muted-foreground">{current.hint}</p>
@@ -525,8 +516,11 @@ function OnboardingPage() {
         </div>
       </main>
 
-      <div className="fixed inset-x-0 bottom-0 z-10 safe-bottom px-4 pb-4 pt-2 glass-strong border-t border-border">
-        <div className="mx-auto flex max-w-xl gap-3">
+      <div className="fixed inset-x-0 bottom-0 z-10 safe-bottom px-4 pb-4 pt-3 glass-strong border-t border-border">
+        <div className="mx-auto flex max-w-xl items-end gap-3">
+          <div className="shrink-0 -mt-6">
+            <Mascot mood={mood} message={current.mascotMsg} size={72} />
+          </div>
           <button
             type="button"
             onClick={next}
