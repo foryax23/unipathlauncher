@@ -366,33 +366,75 @@ function OnboardingPage() {
       ok: () => /^\+?[0-9 ()-]{7,}$/.test(s.phone) && s.consent,
       body: (
         <div className="space-y-4">
-          <input
-            type="tel"
-            value={s.phone}
-            onChange={(e) => { setS({ ...s, phone: e.target.value }); setMood(/^\+?[0-9 ()-]{7,}$/.test(e.target.value) ? "happy" : "thinking"); }}
-            placeholder="UK mobile e.g. 07700 900 123"
-            className={`tap w-full rounded-2xl border bg-background px-4 py-4 text-base outline-none transition focus:ring-2 focus:ring-ring ${/^\+?[0-9 ()-]{7,}$/.test(s.phone) ? "border-success" : "border-input"}`}
-          />
-          <textarea
-            value={s.reason}
-            onChange={(e) => setS({ ...s, reason: e.target.value })}
-            placeholder="Anything else we should know? (optional)"
-            rows={3}
-            maxLength={500}
-            className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-ring"
-          />
-          <label className="flex items-start gap-3 text-sm text-muted-foreground">
+          {/* Phone with +44 plate */}
+          <div
+            className={`tap flex w-full items-stretch overflow-hidden rounded-2xl border bg-background transition focus-within:ring-2 focus-within:ring-ring ${
+              /^\+?[0-9 ()-]{7,}$/.test(s.phone) ? "border-success" : "border-input"
+            }`}
+          >
+            <div className="flex shrink-0 items-center gap-1.5 border-r border-input bg-surface-muted px-3 text-sm font-medium text-muted-foreground">
+              <span aria-hidden>🇬🇧</span>
+              <span>+44</span>
+            </div>
             <input
-              type="checkbox"
-              checked={s.consent}
-              onChange={(e) => { setS({ ...s, consent: e.target.checked }); if (e.target.checked) sound.play("pop"); }}
-              className="mt-1 size-5 accent-primary"
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              value={s.phone}
+              onChange={(e) => { setS({ ...s, phone: e.target.value }); setMood(/^\+?[0-9 ()-]{7,}$/.test(e.target.value) ? "happy" : "thinking"); }}
+              placeholder="7700 900 123"
+              className="w-full bg-transparent px-4 py-4 text-base outline-none"
             />
-            <span>
-              I agree to be contacted by a Bridge Gateway adviser about UK university options.
-              See our privacy policy.
+          </div>
+
+          {/* Notes card */}
+          <div className="rounded-2xl border border-input bg-background p-4 focus-within:ring-2 focus-within:ring-ring">
+            <label className="flex items-center justify-between text-xs">
+              <span className="font-medium text-foreground">Anything else we should know?</span>
+              <span className="font-mono text-[11px] text-muted-foreground">{s.reason.length}/500</span>
+            </label>
+            <p className="mt-0.5 text-xs text-muted-foreground">Optional — visa status, exam scores, preferred course…</p>
+            <textarea
+              value={s.reason}
+              onChange={(e) => setS({ ...s, reason: e.target.value.slice(0, 500) })}
+              placeholder="Tell your adviser anything that'll help"
+              rows={3}
+              maxLength={500}
+              className="mt-2 w-full resize-none bg-transparent text-sm outline-none placeholder:text-muted-foreground/70"
+            />
+          </div>
+
+          {/* Consent card */}
+          <button
+            type="button"
+            onClick={() => { setS({ ...s, consent: !s.consent }); if (!s.consent) sound.play("pop"); }}
+            aria-pressed={s.consent}
+            className={`tap flex w-full items-start gap-3 rounded-2xl border p-4 text-left transition active:scale-[0.99] ${
+              s.consent ? "border-gold/70 bg-gold/10" : "border-border bg-surface hover:bg-accent"
+            }`}
+          >
+            <span
+              className={`mt-0.5 inline-flex size-6 shrink-0 items-center justify-center rounded-full border-2 transition ${
+                s.consent ? "border-gold bg-gold text-gold-foreground" : "border-border bg-background"
+              }`}
+            >
+              {s.consent && <Check className="size-3.5" strokeWidth={3} />}
             </span>
-          </label>
+            <span className="flex-1">
+              <span className="block text-sm font-semibold text-foreground">
+                Yes, I'd like a free call from a Bridge Gateway adviser
+              </span>
+              <span className="mt-0.5 block text-xs text-muted-foreground">
+                We'll reach out within 1 business day. One call, no spam.
+              </span>
+            </span>
+          </button>
+
+          {/* Reassurance */}
+          <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+            <Lock className="size-3.5" />
+            <span>Your details stay private. We never share them.</span>
+          </div>
         </div>
       ),
     },
