@@ -506,7 +506,7 @@ function OnboardingPage() {
         </div>
       </header>
 
-      <main className="flex-1 px-4 pb-40 pt-8">
+      <main className="flex-1 px-4 pb-56 pt-8">
         <div className="mx-auto max-w-xl">
           <StepShell stepKey={step} direction={direction}>
             <h1 className="text-display-md text-foreground">{current.title}</h1>
