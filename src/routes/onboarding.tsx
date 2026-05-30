@@ -71,6 +71,33 @@ const SUBJECT_ICONS: Record<string, React.ComponentType<{ className?: string }>>
   psychology: Brain,
 };
 
+const LEVEL_MSGS: Record<string, string> = {
+  Foundation: "Foundations first — that's how every great bridge starts.",
+  Undergraduate: "A classic. UK unis love an undergrad.",
+  "Top-up": "Smart move — finish what you started.",
+  Postgraduate: "Ooh, the brainy route. Respect.",
+};
+
+const SUBJECT_MSGS: Record<string, string> = {
+  "business-finance": "Future CEO energy. Noted.",
+  "computer-science": "0s and 1s it is. Very 2026.",
+  law: "Objection: this is a great choice.",
+  "health-social-care": "Caring careers. The UK needs you.",
+  "public-health": "Caring careers. The UK needs you.",
+  engineering: "Bridges, literally. We're soulmates.",
+  "arts-design": "Creative chaos incoming.",
+  education: "Shaping minds. Big deal.",
+  "hospitality-tourism": "Tea, biscuits, world tour. Sorted.",
+  psychology: "Reading me already, aren't you?",
+};
+
+const START_MSGS: Record<string, string> = {
+  "May 2026": "Spring start — sunshine and freshers' fairs.",
+  "September 2026": "The big one. Most courses, most options.",
+  "January 2027": "Winter intake — fewer crowds, same degree.",
+  "Not sure": "Flexible — my favourite kind of student.",
+};
+
 function loadState(): { state: State; step: number } {
   if (typeof window === "undefined") return { state: EMPTY, step: 0 };
   try {

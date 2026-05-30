@@ -1,59 +1,66 @@
-# Onboarding v2 — Bridge mascot + glass tiles
+## Goal
+Make Archie the Bridge's messages much more engaging — cheeky, playful, on-brand for a UK university journey — with dynamic variations per state instead of one-liner stubs.
 
-Move the mascot down beside the Continue button, redraw it as a polished "Bridge" character that personifies Bridge Gateway, and restyle the step-3 subject grid as glass cards with gradient icons. Keep all existing animations and add a few new ones for the new mascot.
+## Approach
+In `src/routes/onboarding.tsx`, replace each step's single `mascotMsg` string with a small helper that returns a contextual message based on the current input state (empty / typing / valid / invalid). Keep all logic in the frontend; no backend or component changes.
 
-## What changes
+## Per-step copy (cheeky companion voice)
 
-### 1. Mascot relocation + redesign
-- **Position**: removed from the top of each step. New home: sits in the sticky bottom bar to the LEFT of the Continue button, ~64–72px tall on mobile, peeking just above the bar so it feels like a real companion watching the user finish each step.
-- **New character — "Archie the Bridge"**: a stylised brass-gold suspension-bridge silhouette with two pylons (the "eyes"), a soft arch (the "smile"), and a small base. Personality comes from animation, not detail — keeps it crisp at any size.
-- **Crisper rendering**: built as a clean multi-layer inline SVG using project tokens (`var(--primary)`, `var(--gold)`, `var(--surface)`):
-  - Soft drop shadow under the base (SVG `<filter>` with `feGaussianBlur` + `feOffset`).
-  - Subtle inner highlight on the pylons (linear gradient stop) for a metallic brass look.
-  - Cable strands as thin curved paths with rounded caps.
-  - Eyes are two glowing windows on each pylon (small rounded rects with a pulse).
-  - A tiny pennant/flag on top that flutters.
-- **Animations** (all gated by `prefers-reduced-motion`):
-  - `idle` → gentle sway (rotate ±1.5°) + flag flutter
-  - `thinking` → pylons blink slower, head tilts -4°
-  - `happy` → pylons sparkle, arch curves up into a smile (path morph via two SVG paths cross-faded)
-  - `cheer` → small jump + sparkle burst from the top of the bridge
-  - `celebrate` → confetti from above + sustained sparkle, used at finish
-- **Speech bubble**: stays, but anchors above the mascot in the bottom bar, max-width ~14rem, auto-hides if it would overlap the Continue button on narrow screens (<360px).
+**Step 1 — Name**
+- Empty: "Right then — what shall I call you?"
+- 1 char: "Don't stop now, keep going…"
+- Valid: `"${firstName}! Brilliant name. Let's build your path."`
 
-### 2. Continue bar layout
-- Bottom bar becomes a 2-column grid: `[mascot 96px] [Continue button flex-1]`.
-- Continue button keeps `animate-glow-pulse` on ready, `animate-shake-x` on invalid tap.
-- Safe-area padding preserved.
+**Step 2 — Level**
+- Empty: "Pick your starting block — no wrong answers."
+- Selected: rotates per choice
+  - Foundation: "Foundations first — that's how every great bridge starts."
+  - Undergraduate: "A classic. UK unis love an undergrad."
+  - Top-up: "Smart move — finish what you started."
+  - Postgraduate: "Ooh, the brainy route. Respect."
 
-### 3. Step 3 — Glass subject cards
-- New `GlassSubjectCard` component used only by the subject step.
-- Visual:
-  - `backdrop-blur` glass surface (`bg-surface/60 backdrop-blur-xl border border-white/15`).
-  - Large 48×48 rounded-square icon plate with **per-subject gradient** (Business→primary→gold, Computer Science→indigo→cyan, Law→navy→brass, Engineering→slate→amber, Arts→coral→pink, Health→teal→emerald, etc.) — gradient defined per subject id in a small lookup.
-  - Icon rendered white inside the gradient plate; soft inner glow ring.
-  - Title in display font, subtle subtitle (course count or short tag).
-  - On hover/desktop: tile lifts 2px, gradient plate scales 1.05, glass border brightens.
-  - On select: gold ring around the whole tile, gradient plate emits a one-shot `ring-sweep`, a small gold check sticker pops in top-right, tile gets a stronger inner glow.
-- Stagger-in retained.
-- Mobile: 2-column; ≥sm: 3-column. Min-height 120px to feel chunky and tappable.
+**Step 3 — Subject**
+- Empty: "What gets you out of bed?"
+- Selected: per subject
+  - business-finance: "Future CEO energy. Noted."
+  - computer-science: "0s and 1s it is. Very 2026."
+  - law: "Objection: this is a great choice."
+  - health-social-care / public-health: "Caring careers. The UK needs you."
+  - engineering: "Bridges, literally. We're soulmates."
+  - arts-design: "Creative chaos incoming."
+  - education: "Shaping minds. Big deal."
+  - hospitality-tourism: "Tea, biscuits, world tour. Sorted."
+  - psychology: "Reading me already, aren't you?"
+  - default: "Lovely. Adding it to your file."
 
-### 4. Other steps — light polish
-- Other step bodies untouched in structure, but the Mascot no longer takes vertical space, so the form gets more room (drop `mt-6`/`mb-4` mascot wrappers, increase content top padding slightly).
+**Step 4 — Start date**
+- Empty: "When do we kick off?"
+- May 2026: "Spring start — sunshine and freshers' fairs."
+- September 2026: "The big one. Most courses, most options."
+- January 2027: "Winter intake — fewer crowds, same degree."
+- Not sure: "Flexible — my favourite kind of student."
+
+**Step 5 — Location**
+- Empty: "Where in the world are you?"
+- Found: `"${city ?? "Got it"}! I'll find unis near you."`
+
+**Step 6 — Phone + consent**
+- Empty phone: "Pop your number in — one call, that's it."
+- Invalid phone: "Hmm, that doesn't look quite right…"
+- Valid phone, no consent: "Tick the box and we're golden."
+- Valid + consent: "Perfect. An adviser will be in touch."
+
+**Step 7 — Account**
+- Signed in: `"Welcome back, ${firstName}. One tap to finish."`
+- Empty: "Last step! Save your shortlist."
+- Invalid email: "Real email please — no funny business."
+- Short password: "6 characters minimum — keep it safe."
+- Valid: "Smashing. Hit Finish and let's go."
+
+## Implementation
+Single file change in `src/routes/onboarding.tsx`. Replace each step object's `mascotMsg: ...` with a derived expression. Add a small `SUBJECT_MSGS` and `LEVEL_MSGS` map near `SUBJECT_ICONS`. No new files, no styling changes, no behavior changes.
 
 ## Out of scope
-- No copy changes beyond mascot speech bubble messages.
-- No data model, no auth, no server function changes.
-- Other steps' button styles unchanged (only step 3 gets the glass treatment).
-- No new npm dependencies.
-
-## Files touched
-
-```
-src/components/onboarding/Mascot.tsx              (rewrite — bridge character + new moods)
-src/components/onboarding/GlassSubjectCard.tsx    (new — step 3 glass tile)
-src/routes/onboarding.tsx                          (edit — move mascot into bottom bar grid; swap subject grid)
-src/styles.css                                     (edit — new keyframes: bridge-sway, flag-flutter, window-blink, smile-morph; subject gradient utilities)
-```
-
-Approve to build.
+- Mascot visuals/animation (already done)
+- Message bubble layout (already done)
+- Sound, validation logic
