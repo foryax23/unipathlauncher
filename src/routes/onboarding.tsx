@@ -3,11 +3,12 @@ import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import {
   ArrowLeft, ArrowRight, Check, GraduationCap, Briefcase, Stethoscope,
-  Code, Scale, Wrench, Palette, BookOpen, Plane, Brain, Mail, Volume2, VolumeX,
+  Code, Scale, Wrench, Palette, BookOpen, Plane, Brain, Mail, Volume2, VolumeX, Lock,
 } from "lucide-react";
 import { LocationStep } from "@/components/onboarding/LocationStep";
 import { Mascot, type Mood } from "@/components/onboarding/Mascot";
 import { GlassSubjectCard } from "@/components/onboarding/GlassSubjectCard";
+import { PhotoChoiceCard } from "@/components/onboarding/PhotoChoiceCard";
 import { StepShell } from "@/components/onboarding/StepShell";
 import { SegmentedProgress } from "@/components/onboarding/SegmentedProgress";
 import { Confetti } from "@/components/onboarding/Confetti";
@@ -29,6 +30,16 @@ import imgEducation from "@/assets/subjects/education.jpg";
 import imgHospitality from "@/assets/subjects/hospitality-tourism.jpg";
 import imgPsychology from "@/assets/subjects/psychology.jpg";
 
+import imgLevelFoundation from "@/assets/levels/foundation.jpg";
+import imgLevelUndergrad from "@/assets/levels/undergraduate.jpg";
+import imgLevelTopup from "@/assets/levels/topup.jpg";
+import imgLevelPostgrad from "@/assets/levels/postgraduate.jpg";
+
+import imgIntakeMay from "@/assets/intakes/may-2026.jpg";
+import imgIntakeSep from "@/assets/intakes/september-2026.jpg";
+import imgIntakeJan from "@/assets/intakes/january-2027.jpg";
+import imgIntakeFlex from "@/assets/intakes/flexible.jpg";
+
 const SUBJECT_IMAGES: Record<string, string> = {
   "business-finance": imgBusiness,
   "health-social-care": imgHealth,
@@ -40,6 +51,20 @@ const SUBJECT_IMAGES: Record<string, string> = {
   education: imgEducation,
   "hospitality-tourism": imgHospitality,
   psychology: imgPsychology,
+};
+
+const LEVEL_IMAGES: Record<string, string> = {
+  Foundation: imgLevelFoundation,
+  Undergraduate: imgLevelUndergrad,
+  "Top-up": imgLevelTopup,
+  Postgraduate: imgLevelPostgrad,
+};
+
+const INTAKE_IMAGES: Record<string, string> = {
+  "May 2026": imgIntakeMay,
+  "September 2026": imgIntakeSep,
+  "January 2027": imgIntakeJan,
+  "Not sure": imgIntakeFlex,
 };
 
 export const Route = createFileRoute("/onboarding")({
@@ -221,13 +246,38 @@ function OnboardingPage() {
       mascotMsg: s.full_name.trim().length >= 2 ? `${s.full_name.trim().split(" ")[0]}! Brilliant name. Let's build your path.` : s.full_name.trim().length === 1 ? "Don't stop now, keep going…" : "Right then — what shall I call you?",
       ok: () => s.full_name.trim().length >= 2,
       body: (
-        <input
-          autoFocus
-          value={s.full_name}
-          onChange={(e) => { setS({ ...s, full_name: e.target.value }); if (e.target.value.length >= 2) setMood("happy"); else setMood("thinking"); }}
-          placeholder="Your full name"
-          className={`tap w-full rounded-2xl border bg-background px-4 py-4 text-base outline-none transition focus:ring-2 focus:ring-ring ${s.full_name.trim().length >= 2 ? "border-success" : "border-input"}`}
-        />
+        <div className="space-y-6">
+          <input
+            autoFocus
+            value={s.full_name}
+            onChange={(e) => { setS({ ...s, full_name: e.target.value }); if (e.target.value.length >= 2) setMood("happy"); else setMood("thinking"); }}
+            placeholder="Your full name"
+            className={`tap w-full rounded-2xl border bg-background px-4 py-4 text-base outline-none transition focus:ring-2 focus:ring-ring ${s.full_name.trim().length >= 2 ? "border-success" : "border-input"}`}
+          />
+          {s.full_name.trim().length >= 1 && (
+            <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 rounded-2xl border border-border bg-surface/60 px-6 py-5 text-center">
+              <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                We'll call you
+              </p>
+              <p
+                className="font-chalk mt-1 text-5xl sm:text-6xl leading-none text-gold/90"
+                style={{ textShadow: "0 1px 0 color-mix(in oklab, var(--gold) 20%, transparent), 0 0 24px color-mix(in oklab, var(--gold) 18%, transparent)" }}
+              >
+                {s.full_name.trim().split(" ")[0] || s.full_name.trim()}
+              </p>
+              <svg
+                viewBox="0 0 200 12"
+                className="mx-auto mt-1 h-3 w-40 text-gold/60"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              >
+                <path d="M4 7 C 40 2, 80 11, 120 5 S 190 7, 196 5" />
+              </svg>
+            </div>
+          )}
+        </div>
       ),
     },
     {
@@ -236,16 +286,22 @@ function OnboardingPage() {
       mascotMsg: s.study_level ? (LEVEL_MSGS[s.study_level] ?? "Nice pick!") : "Pick your starting block — no wrong answers.",
       ok: () => !!s.study_level,
       body: (
-        <CardGrid
-          options={[
-            { id: "Foundation", label: "Foundation", desc: "Entry route, no prior degree" },
-            { id: "Undergraduate", label: "Undergraduate", desc: "Bachelor's degree (BSc / BA)" },
-            { id: "Top-up", label: "Top-up", desc: "Convert your HND / Level 5 to a degree" },
-            { id: "Postgraduate", label: "Postgraduate", desc: "MSc, MA, MBA" },
-          ]}
-          value={s.study_level}
-          onChange={(v) => pickSelect(() => setS({ ...s, study_level: v }))}
-        />
+        <div className="stagger grid grid-cols-2 gap-3">
+          {[
+            { id: "Foundation", label: "Foundation" },
+            { id: "Undergraduate", label: "Undergraduate" },
+            { id: "Top-up", label: "Top-up" },
+            { id: "Postgraduate", label: "Postgraduate" },
+          ].map((o) => (
+            <PhotoChoiceCard
+              key={o.id}
+              title={o.label}
+              image={LEVEL_IMAGES[o.id]}
+              active={s.study_level === o.id}
+              onClick={() => pickSelect(() => setS({ ...s, study_level: o.id }))}
+            />
+          ))}
+        </div>
       ),
     },
     {
@@ -278,16 +334,22 @@ function OnboardingPage() {
       mascotMsg: s.start_year ? (START_MSGS[s.start_year] ?? "Locked in! ✨") : "When do we kick off?",
       ok: () => !!s.start_year,
       body: (
-        <CardGrid
-          options={[
-            { id: "May 2026", label: "May 2026", desc: "Spring intake" },
-            { id: "September 2026", label: "September 2026", desc: "Main UK intake" },
-            { id: "January 2027", label: "January 2027", desc: "Winter intake" },
-            { id: "Not sure", label: "I'm flexible", desc: "Show me all options" },
-          ]}
-          value={s.start_year}
-          onChange={(v) => pickSelect(() => setS({ ...s, start_year: v }))}
-        />
+        <div className="stagger grid grid-cols-2 gap-3">
+          {[
+            { id: "May 2026", label: "May 2026" },
+            { id: "September 2026", label: "September 2026" },
+            { id: "January 2027", label: "January 2027" },
+            { id: "Not sure", label: "I'm flexible" },
+          ].map((o) => (
+            <PhotoChoiceCard
+              key={o.id}
+              title={o.label}
+              image={INTAKE_IMAGES[o.id]}
+              active={s.start_year === o.id}
+              onClick={() => pickSelect(() => setS({ ...s, start_year: o.id }))}
+            />
+          ))}
+        </div>
       ),
     },
     {
@@ -304,33 +366,75 @@ function OnboardingPage() {
       ok: () => /^\+?[0-9 ()-]{7,}$/.test(s.phone) && s.consent,
       body: (
         <div className="space-y-4">
-          <input
-            type="tel"
-            value={s.phone}
-            onChange={(e) => { setS({ ...s, phone: e.target.value }); setMood(/^\+?[0-9 ()-]{7,}$/.test(e.target.value) ? "happy" : "thinking"); }}
-            placeholder="UK mobile e.g. 07700 900 123"
-            className={`tap w-full rounded-2xl border bg-background px-4 py-4 text-base outline-none transition focus:ring-2 focus:ring-ring ${/^\+?[0-9 ()-]{7,}$/.test(s.phone) ? "border-success" : "border-input"}`}
-          />
-          <textarea
-            value={s.reason}
-            onChange={(e) => setS({ ...s, reason: e.target.value })}
-            placeholder="Anything else we should know? (optional)"
-            rows={3}
-            maxLength={500}
-            className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-ring"
-          />
-          <label className="flex items-start gap-3 text-sm text-muted-foreground">
+          {/* Phone with +44 plate */}
+          <div
+            className={`tap flex w-full items-stretch overflow-hidden rounded-2xl border bg-background transition focus-within:ring-2 focus-within:ring-ring ${
+              /^\+?[0-9 ()-]{7,}$/.test(s.phone) ? "border-success" : "border-input"
+            }`}
+          >
+            <div className="flex shrink-0 items-center gap-1.5 border-r border-input bg-surface-muted px-3 text-sm font-medium text-muted-foreground">
+              <span aria-hidden>🇬🇧</span>
+              <span>+44</span>
+            </div>
             <input
-              type="checkbox"
-              checked={s.consent}
-              onChange={(e) => { setS({ ...s, consent: e.target.checked }); if (e.target.checked) sound.play("pop"); }}
-              className="mt-1 size-5 accent-primary"
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              value={s.phone}
+              onChange={(e) => { setS({ ...s, phone: e.target.value }); setMood(/^\+?[0-9 ()-]{7,}$/.test(e.target.value) ? "happy" : "thinking"); }}
+              placeholder="7700 900 123"
+              className="w-full bg-transparent px-4 py-4 text-base outline-none"
             />
-            <span>
-              I agree to be contacted by a Bridge Gateway adviser about UK university options.
-              See our privacy policy.
+          </div>
+
+          {/* Notes card */}
+          <div className="rounded-2xl border border-input bg-background p-4 focus-within:ring-2 focus-within:ring-ring">
+            <label className="flex items-center justify-between text-xs">
+              <span className="font-medium text-foreground">Anything else we should know?</span>
+              <span className="font-mono text-[11px] text-muted-foreground">{s.reason.length}/500</span>
+            </label>
+            <p className="mt-0.5 text-xs text-muted-foreground">Optional — visa status, exam scores, preferred course…</p>
+            <textarea
+              value={s.reason}
+              onChange={(e) => setS({ ...s, reason: e.target.value.slice(0, 500) })}
+              placeholder="Tell your adviser anything that'll help"
+              rows={3}
+              maxLength={500}
+              className="mt-2 w-full resize-none bg-transparent text-sm outline-none placeholder:text-muted-foreground/70"
+            />
+          </div>
+
+          {/* Consent card */}
+          <button
+            type="button"
+            onClick={() => { setS({ ...s, consent: !s.consent }); if (!s.consent) sound.play("pop"); }}
+            aria-pressed={s.consent}
+            className={`tap flex w-full items-start gap-3 rounded-2xl border p-4 text-left transition active:scale-[0.99] ${
+              s.consent ? "border-gold/70 bg-gold/10" : "border-border bg-surface hover:bg-accent"
+            }`}
+          >
+            <span
+              className={`mt-0.5 inline-flex size-6 shrink-0 items-center justify-center rounded-full border-2 transition ${
+                s.consent ? "border-gold bg-gold text-gold-foreground" : "border-border bg-background"
+              }`}
+            >
+              {s.consent && <Check className="size-3.5" strokeWidth={3} />}
             </span>
-          </label>
+            <span className="flex-1">
+              <span className="block text-sm font-semibold text-foreground">
+                Yes, I'd like a free call from a Bridge Gateway adviser
+              </span>
+              <span className="mt-0.5 block text-xs text-muted-foreground">
+                We'll reach out within 1 business day. One call, no spam.
+              </span>
+            </span>
+          </button>
+
+          {/* Reassurance */}
+          <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+            <Lock className="size-3.5" />
+            <span>Your details stay private. We never share them.</span>
+          </div>
         </div>
       ),
     },
@@ -595,42 +699,6 @@ function OnboardingPage() {
   );
 }
 
-function CardGrid({
-  options, value, onChange,
-}: {
-  options: { id: string; label: string; desc: string }[];
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  return (
-    <div className="stagger grid gap-3">
-      {options.map((o) => {
-        const active = value === o.id;
-        return (
-          <button
-            key={o.id}
-            type="button"
-            onClick={() => onChange(o.id)}
-            className={`tap relative overflow-hidden rounded-2xl border p-4 text-left transition-all active:scale-[0.98] hover:-translate-y-0.5 ${
-              active ? "border-primary bg-primary text-primary-foreground shadow-lg" : "border-border bg-surface hover:bg-accent"
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-base font-medium">{o.label}</p>
-                <p className={`mt-0.5 text-xs ${active ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
-                  {o.desc}
-                </p>
-              </div>
-              {active && <Check className="size-5 animate-pop-in" />}
-            </div>
-            {active && <span className="pointer-events-none absolute inset-0 rounded-2xl ring-2 ring-gold/50 animate-ring-sweep" />}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
 
 function GoogleIcon() {
   return (

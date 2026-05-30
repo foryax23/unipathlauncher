@@ -107,6 +107,35 @@ export function LocationStep({
 
   return (
     <div className="space-y-4">
+      {/* Quick city chips */}
+      <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {CAMPUSES.map((c) => {
+          const active =
+            value != null &&
+            Math.abs(value.lat - c.lat) < 0.05 &&
+            Math.abs(value.lng - c.lng) < 0.05;
+          return (
+            <button
+              key={c.city}
+              type="button"
+              onClick={() => {
+                setQuery(c.city);
+                setResults([]);
+                pick(c.lat, c.lng);
+              }}
+              className={`tap inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-2 text-sm font-medium transition active:scale-95 ${
+                active
+                  ? "border-gold/70 bg-gold/15 text-foreground ring-2 ring-gold/40"
+                  : "border-border bg-surface text-muted-foreground hover:bg-accent hover:text-foreground"
+              }`}
+            >
+              <MapPin className={`size-3.5 ${active ? "text-gold" : ""}`} />
+              {c.city}
+            </button>
+          );
+        })}
+      </div>
+
       <div className="relative">
         <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         <input
@@ -139,6 +168,7 @@ export function LocationStep({
           <p className="mt-2 text-xs text-muted-foreground">Searching…</p>
         )}
       </div>
+
 
       <button
         type="button"
