@@ -29,9 +29,9 @@ export function Mascot({
   return (
     <div className="relative flex flex-col items-center" style={{ width: size }}>
       {message && (
-        <div className="absolute -top-16 left-1/2 z-10 -translate-x-1/2 max-w-[280px] whitespace-normal text-center rounded-2xl rounded-bl-sm border border-border bg-surface px-4 py-2 text-sm font-medium leading-snug text-foreground shadow-lg animate-in fade-in slide-in-from-bottom-1 duration-300">
+        <div className="absolute -top-14 left-1/2 z-10 w-max max-w-[min(320px,80vw)] -translate-x-1/2 rounded-2xl rounded-b-md border border-border bg-surface/95 px-4 py-2.5 text-[15px] font-medium leading-snug text-foreground shadow-xl backdrop-blur-md animate-in fade-in slide-in-from-bottom-1 duration-300 text-center">
           {message}
-          <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 size-2 rotate-45 border-b border-r border-border bg-surface" />
+          <span className="absolute -bottom-1.5 left-1/2 size-3 -translate-x-1/2 rotate-45 border-b border-r border-border bg-surface/95" />
         </div>
       )}
       <div
