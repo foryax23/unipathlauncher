@@ -246,13 +246,38 @@ function OnboardingPage() {
       mascotMsg: s.full_name.trim().length >= 2 ? `${s.full_name.trim().split(" ")[0]}! Brilliant name. Let's build your path.` : s.full_name.trim().length === 1 ? "Don't stop now, keep going…" : "Right then — what shall I call you?",
       ok: () => s.full_name.trim().length >= 2,
       body: (
-        <input
-          autoFocus
-          value={s.full_name}
-          onChange={(e) => { setS({ ...s, full_name: e.target.value }); if (e.target.value.length >= 2) setMood("happy"); else setMood("thinking"); }}
-          placeholder="Your full name"
-          className={`tap w-full rounded-2xl border bg-background px-4 py-4 text-base outline-none transition focus:ring-2 focus:ring-ring ${s.full_name.trim().length >= 2 ? "border-success" : "border-input"}`}
-        />
+        <div className="space-y-6">
+          <input
+            autoFocus
+            value={s.full_name}
+            onChange={(e) => { setS({ ...s, full_name: e.target.value }); if (e.target.value.length >= 2) setMood("happy"); else setMood("thinking"); }}
+            placeholder="Your full name"
+            className={`tap w-full rounded-2xl border bg-background px-4 py-4 text-base outline-none transition focus:ring-2 focus:ring-ring ${s.full_name.trim().length >= 2 ? "border-success" : "border-input"}`}
+          />
+          {s.full_name.trim().length >= 1 && (
+            <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 rounded-2xl border border-border bg-surface/60 px-6 py-5 text-center">
+              <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                We'll call you
+              </p>
+              <p
+                className="font-chalk mt-1 text-5xl sm:text-6xl leading-none text-gold/90"
+                style={{ textShadow: "0 1px 0 color-mix(in oklab, var(--gold) 20%, transparent), 0 0 24px color-mix(in oklab, var(--gold) 18%, transparent)" }}
+              >
+                {s.full_name.trim().split(" ")[0] || s.full_name.trim()}
+              </p>
+              <svg
+                viewBox="0 0 200 12"
+                className="mx-auto mt-1 h-3 w-40 text-gold/60"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              >
+                <path d="M4 7 C 40 2, 80 11, 120 5 S 190 7, 196 5" />
+              </svg>
+            </div>
+          )}
+        </div>
       ),
     },
     {
