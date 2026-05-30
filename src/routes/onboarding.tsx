@@ -71,6 +71,33 @@ const SUBJECT_ICONS: Record<string, React.ComponentType<{ className?: string }>>
   psychology: Brain,
 };
 
+const LEVEL_MSGS: Record<string, string> = {
+  Foundation: "Foundations first — that's how every great bridge starts.",
+  Undergraduate: "A classic. UK unis love an undergrad.",
+  "Top-up": "Smart move — finish what you started.",
+  Postgraduate: "Ooh, the brainy route. Respect.",
+};
+
+const SUBJECT_MSGS: Record<string, string> = {
+  "business-finance": "Future CEO energy. Noted.",
+  "computer-science": "0s and 1s it is. Very 2026.",
+  law: "Objection: this is a great choice.",
+  "health-social-care": "Caring careers. The UK needs you.",
+  "public-health": "Caring careers. The UK needs you.",
+  engineering: "Bridges, literally. We're soulmates.",
+  "arts-design": "Creative chaos incoming.",
+  education: "Shaping minds. Big deal.",
+  "hospitality-tourism": "Tea, biscuits, world tour. Sorted.",
+  psychology: "Reading me already, aren't you?",
+};
+
+const START_MSGS: Record<string, string> = {
+  "May 2026": "Spring start — sunshine and freshers' fairs.",
+  "September 2026": "The big one. Most courses, most options.",
+  "January 2027": "Winter intake — fewer crowds, same degree.",
+  "Not sure": "Flexible — my favourite kind of student.",
+};
+
 function loadState(): { state: State; step: number } {
   if (typeof window === "undefined") return { state: EMPTY, step: 0 };
   try {
@@ -167,7 +194,7 @@ function OnboardingPage() {
     {
       title: "What's your name?",
       hint: "We'll personalise your shortlist.",
-      mascotMsg: s.full_name.trim().length >= 2 ? `Hi ${s.full_name.split(" ")[0]}! 👋` : "Hi there!",
+      mascotMsg: s.full_name.trim().length >= 2 ? `${s.full_name.trim().split(" ")[0]}! Brilliant name. Let's build your path.` : s.full_name.trim().length === 1 ? "Don't stop now, keep going…" : "Right then — what shall I call you?",
       ok: () => s.full_name.trim().length >= 2,
       body: (
         <input
@@ -182,7 +209,7 @@ function OnboardingPage() {
     {
       title: "Which level suits you?",
       hint: "Pick your starting point.",
-      mascotMsg: s.study_level ? "Nice pick!" : "Tap one to choose.",
+      mascotMsg: s.study_level ? (LEVEL_MSGS[s.study_level] ?? "Nice pick!") : "Pick your starting block — no wrong answers.",
       ok: () => !!s.study_level,
       body: (
         <CardGrid
@@ -200,7 +227,7 @@ function OnboardingPage() {
     {
       title: "What do you want to study?",
       hint: "Choose your main interest.",
-      mascotMsg: s.subject ? "Great choice!" : "What excites you?",
+      mascotMsg: s.subject ? (SUBJECT_MSGS[s.subject] ?? "Lovely. Adding it to your file.") : "What gets you out of bed?",
       ok: () => !!s.subject,
       body: (
         <div className="stagger grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -223,7 +250,7 @@ function OnboardingPage() {
     {
       title: "When do you want to start?",
       hint: "We'll match the right intake.",
-      mascotMsg: s.start_year ? "Locked in! ✨" : "Pick a date.",
+      mascotMsg: s.start_year ? (START_MSGS[s.start_year] ?? "Locked in! ✨") : "When do we kick off?",
       ok: () => !!s.start_year,
       body: (
         <CardGrid
@@ -241,14 +268,14 @@ function OnboardingPage() {
     {
       title: "Where are you based?",
       hint: "We'll find the closest campuses.",
-      mascotMsg: s.location ? `Got you in ${s.location.city ?? "your area"}!` : "Share your spot.",
+      mascotMsg: s.location ? `${s.location.city ?? "Got it"}! I'll find unis near you.` : "Where in the world are you?",
       ok: () => !!s.location,
       body: <LocationStep value={s.location} onChange={(v) => { setS({ ...s, location: v }); setMood("happy"); }} />,
     },
     {
       title: "How can an adviser reach you?",
       hint: "We call only once. Promise.",
-      mascotMsg: /^\+?[0-9 ()-]{7,}$/.test(s.phone) ? "Looks good!" : "Add your number.",
+      mascotMsg: !s.phone ? "Pop your number in — one call, that's it." : !/^\+?[0-9 ()-]{7,}$/.test(s.phone) ? "Hmm, that doesn't look quite right…" : !s.consent ? "Tick the box and we're golden." : "Perfect. An adviser will be in touch.",
       ok: () => /^\+?[0-9 ()-]{7,}$/.test(s.phone) && s.consent,
       body: (
         <div className="space-y-4">
@@ -287,7 +314,7 @@ function OnboardingPage() {
       hint: hasSession
         ? "We'll save your matches and take you to your dashboard."
         : "Save your shortlist and finish in one tap.",
-      mascotMsg: hasSession ? "Let's go!" : "Almost there!",
+      mascotMsg: hasSession ? `Welcome back${s.full_name ? ", " + s.full_name.trim().split(" ")[0] : ""}. One tap to finish.` : !email && !password ? "Last step! Save your shortlist." : !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) ? "Real email please — no funny business." : password.length < 6 ? "6 characters minimum — keep it safe." : "Smashing. Hit Finish and let's go.",
       ok: () => hasSession || (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) && password.length >= 6),
       body: hasSession ? (
         <div className="rounded-2xl border border-border bg-surface p-5 text-sm text-muted-foreground">
