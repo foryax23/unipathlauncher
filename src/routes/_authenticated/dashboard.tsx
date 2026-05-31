@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { getMyProfile } from "@/lib/profile.functions";
 import { PROGRAMMES, COURSES, CAMPUSES } from "@/components/marketing/data/courses";
 import { supabase } from "@/integrations/supabase/client";
-import { GraduationCap, MapPin, Sparkles, LogOut } from "lucide-react";
+import { GraduationCap, MapPin, Sparkles, LogOut, BookOpen, Phone } from "lucide-react";
 import { Logo } from "@/components/marketing/Logo";
 import { VerifyEmailBanner } from "@/components/dashboard/VerifyEmailBanner";
 
@@ -53,7 +53,7 @@ function Dashboard() {
 
   if (!profile) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen hero-warm flex items-center justify-center">
         <p className="text-muted-foreground">Loading…</p>
       </div>
     );
@@ -61,10 +61,11 @@ function Dashboard() {
 
   const matches = rankMatches(profile);
   const subjectTitle = COURSES.find((c) => c.id === profile.subject)?.title ?? "any subject";
+  const firstName = profile.full_name?.trim().split(" ")[0] ?? "there";
 
   return (
-    <div className="min-h-screen bg-background safe-top">
-      <header className="border-b border-border bg-surface/80 backdrop-blur">
+    <div className="min-h-screen hero-warm safe-top">
+      <header className="glass border-b border-border/50">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
           <Link to="/"><Logo /></Link>
           <button
@@ -73,7 +74,7 @@ function Dashboard() {
               await supabase.auth.signOut();
               navigate({ to: "/" });
             }}
-            className="tap inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+            className="tap inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent/40 transition"
           >
             <LogOut className="size-4" /> Sign out
           </button>
@@ -82,80 +83,126 @@ function Dashboard() {
 
       <main className="mx-auto max-w-5xl px-4 py-10 pb-24">
         {email && (
-          <VerifyEmailBanner email={email} verifiedAt={profile.email_verified_at} />
+          <div className="mb-6">
+            <VerifyEmailBanner email={email} verifiedAt={profile.email_verified_at} />
+          </div>
         )}
-        <div className="rounded-3xl aurora glass-strong p-6 sm:p-10">
+
+        {/* Hero */}
+        <section className="glass-strong rounded-3xl p-7 sm:p-10 shadow-xl">
           <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
             Your personalised shortlist
           </p>
-          <h1 className="mt-3 text-display-lg text-foreground">
-            Hi {profile.full_name?.split(" ")[0] ?? "there"} -
-            <br />
-            here are the best {subjectTitle.toLowerCase()} routes for you.
+          <h1 className="mt-4 font-display text-display-lg text-foreground leading-tight">
+            Hi{" "}
+            <span className="font-chalk text-gold/90 align-baseline">
+              {firstName}
+            </span>
+            <svg viewBox="0 0 200 12" className="block h-3 w-48 text-gold/60 -mt-1">
+              <path d="M4 7 C 40 2, 80 11, 120 5 S 190 7, 196 5" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+            <span className="block mt-2">
+              here are the best {subjectTitle.toLowerCase()} routes for you.
+            </span>
           </h1>
-          <p className="mt-3 text-muted-foreground">
+          <p className="mt-4 text-muted-foreground">
             Based on {profile.study_level} level near {profile.city ?? "your location"}.
           </p>
           <div className="mt-6 flex flex-wrap gap-2">
             <Link
               to="/onboarding"
-              className="tap rounded-full border border-border bg-surface px-4 py-2 text-sm hover:bg-accent"
+              className="tap rounded-full border border-border bg-surface/60 px-5 py-2.5 text-sm hover:bg-accent transition"
             >
               Edit preferences
             </Link>
             <Link
               to="/courses"
-              className="tap rounded-full bg-primary px-4 py-2 text-sm text-primary-foreground hover:opacity-90"
+              className="tap rounded-full bg-gold px-5 py-2.5 text-sm font-medium text-gold-foreground hover:opacity-90 transition shadow-lg"
             >
               Browse full catalogue
             </Link>
           </div>
+        </section>
+
+        {/* Snapshot chips */}
+        <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <SnapshotChip icon={<BookOpen className="size-4" />} label="Subject" value={subjectTitle} />
+          <SnapshotChip icon={<GraduationCap className="size-4" />} label="Level" value={profile.study_level ?? "—"} />
+          <SnapshotChip icon={<MapPin className="size-4" />} label="Near" value={profile.city ?? "—"} />
         </div>
 
-        <h2 className="mt-12 text-display-md">Top matches</h2>
+        {/* Top matches */}
+        <div className="mt-12">
+          <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Top matches</p>
+          <h2 className="mt-2 font-display text-display-md">Hand-picked for you</h2>
+        </div>
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           {matches.map((m) => (
             <article
               key={m.id}
-              className="group rounded-3xl border border-border bg-surface p-6 transition hover:-translate-y-0.5 hover:shadow-lg"
+              className="group glass rounded-3xl p-6 transition hover:-translate-y-0.5 hover:shadow-xl"
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="text-xs uppercase tracking-widest text-muted-foreground">
                     {m.level} · {m.partner}
                   </p>
-                  <h3 className="mt-2 text-xl font-display tracking-tight text-foreground">
+                  <h3 className="mt-2 font-display text-xl tracking-tight text-foreground">
                     {m.name}
                   </h3>
                 </div>
-                <span className="rounded-full bg-gold/20 px-2.5 py-1 text-xs font-medium text-gold-foreground dark:text-gold">
+                <span className="shrink-0 rounded-full bg-gold/20 px-2.5 py-1 text-xs font-medium text-gold-foreground dark:text-gold">
                   {Math.round(m.score)}% match
                 </span>
               </div>
-              <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                <span className="inline-flex items-center gap-1"><MapPin className="size-3.5" />{m.cities.join(", ")}</span>
-                <span className="inline-flex items-center gap-1"><GraduationCap className="size-3.5" />{m.duration}</span>
+              <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-muted-foreground">
+                <span className="inline-flex items-center gap-1"><MapPin className="size-3.5 text-gold" />{m.cities.join(", ")}</span>
+                <span className="text-border">·</span>
+                <span className="inline-flex items-center gap-1"><GraduationCap className="size-3.5 text-gold" />{m.duration}</span>
+                <span className="text-border">·</span>
                 <span>{m.modes.join(" · ")}</span>
                 {m.km !== null && (
-                  <span className="font-mono">{Math.round(m.km)} km away</span>
+                  <>
+                    <span className="text-border">·</span>
+                    <span className="font-mono">{Math.round(m.km)} km away</span>
+                  </>
                 )}
               </div>
             </article>
           ))}
         </div>
 
-        <div className="mt-12 rounded-3xl border border-border bg-surface p-6 sm:p-8">
-          <div className="flex items-start gap-3">
-            <Sparkles className="mt-1 size-5 text-gold" />
-            <div>
-              <h3 className="text-lg font-display tracking-tight">Talk to an adviser</h3>
+        {/* Adviser card */}
+        <section className="mt-12 glass-strong rounded-3xl p-6 sm:p-8 shadow-lg">
+          <div className="flex items-start gap-4">
+            <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-2xl bg-gold/20 text-gold">
+              <Sparkles className="size-5" />
+            </span>
+            <div className="flex-1">
+              <h3 className="font-display text-xl tracking-tight">Talk to an adviser</h3>
               <p className="mt-1 text-sm text-muted-foreground">
                 A Bridge Gateway adviser will call within 24 hours to walk you through your matches and the application process.
               </p>
+              <div className="mt-4 inline-flex items-center gap-2 text-xs text-muted-foreground">
+                <Phone className="size-3.5 text-gold" />
+                We'll reach out on the number you shared during sign-up.
+              </div>
             </div>
           </div>
-        </div>
+        </section>
       </main>
+    </div>
+  );
+}
+
+function SnapshotChip({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+  return (
+    <div className="glass rounded-2xl px-4 py-3 flex items-center gap-3">
+      <span className="inline-flex size-8 items-center justify-center rounded-xl bg-gold/15 text-gold">{icon}</span>
+      <div className="min-w-0">
+        <p className="text-[10px] uppercase tracking-widest text-muted-foreground">{label}</p>
+        <p className="truncate text-sm font-medium text-foreground">{value}</p>
+      </div>
     </div>
   );
 }

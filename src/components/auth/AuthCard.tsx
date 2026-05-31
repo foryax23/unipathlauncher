@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
@@ -29,6 +29,27 @@ export function AuthCard({ mode }: { mode: Mode }) {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Self-correct if the user is (or becomes) authenticated — e.g. after the
+  // Google OAuth round-trip lands back on /login with a session in storage.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.auth.getUser();
+      if (!cancelled && data.user) navigate({ to: dest, replace: true });
+    })();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (cancelled) return;
+      if ((event === "SIGNED_IN" || event === "TOKEN_REFRESHED") && session) {
+        navigate({ to: dest, replace: true });
+      }
+    });
+    return () => {
+      cancelled = true;
+      subscription.unsubscribe();
+    };
+  }, [dest, navigate]);
+
 
   const handleEmail = async (e: React.FormEvent) => {
     e.preventDefault();
