@@ -1,4 +1,12 @@
+import logoAsset from "@/assets/bgc-logo.png.asset.json";
+
 type Variant = "full" | "mark" | "stacked";
+
+const SIZES: Record<Variant, number> = {
+  full: 36,
+  mark: 32,
+  stacked: 64,
+};
 
 export function Logo({
   className = "",
@@ -9,25 +17,18 @@ export function Logo({
   variant?: Variant;
   showTagline?: boolean;
 }) {
+  const size = SIZES[variant];
   const Mark = (
-    <svg
-      width="36"
-      height="20"
-      viewBox="0 0 36 20"
-      aria-hidden="true"
-      className="text-foreground"
-    >
-      {/* Bridge arc — the brand mark */}
-      <path
-        d="M2 16 Q 18 2 34 16"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="3"
-        strokeLinecap="round"
-      />
-      {/* Gold gateway pillar accent */}
-      <circle cx="18" cy="6.5" r="1.4" fill="var(--gold)" />
-    </svg>
+    <img
+      src={logoAsset.url}
+      alt="Bridge Gateway Consulting"
+      width={size}
+      height={size}
+      loading="eager"
+      decoding="async"
+      className="shrink-0 drop-shadow-[0_1px_2px_rgba(0,0,0,0.25)]"
+      style={{ width: size, height: size }}
+    />
   );
 
   if (variant === "mark") {
@@ -36,7 +37,7 @@ export function Logo({
 
   if (variant === "stacked") {
     return (
-      <span className={`inline-flex flex-col items-center gap-1 ${className}`}>
+      <span className={`inline-flex flex-col items-center gap-2 ${className}`}>
         {Mark}
         <span className="font-serif text-lg leading-none tracking-tight text-foreground">
           Bridge Gateway
