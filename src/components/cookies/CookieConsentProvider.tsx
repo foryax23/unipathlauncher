@@ -99,3 +99,7 @@ export function useCookieConsent() {
   if (!ctx) throw new Error("useCookieConsent must be used within CookieConsentProvider");
   return ctx;
 }
+
+export function useOptionalCookieConsent() {
+  return useContext(CookieCtx);
+}

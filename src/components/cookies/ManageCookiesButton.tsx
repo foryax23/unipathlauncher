@@ -1,11 +1,14 @@
-import { useCookieConsent } from "./CookieConsentProvider";
+import { useOptionalCookieConsent } from "./CookieConsentProvider";
 
 export function ManageCookiesButton({ className = "" }: { className?: string }) {
-  const { openPreferences } = useCookieConsent();
+  const cookieConsent = useOptionalCookieConsent();
+
+  if (!cookieConsent) return null;
+
   return (
     <button
       type="button"
-      onClick={openPreferences}
+      onClick={cookieConsent.openPreferences}
       className={`hover:text-foreground ${className}`}
     >
       Manage cookies
