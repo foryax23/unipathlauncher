@@ -2,8 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Header } from "@/components/marketing/Header";
 import { Footer } from "@/components/marketing/Footer";
 import { COMPANY } from "@/components/marketing/data/company";
-import { ManageCookiesButton } from "@/components/cookies/ManageCookiesButton";
+import { useCookieConsent } from "@/components/cookies/CookieConsentProvider";
 import { Button } from "@/components/ui/button";
+
 
 export const Route = createFileRoute("/cookies")({
   head: () => ({
