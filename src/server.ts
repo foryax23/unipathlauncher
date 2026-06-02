@@ -66,12 +66,39 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
   return brandedErrorResponse();
 }
 
+function applyCacheHeaders(request: Request, response: Response): Response {
+  // Don't touch error responses or already-set cache headers.
+  if (response.status >= 400) return response;
+  if (response.headers.has("cache-control")) return response;
+
+  const url = new URL(request.url);
+  const path = url.pathname;
+  const isHashedAsset =
+    path.startsWith("/_build/") ||
+    path.startsWith("/assets/") ||
+    /\.(?:js|css|woff2?|ttf|otf|svg|png|jpg|jpeg|webp|avif|ico)$/i.test(path);
+
+  const headers = new Headers(response.headers);
+  if (isHashedAsset) {
+    headers.set("cache-control", "public, max-age=31536000, immutable");
+  } else {
+    // HTML / server function responses: revalidate every load so updates ship immediately.
+    headers.set("cache-control", "public, max-age=0, must-revalidate");
+  }
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
-      return await normalizeCatastrophicSsrResponse(response);
+      const normalized = await normalizeCatastrophicSsrResponse(response);
+      return applyCacheHeaders(request, normalized);
     } catch (error) {
       console.error(error);
       return brandedErrorResponse();
