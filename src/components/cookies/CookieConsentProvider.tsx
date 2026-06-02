@@ -67,18 +67,12 @@ export function CookieConsentProvider({ children }: { children: React.ReactNode 
     setConsent(next);
   }, []);
 
-  const value = useMemo<Ctx>(() => {
-    // Respect Global Privacy Control as a default-off signal
-    const gpc =
-      typeof navigator !== "undefined" &&
-      // @ts-expect-error – non-standard but widely supported
-      navigator.globalPrivacyControl === true;
-
-    return {
+  const value = useMemo<Ctx>(
+    () => ({
       consent,
       ready,
       preferencesOpen,
-      acceptAll: () => persist(!gpc ? true : false, !gpc ? true : false) || persist(true, true),
+      acceptAll: () => persist(true, true),
       rejectAll: () => persist(false, false),
       save: ({ analytics, marketing }) => {
         persist(analytics, marketing);
@@ -92,15 +86,13 @@ export function CookieConsentProvider({ children }: { children: React.ReactNode 
         } catch {}
         setConsent(null);
       },
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [consent, ready, preferencesOpen, persist]);
+    }),
+    [consent, ready, preferencesOpen, persist],
+  );
 
-  // Override acceptAll cleanly (the ternary above was a guard pattern; simplify)
-  const fixed: Ctx = { ...value, acceptAll: () => persist(true, true) };
-
-  return <CookieCtx.Provider value={fixed}>{children}</CookieCtx.Provider>;
+  return <CookieCtx.Provider value={value}>{children}</CookieCtx.Provider>;
 }
+
 
 export function useCookieConsent() {
   const ctx = useContext(CookieCtx);
