@@ -21,6 +21,8 @@ export const Route = createFileRoute("/cookies")({
 });
 
 function CookiesPage() {
+  const { openPreferences } = useCookieConsent();
+
   return (
     <>
       <Header />
@@ -41,10 +43,11 @@ function CookiesPage() {
             Strictly-necessary cookies cannot be switched off as the site won't work without them.
           </p>
           <div className="mt-4 not-prose">
-            <Button asChild className="bg-gold text-gold-foreground hover:bg-gold/90">
-              <span><ManageCookiesButton className="text-current" /></span>
+            <Button onClick={openPreferences} className="bg-gold text-gold-foreground hover:bg-gold/90">
+              Manage cookie preferences
             </Button>
           </div>
+
 
           <h2>Categories we use</h2>
           <ul>
