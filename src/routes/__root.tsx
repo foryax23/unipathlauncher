@@ -9,8 +9,12 @@ import {
 } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { CookieConsentProvider } from "@/components/cookies/CookieConsentProvider";
+import { CookieBanner } from "@/components/cookies/CookieBanner";
+import { COMPANY } from "@/components/marketing/data/company";
 
 import appCss from "../styles.css?url";
+
 
 function NotFoundComponent() {
   return (
@@ -104,11 +108,23 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         children: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "Organization",
-          name: "Bridge Gateway Consulting",
-          url: "https://bridgegatewayconsulting.com",
+          name: COMPANY.shortName,
+          legalName: COMPANY.legalName,
+          url: COMPANY.url,
+          email: COMPANY.email,
+          telephone: COMPANY.phones,
+          address: {
+            "@type": "PostalAddress",
+            streetAddress: `${COMPANY.address.line1}, ${COMPANY.address.line2}`,
+            addressLocality: COMPANY.address.city,
+            postalCode: COMPANY.address.postcode,
+            addressCountry: COMPANY.address.countryCode,
+          },
+          identifier: `Company No. ${COMPANY.companyNumber}`,
           description:
             "Education consultancy helping students apply to UK universities with expert, impartial guidance.",
         }),
+
       },
       {
         type: "application/ld+json",
@@ -166,7 +182,11 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
+      <CookieConsentProvider>
+        <Outlet />
+        <CookieBanner />
+      </CookieConsentProvider>
     </QueryClientProvider>
   );
 }
+
