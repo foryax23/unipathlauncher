@@ -9,9 +9,10 @@ import {
 } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { CookieConsentProvider } from "@/components/cookies/CookieConsentProvider";
+import { CookieConsentProvider, useOptionalCookieConsent } from "@/components/cookies/CookieConsentProvider";
 import { CookieBanner } from "@/components/cookies/CookieBanner";
 import { COMPANY } from "@/components/marketing/data/company";
+import { startQueryPersistence, stopQueryPersistence } from "@/lib/cache/persistQueryClient";
 
 import appCss from "../styles.css?url";
 
@@ -184,10 +185,24 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <CookieConsentProvider>
+        <QueryCachePersistence />
         <Outlet />
         <CookieBanner />
       </CookieConsentProvider>
     </QueryClientProvider>
   );
+}
+
+function QueryCachePersistence() {
+  const { queryClient } = Route.useRouteContext();
+  const consent = useOptionalCookieConsent();
+  useEffect(() => {
+    if (consent?.consent?.preferences) {
+      startQueryPersistence(queryClient);
+    } else {
+      stopQueryPersistence();
+    }
+  }, [consent?.consent?.preferences, queryClient]);
+  return null;
 }
 

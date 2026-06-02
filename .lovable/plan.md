@@ -1,67 +1,89 @@
 
-## 1. Company information
+# Plan: Next-Gen Cookies, Consent & Cache Layer
 
-Add Bridge Gateway Consulting LTD details across the site.
+The site already has a basic banner + provider + preferences dialog (necessary / analytics / marketing). This plan upgrades it into the kind of consent + caching system you see on major platforms (GDPR/ePrivacy-compliant, granular, persisted per device, and wired into real loading behavior).
 
-**`src/components/marketing/Footer.tsx`** — restructure into a 4-column layout:
-- **Brand column**: Logo, tagline, "Company No. 15707621", registered address (167-169 Great Portland Street, 5th Floor, London, W1W 5PF, UK).
-- **Contact column**: email `info@bridgegatewayconsulting.com` (mailto), all four phone numbers as `tel:` links:
-  - +44 7448 921 873
-  - +44 7593 855 452
-  - +44 7448 426 168
-  - +359 886 499 368
-- **Legal column**: links to `/privacy`, `/terms`, `/cookies`, "Manage cookies" button (re-opens consent modal).
-- **Social column**: existing IG/TikTok/LinkedIn icons.
-- Bottom strip: copyright + "Bridge Gateway Consulting Ltd is registered in England & Wales, company number 15707621."
+## Goals
 
-**Update `src/components/marketing/data/`** — add a `company.ts` exporting a single source of truth (name, number, address, email, phones) so Footer, Contact page, and JSON-LD all share it. Update root `Organization` JSON-LD in `src/routes/__root.tsx` to include `address`, `email`, `telephone`, `legalName`.
+1. First-visit blocking banner with clear Accept / Reject / Customize actions.
+2. Granular categories saved per device, versioned, and re-prompted when policy changes.
+3. Scripts/integrations only load **after** matching consent (Google Consent Mode v2 ready).
+4. App data caching (TanStack Query) tuned so the site feels instant on repeat visits.
+5. Service worker + HTTP-cache friendly static asset strategy for offline-friendly reloads.
 
-## 2. Legal pages
+## 1. Consent model (extend current provider)
 
-Create three new routes with proper `head()` meta + canonical:
-- **`src/routes/privacy.tsx`** — Privacy Policy (GDPR/UK DPA 2018: data we collect, lawful basis, retention, rights, contact for DPO requests).
-- **`src/routes/terms.tsx`** — Terms of Service.
-- **`src/routes/cookies.tsx`** — Cookie Policy listing each cookie/category (Necessary, Analytics, Marketing) with purpose, provider, duration; plus a "Manage cookie preferences" button that re-opens the consent modal.
+Categories:
+- `necessary` (always on) — session, auth, CSRF, consent record itself.
+- `preferences` — language, theme, dismissed banners.
+- `analytics` — GA4 / Plausible / Vercel Analytics.
+- `marketing` — Meta Pixel, LinkedIn Insight, Google Ads.
 
-All three reuse `Header` + `Footer` and a shared `<LegalShell>` wrapper for prose styling.
+Storage:
+- Keep `localStorage` key `bgc-cookie-consent-v1`, add `version` bump → `v2` with new fields.
+- Mirror a minimal record into a first-party cookie (`bgc_consent`, 180 days, `SameSite=Lax`, `Secure`) so SSR can read it.
+- Auto re-prompt when `version` changes or record is >12 months old.
 
-## 3. Cookie consent system (Cookiebot/OneTrust-style)
+## 2. Banner & preferences UX (next-gen)
 
-### Components (`src/components/cookies/`)
-- **`CookieConsentProvider.tsx`** — React context that:
-  - Reads/writes consent to `localStorage` key `bgc-cookie-consent-v1` (JSON: `{ necessary: true, analytics: bool, marketing: bool, timestamp, version }`).
-  - Versioned — bumping version re-prompts everyone (required when policy changes).
-  - Exposes `useCookieConsent()` → `{ consent, accept, reject, save, openPreferences }`.
-  - Fires a `window` event `cookieconsentchange` so analytics/marketing scripts can react.
-- **`CookieBanner.tsx`** — bottom-anchored slide-up banner (glass style matching site):
-  - Short copy: "We use cookies to improve your experience, analyse traffic, and personalise content. Read our [Cookie Policy]."
-  - Buttons: **Reject all**, **Customise**, **Accept all** (primary gold).
-  - Hidden once a consent decision exists.
-- **`CookiePreferencesDialog.tsx`** — modal (shadcn `Dialog`) with four toggle rows:
-  - **Strictly necessary** — always on, disabled toggle (session, CSRF, consent state).
-  - **Analytics** — optional (e.g. plausible/GA placeholders).
-  - **Marketing** — optional.
-  - Each row: name, description, list of cookies/providers, expandable details.
-  - Footer: **Reject all**, **Save preferences**, **Accept all**.
-- **`ManageCookiesButton.tsx`** — small text button used in Footer + Cookie Policy page to re-open the dialog.
+- Bottom-anchored, mobile-first card (sheet on mobile, floating card on desktop).
+- Three primary actions on first view: **Accept all**, **Reject all**, **Customize** (equal visual weight — required by EU law).
+- Customize opens the existing dialog with per-category toggles + plain-language descriptions + a "What we store" expandable list per category.
+- Persistent floating "Cookie settings" button (already have `ManageCookiesButton`) in the footer to re-open preferences anytime.
+- Link to `/cookies`, `/privacy`, `/terms` from the banner.
 
-### Wiring
-- Wrap app in `__root.tsx` `RootComponent` with `<CookieConsentProvider>`, render `<CookieBanner />` once at the root so it appears on every page.
-- Gate any future analytics/marketing scripts on `consent.analytics === true` / `consent.marketing === true` via the `cookieconsentchange` event — for now we ship the framework with no third-party scripts loaded, but the hook points are ready.
-- Respect Do-Not-Track / GPC: if `navigator.globalPrivacyControl === true`, default analytics + marketing to `false` and still show the banner.
-- Accessibility: focus-trapped dialog, ESC closes preferences (but not the banner), labelled toggles, banner has `role="dialog" aria-label="Cookie consent"`.
+## 3. Consent-gated script loader
 
-## Files touched
+New `src/lib/consent/loadScripts.ts` that subscribes to `cookieconsentchange` and:
+- Pushes Google Consent Mode v2 defaults on app boot (`ad_storage`, `analytics_storage`, `ad_user_data`, `ad_personalization` = `denied`).
+- On consent update calls `gtag('consent','update', …)` with the resolved values.
+- Lazy-injects analytics/marketing tags only when their category is granted; removes them and clears their cookies on revoke.
 
-- created: `src/components/marketing/data/company.ts`
-- created: `src/components/cookies/CookieConsentProvider.tsx`
-- created: `src/components/cookies/CookieBanner.tsx`
-- created: `src/components/cookies/CookiePreferencesDialog.tsx`
-- created: `src/components/cookies/ManageCookiesButton.tsx`
-- created: `src/routes/privacy.tsx`
-- created: `src/routes/terms.tsx`
-- created: `src/routes/cookies.tsx`
-- edited: `src/components/marketing/Footer.tsx`
-- edited: `src/routes/__root.tsx` (provider + banner + updated Organization JSON-LD)
+Integrations are stubbed behind env vars so nothing loads until IDs are configured:
+- `VITE_GA_MEASUREMENT_ID`
+- `VITE_META_PIXEL_ID`
+- `VITE_LINKEDIN_PARTNER_ID`
 
-No backend, schema, or auth changes — purely frontend + static content.
+## 4. App data caching (TanStack Query)
+
+In `src/router.tsx` `getRouter` per-request `QueryClient`:
+- `defaultOptions.queries`: `staleTime: 60_000`, `gcTime: 5 * 60_000`, `refetchOnWindowFocus: false`, `retry: 1`.
+- Add `@tanstack/query-sync-storage-persister` + `persistQueryClient` on the client only, gated on `preferences` consent, key `bgc-rq-cache-v1`, max age 24h. This is the "site feels instant on repeat visits" piece.
+
+## 5. Static asset & SSR caching
+
+- Add long-lived `Cache-Control: public, max-age=31536000, immutable` for hashed Vite assets via the worker's response headers (in `src/server.ts` after the normalizer).
+- HTML responses: `Cache-Control: public, max-age=0, must-revalidate` so updates are picked up immediately.
+- Add a tiny service worker (`public/sw.js`) using a stale-while-revalidate strategy for `/_build/assets/*` and fonts. Registered only after `preferences` consent.
+
+## 6. Footer / legal touch-ups
+
+- Footer already lists `/cookies`, `/privacy`, `/terms` and the company block. Add a "Manage cookies" link next to them that calls `openPreferences()`.
+- `/cookies` page gets a generated table of all cookies we set, sourced from a single `src/lib/consent/registry.ts` (id, purpose, category, duration, provider) so legal copy and runtime gating never drift apart.
+
+## 7. Files
+
+New:
+- `src/lib/consent/registry.ts` — single source of truth for cookies/scripts.
+- `src/lib/consent/loadScripts.ts` — Consent Mode v2 + lazy tag injection.
+- `src/lib/consent/cookie.ts` — read/write first-party `bgc_consent` cookie.
+- `src/lib/cache/persistQueryClient.ts` — RQ persistence wiring.
+- `public/sw.js` + `src/lib/cache/registerSW.ts`.
+
+Edited:
+- `src/components/cookies/CookieConsentProvider.tsx` — v2 schema, cookie mirror, expiry check, `preferences` category.
+- `src/components/cookies/CookieBanner.tsx` — equal-weight three buttons, mobile sheet.
+- `src/components/cookies/CookiePreferencesDialog.tsx` — add `preferences` toggle + per-category cookie tables.
+- `src/components/marketing/Footer.tsx` — "Manage cookies" link.
+- `src/router.tsx` — Query defaults.
+- `src/routes/__root.tsx` — boot Consent Mode defaults + script loader + SW register.
+- `src/routes/cookies.tsx` — render registry table.
+- `src/server.ts` — asset/HTML cache headers.
+
+## Out of scope (ask before adding)
+
+- Actually wiring real GA4 / Meta / LinkedIn IDs (need the IDs from you).
+- Server-side consent log in the database for audit trail.
+- Geo-gating (only show banner in EU/UK).
+
+Confirm and I'll implement.
