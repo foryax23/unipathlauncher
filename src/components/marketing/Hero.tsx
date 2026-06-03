@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { HeroMatchCard } from "./HeroMatchCard";
 import { LiveOffersBand } from "./LiveOffersBand";
 import heroVideo from "@/assets/hero-bg.mp4.asset.json";
