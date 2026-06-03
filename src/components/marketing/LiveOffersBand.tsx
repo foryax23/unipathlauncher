@@ -40,18 +40,7 @@ export function LiveOffersBand() {
   const partners = [...PARTNERS, ...PARTNERS];
 
   return (
-    <div className="relative mt-16 space-y-5 motion-reduce:[&_*]:!animate-none">
-      {/* Eyebrow */}
-      <div className="flex items-center justify-center gap-2.5">
-        <span className="relative flex h-2 w-2">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-70" />
-          <span className="relative inline-flex h-2 w-2 rounded-full bg-white" />
-        </span>
-        <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.28em] text-white/90">
-          Live · Recent offers
-        </p>
-      </div>
-
+    <div className="relative mt-16 space-y-5 motion-reduce:[&_*]:!animate-none mx-[calc(50%-50vw)] w-screen sm:mx-0 sm:w-auto">
       {/* Row 1: offer pills */}
       <div
         className="group overflow-hidden"
@@ -62,11 +51,14 @@ export function LiveOffersBand() {
             "linear-gradient(to right, transparent, black 6%, black 94%, transparent)",
         }}
       >
-        <div className="flex w-max gap-3 marquee-track group-hover:[animation-play-state:paused]">
+        <div
+          className="flex w-max gap-3 marquee-track group-hover:[animation-play-state:paused] will-change-transform"
+          style={{ transform: "translateZ(0)" }}
+        >
           {offers.map((o, i) => (
             <div
               key={i}
-              className="flex shrink-0 items-center gap-3 rounded-full bg-white/15 px-5 py-2.5 text-sm text-white ring-1 ring-white/25 backdrop-blur-md"
+              className="flex shrink-0 items-center gap-3 rounded-full bg-white/15 px-5 py-2.5 text-sm text-white ring-1 ring-white/25 sm:backdrop-blur-md"
             >
               <span className="relative flex h-2 w-2 shrink-0">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-300 opacity-80" />
@@ -92,7 +84,10 @@ export function LiveOffersBand() {
             "linear-gradient(to right, transparent, black 8%, black 92%, transparent)",
         }}
       >
-        <div className="flex w-max items-center gap-10 marquee-track-reverse sm:gap-14">
+        <div
+          className="flex w-max items-center gap-10 marquee-track-reverse sm:gap-14 will-change-transform"
+          style={{ transform: "translateZ(0)" }}
+        >
           {partners.map((p, i) => (
             <img
               key={i}
