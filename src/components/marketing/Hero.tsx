@@ -97,18 +97,15 @@ export function Hero() {
             <span className="h-px w-8 bg-white/70" />
           </p>
           <h1 className="text-display-xl hero-headline-shadow">
-            Apply with the UK's <br className="hidden sm:block" />
+            <span className="block">Apply with the UK's</span>
             <span
-              className="relative inline-block align-baseline italic"
+              className="mt-1 block min-h-[1.2em] italic"
               onMouseEnter={() => setPaused(true)}
               onMouseLeave={() => setPaused(false)}
             >
-              <span className="invisible whitespace-nowrap" aria-hidden>
-                {LONGEST}
-              </span>
               <span
                 aria-live="polite"
-                className="absolute inset-0 whitespace-nowrap transition-colors duration-500"
+                className="break-words transition-colors duration-500"
                 style={{ color: active.color }}
               >
                 <span className="motion-reduce:hidden">{text}</span>
