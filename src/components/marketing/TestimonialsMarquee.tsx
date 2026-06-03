@@ -4,7 +4,7 @@ export function TestimonialsMarquee() {
   // duplicate for seamless loop
   const items = [...TESTIMONIALS, ...TESTIMONIALS];
   return (
-    <section id="stories" className="border-t border-border bg-background">
+    <section id="stories" className="bg-background">
       <div className="mx-auto w-full max-w-6xl px-4 py-20 sm:px-6 lg:py-28">
         <div className="mb-12 max-w-2xl">
           <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-coral">
