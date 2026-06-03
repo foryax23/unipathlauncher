@@ -11,7 +11,15 @@ const ROTATING_PHRASES: { text: string; color: string }[] = [
   { text: "Russell Group Institutions", color: "var(--coral)" },
   { text: "Your Future Career", color: "#86efac" },
   { text: "Scholarships & Funding", color: "var(--amber)" },
+  { text: "Trusted UK Advisers", color: "#fca5a5" },
+  { text: "Foundation & Pathway Routes", color: "#7dd3fc" },
+  { text: "Postgraduate Programmes", color: "var(--gold)" },
+  { text: "Student Visa Support", color: "#86efac" },
+  { text: "A Free Course Match", color: "var(--coral)" },
+  { text: "Personalised Shortlists", color: "var(--amber)" },
+  { text: "Expert Application Help", color: "#c4b5fd" },
 ];
+
 
 const LONGEST = ROTATING_PHRASES.reduce((a, b) =>
   a.text.length >= b.text.length ? a : b,
