@@ -78,30 +78,34 @@ export function Hero() {
             UK's trusted student platform
             <span className="h-px w-8 bg-white/70" />
           </p>
-          <h1 className="text-display-xl">
+          <h1 className="text-display-xl hero-headline-shadow">
             Apply with the UK's <br className="hidden sm:block" />
             <span
               className="relative inline-block align-baseline italic"
-              style={{ minHeight: "1.05em" }}
               onMouseEnter={() => setPaused(true)}
               onMouseLeave={() => setPaused(false)}
             >
               <span className="invisible whitespace-nowrap" aria-hidden>
-                {ROTATING_PHRASES.reduce((a, b) => (a.length >= b.length ? a : b))}
+                {LONGEST}
               </span>
-              {ROTATING_PHRASES.map((p, i) => (
+              <span
+                aria-live="polite"
+                className="absolute inset-0 whitespace-nowrap transition-colors duration-500"
+                style={{ color: active.color }}
+              >
+                <span className="motion-reduce:hidden">{text}</span>
+                <span className="hidden motion-reduce:inline">{active.text}</span>
                 <span
-                  key={p}
-                  aria-hidden={i !== idx}
-                  className="absolute inset-0 whitespace-nowrap text-amber transition-all duration-500 ease-out motion-reduce:transition-opacity"
+                  aria-hidden
+                  className="ml-0.5 inline-block w-[0.06em] align-baseline motion-reduce:hidden"
                   style={{
-                    opacity: i === idx ? 1 : 0,
-                    transform: i === idx ? "translateY(0)" : "translateY(0.35em)",
+                    height: "0.95em",
+                    background: "currentColor",
+                    animation: "caret-blink 1s steps(2,start) infinite",
+                    transform: "translateY(0.1em)",
                   }}
-                >
-                  {p}
-                </span>
-              ))}
+                />
+              </span>
             </span>
           </h1>
           <p className="mx-auto mt-6 max-w-xl text-base text-white/90 sm:text-lg">
