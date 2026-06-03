@@ -1,37 +1,34 @@
 ## Goal
-Replace the random `picsum.photos` placeholders across the homepage with purposeful, on-brand UK student imagery. The current photos (Golden Gate Bridge, rainy city window, Scottish coastal cottages) are irrelevant to "UK universities", "scholarships", and "expert advisers" and weaken trust.
+The 5 picsum placeholders in the **"How we help"** section (`HowWeHelp.tsx`, the five-step product walkthrough) are off-brand and static. Replace them with bespoke, on-theme images and wrap each in a cinematic media frame with subtle motion so the section reads like an editorial product film, not a stock-photo grid.
 
-## Sections affected
+## What I'll generate (5 images, 3:2, standard quality)
+1. **Personalised recommendations** → moody hero shot of a sleek dashboard mockup on a laptop showing a UK universities match list, soft coral/gold rim light.
+2. **Research checklist** → top-down editorial shot of a notebook + phone showing a checklist, warm desk lamp, university brochures.
+3. **Course comparison** → cinematic close-up of a side-by-side comparison table on a tablet, finger about to tap, shallow depth of field.
+4. **Parent / guardian access** → warm candid shot of a parent and student reviewing a laptop together on a sofa, golden window light.
+5. **Application & visa support** → editorial flat-lay of UK passport, UCAS-style application papers, laptop with deadline tracker, coffee.
 
-### 1. WhyUs cards (`src/components/marketing/WhyUs.tsx`) — the three cards in the screenshot
-- **Direct access to 40+ UK universities** → photo of a recognisable UK university campus / quad (e.g. Oxbridge-style spires, students walking under arches).
-- **Save more with scholarships** → photo of a smiling student holding an acceptance letter / graduation cap with coins/notes motif, or a student celebrating with a laptop.
-- **Expert UK education advisers** → photo of a warm 1:1 adviser meeting (adviser + student at a desk, laptop open, UK setting).
+All uploaded via `lovable-assets create` → `src/assets/help-step-0[1-5].jpg.asset.json`.
 
-### 2. HowItWorks steps (`src/components/marketing/HowItWorks.tsx`)
-- **01 Tell us your interests** → student filling out a form on a phone/laptop in a cozy study setup.
-- **02 We match you to universities** → adviser pointing at a UK university shortlist on a screen / map of UK with pins.
-- **03 Get expert guidance** → real adviser-student conversation, UK office feel (different angle from WhyUs card 3 so they don't repeat).
-
-## Approach
-- Generate 6 bespoke images with `imagegen--generate_image` (model `standard`, 4:3 aspect ≈ 1024×768).
-- Upload each to the CDN via `lovable-assets create` → `.asset.json` pointers in `src/assets/`.
-- Import the pointers in the two components and replace the `picsum.photos` URLs.
-- Keep alt text descriptive for accessibility/SEO; keep all existing layout, tokens, and animations untouched.
-
-## Out of scope
-- `DestinationsGrid` (still uses picsum but each card represents a UK region — separate pass if you want).
-- Hero, Testimonials, and any other section.
-- Copy changes — only the images swap.
+## Cinematic media frame (new component `CinematicMedia`)
+A reusable wrapper used inside each step:
+- **Outer**: existing `rounded-3xl border bg-surface shadow-xl` + the existing `bg-gradient-warm` blur halo behind.
+- **Ken-burns**: image gets `scale-[1.08]` baseline and animates to `scale-100` over ~14s on an infinite alternate loop (`@keyframes kenburns` added to `styles.css`). Disabled under `prefers-reduced-motion`.
+- **Reveal**: reuse `useReveal` so each frame fades up + the image fades in with a slight `clip-path` reveal from bottom.
+- **Scroll parallax-lite**: `IntersectionObserver` ratio → translates the image `-translate-y-[6%]` to `translate-y-[6%]` across the viewport (CSS variable, no libs). Subtle, not jumpy.
+- **Sheen sweep**: a one-time diagonal gradient sweep across the frame when it first enters view (`@keyframes sheen`, masked overlay), giving a "film leader" cinematic moment.
+- **Corner meta chip**: small mono `0X / 05` label top-left and a coral pulse dot top-right, matching the section's `font-mono · uppercase · tracking-[0.24em] · text-coral` rhythm.
+- **Bottom gradient vignette**: `bg-gradient-to-t from-background/40 via-transparent` for depth.
 
 ## Files touched
-- **new** `src/assets/why-universities.jpg.asset.json`
-- **new** `src/assets/why-scholarships.jpg.asset.json`
-- **new** `src/assets/why-advisers.jpg.asset.json`
-- **new** `src/assets/how-step-01.jpg.asset.json`
-- **new** `src/assets/how-step-02.jpg.asset.json`
-- **new** `src/assets/how-step-03.jpg.asset.json`
-- **edit** `src/components/marketing/WhyUs.tsx`
-- **edit** `src/components/marketing/HowItWorks.tsx`
+- **new** `src/assets/help-step-01.jpg.asset.json` … `help-step-05.jpg.asset.json`
+- **new** `src/components/marketing/CinematicMedia.tsx`
+- **edit** `src/components/marketing/HowWeHelp.tsx` — wire the 5 new images, render through `CinematicMedia`, attach the `0X / 05` index.
+- **edit** `src/styles.css` — add `@keyframes kenburns` + `@keyframes sheen` + a `@media (prefers-reduced-motion: reduce)` override.
 
-Confirm and I'll also swap the `DestinationsGrid` region photos in the same pass if you want.
+## Out of scope
+- `HowItWorks` (the 3-step section we just updated — already cinematic-enough, no changes).
+- Copy / bullet lists / section heading — unchanged.
+- New libraries — pure CSS + existing `useReveal` hook only.
+
+Approve and I'll generate the assets and ship it.
