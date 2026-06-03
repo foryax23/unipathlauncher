@@ -4,24 +4,48 @@ import { LiveOffersBand } from "./LiveOffersBand";
 import heroVideo from "@/assets/hero-bg.mp4.asset.json";
 import heroPoster from "@/assets/hero-bg-poster.jpg.asset.json";
 
-const ROTATING_PHRASES = [
-  "Leading Universities",
-  "Top Business Schools",
-  "World-Class Campuses",
-  "Russell Group Institutions",
-  "Your Future Career",
-  "Scholarships & Funding",
+const ROTATING_PHRASES: { text: string; color: string }[] = [
+  { text: "Leading Universities", color: "var(--amber)" },
+  { text: "Top Business Schools", color: "var(--gold)" },
+  { text: "World-Class Campuses", color: "#7dd3fc" },
+  { text: "Russell Group Institutions", color: "var(--coral)" },
+  { text: "Your Future Career", color: "#86efac" },
+  { text: "Scholarships & Funding", color: "var(--amber)" },
 ];
+
+const LONGEST = ROTATING_PHRASES.reduce((a, b) =>
+  a.text.length >= b.text.length ? a : b,
+).text;
+
+const TYPE_MS = 55;
+const DELETE_MS = 35;
+const HOLD_MS = 1600;
+const GAP_MS = 400;
 
 export function Hero() {
   const [idx, setIdx] = useState(0);
+  const [text, setText] = useState("");
   const [paused, setPaused] = useState(false);
 
   useEffect(() => {
     if (paused) return;
-    const id = setInterval(() => setIdx((i) => (i + 1) % ROTATING_PHRASES.length), 3500);
-    return () => clearInterval(id);
-  }, [paused]);
+    const current = ROTATING_PHRASES[idx].text;
+    let timeout: ReturnType<typeof setTimeout>;
+
+    if (text === current) {
+      timeout = setTimeout(() => setText(current.slice(0, -1)), HOLD_MS);
+    } else if (text.length < current.length && current.startsWith(text)) {
+      timeout = setTimeout(() => setText(current.slice(0, text.length + 1)), TYPE_MS);
+    } else if (text.length === 0) {
+      timeout = setTimeout(() => setIdx((i) => (i + 1) % ROTATING_PHRASES.length), GAP_MS);
+    } else {
+      timeout = setTimeout(() => setText(text.slice(0, -1)), DELETE_MS);
+    }
+    return () => clearTimeout(timeout);
+  }, [text, idx, paused]);
+
+  const active = ROTATING_PHRASES[idx];
+
 
   return (
     <section id="top" className="relative overflow-hidden">
