@@ -8,7 +8,7 @@ const ROTATING_PHRASES: { text: string; color: string }[] = [
   { text: "Leading Universities", color: "var(--amber)" },
   { text: "Top Business Schools", color: "var(--gold)" },
   { text: "World-Class Campuses", color: "#7dd3fc" },
-  { text: "Russell Group Institutions", color: "var(--coral)" },
+  { text: "Russell Group Unis", color: "var(--coral)" },
   { text: "Your Future Career", color: "#86efac" },
   { text: "Scholarships & Funding", color: "var(--amber)" },
   { text: "Trusted UK Advisers", color: "#fca5a5" },
@@ -97,18 +97,15 @@ export function Hero() {
             <span className="h-px w-8 bg-white/70" />
           </p>
           <h1 className="text-display-xl hero-headline-shadow">
-            Apply with the UK's <br className="hidden sm:block" />
+            <span className="block">Apply with the UK's</span>
             <span
-              className="relative inline-block align-baseline italic"
+              className="mt-1 block min-h-[1.2em] italic"
               onMouseEnter={() => setPaused(true)}
               onMouseLeave={() => setPaused(false)}
             >
-              <span className="invisible whitespace-nowrap" aria-hidden>
-                {LONGEST}
-              </span>
               <span
                 aria-live="polite"
-                className="absolute inset-0 whitespace-nowrap transition-colors duration-500"
+                className="break-words transition-colors duration-500"
                 style={{ color: active.color }}
               >
                 <span className="motion-reduce:hidden">{text}</span>
