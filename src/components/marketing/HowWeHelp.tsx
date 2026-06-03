@@ -45,8 +45,10 @@ const FEATURES = [
 
 export function HowWeHelp() {
   return (
-    <section id="how" className="border-t border-border bg-background">
-      <div className="mx-auto w-full max-w-6xl px-4 py-20 sm:px-6 lg:py-28">
+    <section id="how" className="relative bg-background">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-[var(--surface-warm)] to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-[var(--surface-muted)]" />
+      <div className="relative mx-auto w-full max-w-6xl px-4 py-20 sm:px-6 lg:py-28">
         <div className="mb-16 max-w-2xl">
           <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-coral">
             How we help

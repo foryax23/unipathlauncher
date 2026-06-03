@@ -31,8 +31,9 @@ const ITEMS = [
 
 export function WhyUs() {
   return (
-    <section id="why" className="border-t border-border bg-surface-muted">
-      <div className="mx-auto w-full max-w-6xl px-4 py-20 sm:px-6 lg:py-28">
+    <section id="why" className="relative bg-surface-muted">
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-amber/40" />
+      <div className="relative mx-auto w-full max-w-6xl px-4 py-20 sm:px-6 lg:py-28">
         <div className="mb-12 max-w-2xl">
           <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-coral">
             Why students prefer us
@@ -50,7 +51,8 @@ export function WhyUs() {
               <img
                 src={it.img}
                 alt={it.alt}
-                loading="lazy"
+                loading="eager"
+                decoding="async"
                 width={1280}
                 height={960}
                 className="aspect-[4/3] w-full object-cover"
