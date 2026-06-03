@@ -8,7 +8,7 @@ const ROTATING_PHRASES: { text: string; color: string }[] = [
   { text: "Leading Universities", color: "var(--amber)" },
   { text: "Top Business Schools", color: "var(--gold)" },
   { text: "World-Class Campuses", color: "#7dd3fc" },
-  { text: "Russell Group Institutions", color: "var(--coral)" },
+  { text: "Russell Group Unis", color: "var(--coral)" },
   { text: "Your Future Career", color: "#86efac" },
   { text: "Scholarships & Funding", color: "var(--amber)" },
   { text: "Trusted UK Advisers", color: "#fca5a5" },
