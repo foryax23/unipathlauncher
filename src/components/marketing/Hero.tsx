@@ -33,6 +33,7 @@ const GAP_MS = 400;
 export function Hero() {
   const [idx, setIdx] = useState(0);
   const [text, setText] = useState("");
+  const [deleting, setDeleting] = useState(false);
   const [paused, setPaused] = useState(false);
 
   useEffect(() => {
@@ -40,17 +41,21 @@ export function Hero() {
     const current = ROTATING_PHRASES[idx].text;
     let timeout: ReturnType<typeof setTimeout>;
 
-    if (text === current) {
-      timeout = setTimeout(() => setText(current.slice(0, -1)), HOLD_MS);
-    } else if (text.length < current.length && current.startsWith(text)) {
+    if (!deleting && text === current) {
+      timeout = setTimeout(() => setDeleting(true), HOLD_MS);
+    } else if (!deleting) {
       timeout = setTimeout(() => setText(current.slice(0, text.length + 1)), TYPE_MS);
-    } else if (text.length === 0) {
-      timeout = setTimeout(() => setIdx((i) => (i + 1) % ROTATING_PHRASES.length), GAP_MS);
-    } else {
+    } else if (text.length > 0) {
       timeout = setTimeout(() => setText(text.slice(0, -1)), DELETE_MS);
+    } else {
+      timeout = setTimeout(() => {
+        setDeleting(false);
+        setIdx((i) => (i + 1) % ROTATING_PHRASES.length);
+      }, GAP_MS);
     }
     return () => clearTimeout(timeout);
-  }, [text, idx, paused]);
+  }, [text, idx, deleting, paused]);
+
 
   const active = ROTATING_PHRASES[idx];
 
