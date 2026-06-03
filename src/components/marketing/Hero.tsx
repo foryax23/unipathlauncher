@@ -4,24 +4,48 @@ import { LiveOffersBand } from "./LiveOffersBand";
 import heroVideo from "@/assets/hero-bg.mp4.asset.json";
 import heroPoster from "@/assets/hero-bg-poster.jpg.asset.json";
 
-const ROTATING_PHRASES = [
-  "Leading Universities",
-  "Top Business Schools",
-  "World-Class Campuses",
-  "Russell Group Institutions",
-  "Your Future Career",
-  "Scholarships & Funding",
+const ROTATING_PHRASES: { text: string; color: string }[] = [
+  { text: "Leading Universities", color: "var(--amber)" },
+  { text: "Top Business Schools", color: "var(--gold)" },
+  { text: "World-Class Campuses", color: "#7dd3fc" },
+  { text: "Russell Group Institutions", color: "var(--coral)" },
+  { text: "Your Future Career", color: "#86efac" },
+  { text: "Scholarships & Funding", color: "var(--amber)" },
 ];
+
+const LONGEST = ROTATING_PHRASES.reduce((a, b) =>
+  a.text.length >= b.text.length ? a : b,
+).text;
+
+const TYPE_MS = 55;
+const DELETE_MS = 35;
+const HOLD_MS = 1600;
+const GAP_MS = 400;
 
 export function Hero() {
   const [idx, setIdx] = useState(0);
+  const [text, setText] = useState("");
   const [paused, setPaused] = useState(false);
 
   useEffect(() => {
     if (paused) return;
-    const id = setInterval(() => setIdx((i) => (i + 1) % ROTATING_PHRASES.length), 3500);
-    return () => clearInterval(id);
-  }, [paused]);
+    const current = ROTATING_PHRASES[idx].text;
+    let timeout: ReturnType<typeof setTimeout>;
+
+    if (text === current) {
+      timeout = setTimeout(() => setText(current.slice(0, -1)), HOLD_MS);
+    } else if (text.length < current.length && current.startsWith(text)) {
+      timeout = setTimeout(() => setText(current.slice(0, text.length + 1)), TYPE_MS);
+    } else if (text.length === 0) {
+      timeout = setTimeout(() => setIdx((i) => (i + 1) % ROTATING_PHRASES.length), GAP_MS);
+    } else {
+      timeout = setTimeout(() => setText(text.slice(0, -1)), DELETE_MS);
+    }
+    return () => clearTimeout(timeout);
+  }, [text, idx, paused]);
+
+  const active = ROTATING_PHRASES[idx];
+
 
   return (
     <section id="top" className="relative overflow-hidden">
@@ -40,7 +64,7 @@ export function Hero() {
       </video>
       {/* Warm gradient tint over the video */}
       <div className="absolute inset-0 -z-10 bg-gradient-warm opacity-80 mix-blend-multiply" />
-      <div className="absolute inset-0 -z-10 bg-gradient-to-b from-foreground/30 via-transparent to-foreground/40" />
+      <div className="absolute inset-0 -z-10 bg-gradient-to-b from-foreground/45 via-transparent to-foreground/40" />
       <div className="absolute inset-0 -z-10 opacity-60">
         <div className="absolute -right-32 top-10 h-[560px] w-[560px] rounded-full bg-amber/60 blur-3xl" />
         <div className="absolute -left-24 top-40 h-[420px] w-[420px] rounded-full bg-coral/50 blur-3xl" />
@@ -48,36 +72,45 @@ export function Hero() {
 
       <div className="mx-auto w-full max-w-6xl px-4 pt-20 pb-16 sm:px-6 lg:pt-24 lg:pb-24">
         {/* Centered headline */}
-        <div className="mx-auto max-w-3xl text-center text-white">
+        <div className="relative mx-auto max-w-3xl text-center text-white">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[140%] w-[120%] -translate-x-1/2 -translate-y-1/2 rounded-full blur-2xl"
+            style={{ background: "radial-gradient(ellipse at center, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.25) 40%, transparent 70%)" }}
+          />
           <p className="mb-5 inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.24em] text-white/85">
             <span className="h-px w-8 bg-white/70" />
             UK's trusted student platform
             <span className="h-px w-8 bg-white/70" />
           </p>
-          <h1 className="text-display-xl">
+          <h1 className="text-display-xl hero-headline-shadow">
             Apply with the UK's <br className="hidden sm:block" />
             <span
               className="relative inline-block align-baseline italic"
-              style={{ minHeight: "1.05em" }}
               onMouseEnter={() => setPaused(true)}
               onMouseLeave={() => setPaused(false)}
             >
               <span className="invisible whitespace-nowrap" aria-hidden>
-                {ROTATING_PHRASES.reduce((a, b) => (a.length >= b.length ? a : b))}
+                {LONGEST}
               </span>
-              {ROTATING_PHRASES.map((p, i) => (
+              <span
+                aria-live="polite"
+                className="absolute inset-0 whitespace-nowrap transition-colors duration-500"
+                style={{ color: active.color }}
+              >
+                <span className="motion-reduce:hidden">{text}</span>
+                <span className="hidden motion-reduce:inline">{active.text}</span>
                 <span
-                  key={p}
-                  aria-hidden={i !== idx}
-                  className="absolute inset-0 whitespace-nowrap text-amber transition-all duration-500 ease-out motion-reduce:transition-opacity"
+                  aria-hidden
+                  className="ml-0.5 inline-block w-[0.06em] align-baseline motion-reduce:hidden"
                   style={{
-                    opacity: i === idx ? 1 : 0,
-                    transform: i === idx ? "translateY(0)" : "translateY(0.35em)",
+                    height: "0.95em",
+                    background: "currentColor",
+                    animation: "caret-blink 1s steps(2,start) infinite",
+                    transform: "translateY(0.1em)",
                   }}
-                >
-                  {p}
-                </span>
-              ))}
+                />
+              </span>
             </span>
           </h1>
           <p className="mx-auto mt-6 max-w-xl text-base text-white/90 sm:text-lg">
