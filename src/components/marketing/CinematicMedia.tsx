@@ -84,7 +84,7 @@ export function CinematicMedia({
           <img
             src={src}
             alt={alt}
-            loading="lazy"
+            loading="eager"
             decoding="async"
             width={1280}
             height={854}
