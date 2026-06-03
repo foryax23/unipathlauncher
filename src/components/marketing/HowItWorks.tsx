@@ -1,4 +1,7 @@
 import { useReveal } from "@/hooks/use-reveal";
+import step01 from "@/assets/how-step-01.jpg.asset.json";
+import step02 from "@/assets/how-step-02.jpg.asset.json";
+import step03 from "@/assets/how-step-03.jpg.asset.json";
 
 const STEPS = [
   {
@@ -6,24 +9,24 @@ const STEPS = [
     title: "Tell us your interests",
     body:
       "Share your subject area, study level and where in the UK you'd like to study. It takes under three minutes.",
-    img: "https://picsum.photos/seed/student-notebook-uk/900/700",
-    alt: "A student writing notes in a university library",
+    img: step01.url,
+    alt: "A student filling out a university application on a laptop at a cozy desk",
   },
   {
     n: "02",
     title: "We match you to universities",
     body:
       "Our advisers shortlist programmes from 120+ UK institutions that fit your goals, grades and budget.",
-    img: "https://picsum.photos/seed/uk-campus-courtyard/900/700",
-    alt: "A bright university courtyard with students walking past",
+    img: step02.url,
+    alt: "An adviser pointing at a shortlist of UK universities on a laptop screen",
   },
   {
     n: "03",
     title: "Get expert guidance",
     body:
       "Receive a tailored shortlist, application tips, and funding options, with a real adviser on call.",
-    img: "https://picsum.photos/seed/uk-adviser-meeting/900/700",
-    alt: "A university adviser meeting with a prospective student",
+    img: step03.url,
+    alt: "A friendly UK university adviser in conversation with a prospective student",
   },
 ];
 
@@ -76,6 +79,8 @@ function Step({
         <img
           src={step.img}
           alt={step.alt}
+          width={1280}
+          height={960}
           className="aspect-[4/3] w-full object-cover"
           loading="lazy"
           decoding="async"
