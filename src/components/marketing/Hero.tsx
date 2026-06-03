@@ -89,6 +89,8 @@ export function Hero() {
         <LiveOffersBand />
       </div>
 
+      {/* Smooth fade into next section */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-48 bg-gradient-to-b from-transparent via-[var(--surface-warm)]/50 to-[var(--surface-warm)]" />
     </section>
   );
 }
