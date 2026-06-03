@@ -167,9 +167,9 @@
   .font-display { font-family: var(--font-display); }
   .font-mono { font-family: var(--font-mono); }
 
-  .text-display-xl { font-size: clamp(2.5rem, 6.5vw, 5.25rem); line-height: 1.02; letter-spacing: -0.04em; }
-  .text-display-lg { font-size: clamp(2rem, 4.8vw, 3.75rem); line-height: 1.05; letter-spacing: -0.035em; }
-  .text-display-md { font-size: clamp(1.6rem, 3.2vw, 2.4rem); line-height: 1.1; letter-spacing: -0.03em; }
+  .text-display-xl { font-family: var(--font-serif); font-size: clamp(2.5rem, 6.5vw, 5.25rem); line-height: 1.02; letter-spacing: -0.02em; }
+  .text-display-lg { font-family: var(--font-serif); font-size: clamp(2rem, 4.8vw, 3.75rem); line-height: 1.05; letter-spacing: -0.02em; }
+  .text-display-md { font-family: var(--font-serif); font-size: clamp(1.6rem, 3.2vw, 2.4rem); line-height: 1.1; letter-spacing: -0.015em; }
 
   .glass {
     background: var(--glass);
