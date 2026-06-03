@@ -1,23 +1,37 @@
-## 1. Remove the student names row from the hero
-In `src/components/marketing/LiveOffersBand.tsx`, delete the entire first marquee (the offer pills with names like "Maria K. · BSc Computer Science · University of Manchester") and the now-unused `OFFERS` array. Keep only the partner-logo row.
+## Goal
+Make the "Research. Analyse. Apply." services section feel premium and alive with thoughtful, professional motion — not generic fade-ins.
 
-## 2. Reimplement the partner-logo carousel so it loops smoothly on mobile
+## Changes (single file: `src/components/marketing/ServicesBand.tsx`)
 
-Root causes of the lag and clipping today:
-- The full-bleed wrapper (`mx-[calc(50%-50vw)] w-screen`) inside the hero's padded container fights the parent's overflow and the mask, producing jank and a cropped strip.
-- `brightness-0 invert` is a CSS filter recomposited every animated frame — on mobile GPUs that multiplies paint cost while the track is transforming.
-- The track only contains `[...PARTNERS, ...PARTNERS]` (2 copies). On wider viewports the second copy can finish before the first wraps, causing a visible jump that reads as "lag".
+### 1. Eyebrow + headline reveal
+- Eyebrow "RESEARCH. ANALYSE. APPLY." → animate each word in sequence (stagger 120ms) with a subtle blur-up + fade, and animated separator dots pulsing between words.
+- Headline → word-by-word mask reveal (translateY 100% → 0 with overflow-hidden clip) on scroll-in via IntersectionObserver (reuse `useReveal`).
+- Add a thin coral underline that draws in (scaleX 0 → 1, 600ms ease-out) under the eyebrow once visible.
 
-Fix:
-- **Lift the marquee out of the hero's padded container**: move `<LiveOffersBand />` in `Hero.tsx` so it sits as a sibling of (not inside) the `max-w-6xl` inner div, still inside the `<section>`. The component itself becomes `w-full overflow-hidden` with no negative margins. The mask runs cleanly edge-to-edge on every viewport.
-- **Triple the track contents** (`[...PARTNERS, ...PARTNERS, ...PARTNERS]`) and animate `translateX(0 → -33.333%)` via a new `marquee-track-3x` keyframe in `src/styles.css`. With 3 copies the loop point is invisible at any viewport width.
-- **Make the white logo tint static**: keep `filter: brightness(0) invert(1)` on each `<img>` (cached layer) but ensure only the *track* gets `will-change: transform; transform: translateZ(0)` so the compositor animates one layer instead of N image layers.
-- **One linear duration (45s)**, pause-on-hover only at `sm:` and up so mobile motion never stalls. `motion-reduce:animate-none` stays.
+### 2. Service cards — premium hover + entrance
+- Entrance: each card fades + lifts (translateY 24px → 0) with 150ms stagger between cards, triggered when section enters viewport.
+- Icon medallion:
+  - Replace flat rounded square with a circular gold gradient badge (matches the screenshot's aesthetic) with a soft outer glow ring.
+  - On entrance: badge scales from 0.6 → 1 with spring-like ease, icon inside fades in 200ms after.
+  - On hover: badge gets a slow rotating conic-gradient halo ring (3s linear infinite) + 1.05 scale; icon does a subtle wiggle.
+- Card body:
+  - Wrap in a group with hover lift (-translateY 4px) + shadow bloom.
+  - Animated underline on the CTA link (existing `story-link` pattern: scaleX origin-left on hover).
+  - Arrow `→` in CTA translates right 4px on hover.
 
-## 3. Files touched
-- `src/components/marketing/LiveOffersBand.tsx` — delete offer pills + `OFFERS`, restructure container, use new track class, triple loop.
-- `src/components/marketing/Hero.tsx` — move `<LiveOffersBand />` outside the padded `max-w-6xl` div but still inside the `<section>`.
-- `src/styles.css` — add `.marquee-track-3x` + `@keyframes marquee-3x` (0 → -33.333%).
+### 3. Connecting motion between cards (desktop only, md+)
+- Add a thin dashed gold line that animates drawing horizontally between the three icon badges on scroll-in (SVG `stroke-dasharray` animation, 1200ms). Reinforces the "Research → Analyse → Apply" flow.
+- Hidden on mobile (single column doesn't need it).
+
+### 4. Ambient background motion
+- Two soft gold/coral radial blurs in the section background that drift slowly (translate 20px loop, 12s ease-in-out infinite alternate) for life without distraction.
+
+## Technical notes
+- All animations use CSS keyframes added inline via Tailwind arbitrary values or a small `<style>` block — no new dependencies.
+- Scroll-triggered reveals use the existing `useReveal` hook pattern (IntersectionObserver, one-shot).
+- Respect `prefers-reduced-motion`: all motion wrapped with `motion-reduce:animate-none motion-reduce:transition-none`.
+- Mobile viewport (390px): cards stack, connecting line hidden, entrance stagger preserved, hover effects degrade gracefully to tap states.
 
 ## Out of scope
-No copy, no logo set changes, no other sections.
+- No copy changes, no new services, no changes to other sections, no routing changes.
+- No new npm packages.
