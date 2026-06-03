@@ -1,24 +1,31 @@
+import whyUniversities from "@/assets/why-universities.jpg.asset.json";
+import whyScholarships from "@/assets/why-scholarships.jpg.asset.json";
+import whyAdvisers from "@/assets/why-advisers.jpg.asset.json";
+
 const ITEMS = [
   {
     title: "Direct access to 40+ UK universities",
     body: "Official partnerships with leading UK institutions, book counselling, arrange campus tours and apply online, free.",
     cta: "Browse universities",
     href: "/courses",
-    img: "uk-university-campus-students",
+    img: whyUniversities.url,
+    alt: "Students walking through a historic UK university quad at golden hour",
   },
   {
     title: "Save more with scholarships",
     body: "We've helped over 5,000 students secure scholarships and bursaries worth £2M+ across the UK.",
     cta: "Scholarship guide",
     href: "/courses",
-    img: "scholarship-students-celebrating-uk",
+    img: whyScholarships.url,
+    alt: "A smiling student in graduation cap holding a university acceptance letter",
   },
   {
     title: "Expert UK education advisers",
     body: "Our in-house team guides you through UCAS, Clearing, visa and accommodation with confidence.",
     cta: "Meet the team",
     href: "/courses",
-    img: "uk-education-adviser-meeting",
+    img: whyAdvisers.url,
+    alt: "A friendly education adviser meeting with a prospective UK university student",
   },
 ];
 
@@ -41,9 +48,11 @@ export function WhyUs() {
               className="overflow-hidden rounded-3xl border border-border bg-surface shadow-sm"
             >
               <img
-                src={`https://picsum.photos/seed/${it.img}/800/520`}
-                alt={it.title}
+                src={it.img}
+                alt={it.alt}
                 loading="lazy"
+                width={1280}
+                height={960}
                 className="aspect-[4/3] w-full object-cover"
               />
               <div className="p-6">
