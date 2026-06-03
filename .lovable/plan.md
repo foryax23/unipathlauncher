@@ -1,19 +1,32 @@
-## Problem
-At the bottom of the Hero, an SVG curve is filled with `text-background`. In dark mode `--background` is deep navy, so the curve renders as a dark "puddle" sitting on the gold hero video — and right after it `CinematicShowcase` starts with a totally different warm/cream surface (`bg-warm`). Result: a curved dark blob squashed between two warm sections.
+## Diagnosis
+In dark mode `--surface-warm` (used by `CinematicShowcase` via `bg-warm`) resolves to dark navy — not warm at all. The hero ends bright gold/amber, the next section starts dark navy, and the 40px amber blend I added is way too short to bridge that contrast. Result: a hard horizontal seam.
 
-## Fix
-Make the Hero → CinematicShowcase seam read as one continuous canvas.
+## Fix — give the seam a real bridge
 
-1. **`src/components/marketing/Hero.tsx`** — delete the bottom SVG curve (lines ~77-84). The hero already ends with the LiveOffersBand and warm gradient; a hard horizontal edge is cleaner than a mismatched curve.
+Two coordinated edits create a smooth ~240px gradient transition from hero-gold down into the showcase's dark surface.
 
-2. **`src/components/marketing/CinematicShowcase.tsx`** — add a soft top blend so the section visually continues the hero's warm tones instead of starting cold:
-   - Add a top-edge gradient overlay: `absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-amber/20 via-amber/5 to-transparent` (sits inside the existing `bg-warm` section, behind content).
-   - Remove the `border-t border-border` (it draws a hard hairline that fights the blend).
+1. **`src/components/marketing/Hero.tsx`** — add a tall fade at the bottom of the hero that goes from transparent to the next section's surface color, so the hero visually dies into navy before the section line. Insert just before `</section>`:
+   ```tsx
+   <div className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-48 bg-gradient-to-b from-transparent via-[var(--surface-warm)]/40 to-[var(--surface-warm)]" />
+   ```
 
-3. No copy, no layout, no other component changes.
+2. **`src/components/marketing/CinematicShowcase.tsx`** — replace the short `h-40 from-amber/25` blend with a taller layered blend so the top of the section *receives* a warm hint from above before settling into its own surface:
+   ```tsx
+   <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-64 bg-gradient-to-b from-amber/30 via-amber/10 to-transparent" />
+   ```
+
+Net effect: hero gold → soft amber haze → dark navy, no hard edge.
+
+## Also apply the same principle to other seams (quick pass)
+Audit the section boundaries on the homepage and add matching `h-32` to `h-48` gradient fades only where two adjacent sections have visibly different background tones. Specifically check:
+- `ServicesBand` → `DestinationsGrid` (light surface → muted surface)
+- `HowWeHelp` → `WhyUs`
+- `StatsBand` → `TestimonialsMarquee`
+
+For any pair where the tones already match (both `bg-background`, both `bg-surface-muted`), no change. Goal: no jarring step between any two consecutive sections.
 
 ## Out of scope
-- Other section seams (Services → Destinations etc.) — they currently look fine, only this one was flagged.
-- Light-mode tweaks — fix works in both modes since we drop the offending element.
+- Copy, layout, component reorder.
+- Light-mode redesign — token values stay as they are; we only add transition gradients.
 
-Approve and I'll apply both edits.
+Approve and I'll ship the fixes.
