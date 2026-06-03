@@ -4,7 +4,25 @@ import { LiveOffersBand } from "./LiveOffersBand";
 import heroVideo from "@/assets/hero-bg.mp4.asset.json";
 import heroPoster from "@/assets/hero-bg-poster.jpg.asset.json";
 
+const ROTATING_PHRASES = [
+  "Leading Universities",
+  "Top Business Schools",
+  "World-Class Campuses",
+  "Russell Group Institutions",
+  "Your Future Career",
+  "Scholarships & Funding",
+];
+
 export function Hero() {
+  const [idx, setIdx] = useState(0);
+  const [paused, setPaused] = useState(false);
+
+  useEffect(() => {
+    if (paused) return;
+    const id = setInterval(() => setIdx((i) => (i + 1) % ROTATING_PHRASES.length), 3500);
+    return () => clearInterval(id);
+  }, [paused]);
+
   return (
     <section id="top" className="relative overflow-hidden">
       {/* Cinematic looping background video */}
