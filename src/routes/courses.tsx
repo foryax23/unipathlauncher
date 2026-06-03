@@ -109,7 +109,7 @@ function CoursesPage() {
                 <p className="text-xs uppercase tracking-widest text-muted-foreground">
                   {p.level} · {p.partner}
                 </p>
-                <h3 className="mt-2 text-lg font-display tracking-tight">{p.name}</h3>
+                <h3 className="mt-2 text-lg font-serif tracking-tight">{p.name}</h3>
                 <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                   <span className="inline-flex items-center gap-1"><MapPin className="size-3.5" />{p.cities.join(", ")}</span>
                   <span className="inline-flex items-center gap-1"><GraduationCap className="size-3.5" />{p.duration}</span>

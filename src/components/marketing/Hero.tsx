@@ -1,9 +1,28 @@
+import { useEffect, useState } from "react";
 import { HeroMatchCard } from "./HeroMatchCard";
 import { LiveOffersBand } from "./LiveOffersBand";
 import heroVideo from "@/assets/hero-bg.mp4.asset.json";
 import heroPoster from "@/assets/hero-bg-poster.jpg.asset.json";
 
+const ROTATING_PHRASES = [
+  "Leading Universities",
+  "Top Business Schools",
+  "World-Class Campuses",
+  "Russell Group Institutions",
+  "Your Future Career",
+  "Scholarships & Funding",
+];
+
 export function Hero() {
+  const [idx, setIdx] = useState(0);
+  const [paused, setPaused] = useState(false);
+
+  useEffect(() => {
+    if (paused) return;
+    const id = setInterval(() => setIdx((i) => (i + 1) % ROTATING_PHRASES.length), 3500);
+    return () => clearInterval(id);
+  }, [paused]);
+
   return (
     <section id="top" className="relative overflow-hidden">
       {/* Cinematic looping background video */}
@@ -37,7 +56,29 @@ export function Hero() {
           </p>
           <h1 className="text-display-xl">
             Apply with the UK's <br className="hidden sm:block" />
-            <span className="italic font-editorial">Leading Universities</span>
+            <span
+              className="relative inline-block align-baseline italic"
+              style={{ minHeight: "1.05em" }}
+              onMouseEnter={() => setPaused(true)}
+              onMouseLeave={() => setPaused(false)}
+            >
+              <span className="invisible whitespace-nowrap" aria-hidden>
+                {ROTATING_PHRASES.reduce((a, b) => (a.length >= b.length ? a : b))}
+              </span>
+              {ROTATING_PHRASES.map((p, i) => (
+                <span
+                  key={p}
+                  aria-hidden={i !== idx}
+                  className="absolute inset-0 whitespace-nowrap text-amber transition-all duration-500 ease-out motion-reduce:transition-opacity"
+                  style={{
+                    opacity: i === idx ? 1 : 0,
+                    transform: i === idx ? "translateY(0)" : "translateY(0.35em)",
+                  }}
+                >
+                  {p}
+                </span>
+              ))}
+            </span>
           </h1>
           <p className="mx-auto mt-6 max-w-xl text-base text-white/90 sm:text-lg">
             Discover, compare and apply to 40+ UK partner institutions. Free expert guidance on
