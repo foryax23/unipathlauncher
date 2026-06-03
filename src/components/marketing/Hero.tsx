@@ -72,7 +72,12 @@ export function Hero() {
 
       <div className="mx-auto w-full max-w-6xl px-4 pt-20 pb-16 sm:px-6 lg:pt-24 lg:pb-24">
         {/* Centered headline */}
-        <div className="mx-auto max-w-3xl text-center text-white">
+        <div className="relative mx-auto max-w-3xl text-center text-white">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[140%] w-[120%] -translate-x-1/2 -translate-y-1/2 rounded-full blur-2xl"
+            style={{ background: "radial-gradient(ellipse at center, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.25) 40%, transparent 70%)" }}
+          />
           <p className="mb-5 inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.24em] text-white/85">
             <span className="h-px w-8 bg-white/70" />
             UK's trusted student platform
