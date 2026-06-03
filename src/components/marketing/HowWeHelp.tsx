@@ -1,38 +1,45 @@
+import { CinematicMedia } from "./CinematicMedia";
+import step01 from "@/assets/help-step-01.jpg.asset.json";
+import step02 from "@/assets/help-step-02.jpg.asset.json";
+import step03 from "@/assets/help-step-03.jpg.asset.json";
+import step04 from "@/assets/help-step-04.jpg.asset.json";
+import step05 from "@/assets/help-step-05.jpg.asset.json";
+
 const FEATURES = [
   {
     eyebrow: "Personalised recommendations",
     title: "Know which unis fit you, instantly.",
     body: "Our tech scans 40+ UK universities to check entry requirements, location, fees, ranking and scholarship eligibility against your profile, so you don't have to.",
     bullets: ["Entry requirement check", "Budget estimate", "Course eligibility", "Ranking match"],
-    img: "ui-uni-recommendations-dashboard",
+    img: step01.url,
   },
   {
     eyebrow: "Research checklist",
     title: "Consolidate every key finding in one place.",
     body: "Know exactly what to look for in a course before deciding. Add notes from your adviser, see what's outstanding, and never miss a detail.",
     bullets: ["Adviser notes", "Open days", "Module breakdown", "Career outcomes"],
-    img: "ui-research-checklist-ui",
+    img: step02.url,
   },
   {
     eyebrow: "Course comparison",
     title: "Compare shortlisted courses side-by-side.",
     body: "Study environment, subject ranking, entry requirements, accreditation, all in one table. Plus a fit analysis based on your budget and goals.",
     bullets: ["Side-by-side metrics", "Fit-score", "Scholarship flags", "City compare"],
-    img: "ui-comparison-table-courses",
+    img: step03.url,
   },
   {
     eyebrow: "Parent / guardian access",
     title: "Keep parents in the loop with one tap.",
     body: "Grant guest access so families can review uni details, comparisons and recommendations together, at any time.",
     bullets: ["Guest invites", "Shared notes", "Read-only mode", "Email digests"],
-    img: "ui-parent-guest-dashboard",
+    img: step04.url,
   },
   {
     eyebrow: "Application & visa support",
     title: "Apply worry-free with end-to-end support.",
     body: "Track UCAS deadlines, document checklists, offer acceptance, visa applications and accommodation, all from your dashboard.",
     bullets: ["UCAS tracking", "Document review", "Visa support", "Accommodation"],
-    img: "ui-application-tracker-uk",
+    img: step05.url,
   },
 ];
 
@@ -78,17 +85,12 @@ export function HowWeHelp() {
                     ))}
                   </ul>
                 </div>
-                <div className="relative">
-                  <div className="absolute -inset-6 -z-10 rounded-[2.5rem] bg-gradient-warm opacity-20 blur-2xl" />
-                  <div className="overflow-hidden rounded-3xl border border-border bg-surface shadow-xl">
-                    <img
-                      src={`https://picsum.photos/seed/${f.img}/900/620`}
-                      alt={f.title}
-                      loading="lazy"
-                      className="aspect-[3/2] w-full object-cover"
-                    />
-                  </div>
-                </div>
+                <CinematicMedia
+                  src={f.img}
+                  alt={f.title}
+                  index={i + 1}
+                  total={FEATURES.length}
+                />
               </div>
             );
           })}
