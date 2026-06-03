@@ -27,7 +27,7 @@ export function Hero() {
         <div className="absolute -left-24 top-40 h-[420px] w-[420px] rounded-full bg-coral/50 blur-3xl" />
       </div>
 
-      <div className="mx-auto w-full max-w-6xl px-4 pt-20 pb-40 sm:px-6 lg:pt-24 lg:pb-56">
+      <div className="mx-auto w-full max-w-6xl px-4 pt-20 pb-16 sm:px-6 lg:pt-24 lg:pb-24">
         {/* Centered headline */}
         <div className="mx-auto max-w-3xl text-center text-white">
           <p className="mb-5 inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.24em] text-white/85">
@@ -85,7 +85,10 @@ export function Hero() {
             />
           </div>
         </div>
+      </div>
 
+      {/* Full-bleed partner marquee, still inside the hero */}
+      <div className="relative z-10 pb-24 lg:pb-32">
         <LiveOffersBand />
       </div>
 

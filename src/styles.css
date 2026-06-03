@@ -238,6 +238,9 @@
   .marquee-track-reverse {
     animation: marquee-reverse 70s linear infinite;
   }
+  .marquee-track-3x {
+    animation: marquee-3x 45s linear infinite;
+  }
   @keyframes marquee {
     from { transform: translateX(0); }
     to { transform: translateX(-50%); }
@@ -245,6 +248,10 @@
   @keyframes marquee-reverse {
     from { transform: translateX(-50%); }
     to { transform: translateX(0); }
+  }
+  @keyframes marquee-3x {
+    from { transform: translate3d(0, 0, 0); }
+    to { transform: translate3d(-33.3333%, 0, 0); }
   }
 
 
