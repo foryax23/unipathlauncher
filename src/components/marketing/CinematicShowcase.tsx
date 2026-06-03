@@ -51,7 +51,8 @@ export function CinematicShowcase() {
   };
 
   return (
-    <section className="relative overflow-hidden border-t border-border bg-warm">
+    <section className="relative overflow-hidden bg-warm">
+      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-40 bg-gradient-to-b from-amber/25 via-amber/5 to-transparent" />
       <div className="absolute inset-0 -z-10 opacity-50">
         <div className="absolute -left-32 top-20 h-[420px] w-[420px] rounded-full bg-amber/40 blur-3xl" />
         <div className="absolute -right-24 bottom-10 h-[360px] w-[360px] rounded-full bg-coral/30 blur-3xl" />

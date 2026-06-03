@@ -89,15 +89,6 @@ export function Hero() {
         <LiveOffersBand />
       </div>
 
-      {/* Soft curve into next section */}
-      <svg
-        viewBox="0 0 1440 120"
-        preserveAspectRatio="none"
-        className="absolute bottom-0 left-0 right-0 h-20 w-full text-background sm:h-28"
-        aria-hidden
-      >
-        <path d="M0,80 C360,140 1080,0 1440,60 L1440,120 L0,120 Z" fill="currentColor" />
-      </svg>
     </section>
   );
 }
