@@ -1,12 +1,28 @@
 import { HeroMatchCard } from "./HeroMatchCard";
 import { LiveOffersBand } from "./LiveOffersBand";
+import heroVideo from "@/assets/hero-bg.mp4.asset.json";
+import heroPoster from "@/assets/hero-bg-poster.jpg.asset.json";
 
 export function Hero() {
   return (
     <section id="top" className="relative overflow-hidden">
-      {/* Bold warm gradient backdrop */}
-      <div className="absolute inset-0 -z-10 bg-gradient-warm" />
-      <div className="absolute inset-0 -z-10 opacity-70">
+      {/* Cinematic looping background video */}
+      <video
+        className="absolute inset-0 -z-20 h-full w-full object-cover"
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="metadata"
+        poster={heroPoster.url}
+        aria-hidden
+      >
+        <source src={heroVideo.url} type="video/mp4" />
+      </video>
+      {/* Warm gradient tint over the video */}
+      <div className="absolute inset-0 -z-10 bg-gradient-warm opacity-80 mix-blend-multiply" />
+      <div className="absolute inset-0 -z-10 bg-gradient-to-b from-foreground/30 via-transparent to-foreground/40" />
+      <div className="absolute inset-0 -z-10 opacity-60">
         <div className="absolute -right-32 top-10 h-[560px] w-[560px] rounded-full bg-amber/60 blur-3xl" />
         <div className="absolute -left-24 top-40 h-[420px] w-[420px] rounded-full bg-coral/50 blur-3xl" />
       </div>
