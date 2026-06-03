@@ -93,7 +93,7 @@ function Dashboard() {
           <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
             Your personalised shortlist
           </p>
-          <h1 className="mt-4 font-display text-display-lg text-foreground leading-tight">
+          <h1 className="mt-4 font-serif text-display-lg text-foreground leading-tight">
             Hi{" "}
             <span className="font-chalk text-gold/90 align-baseline">
               {firstName}
@@ -134,7 +134,7 @@ function Dashboard() {
         {/* Top matches */}
         <div className="mt-12">
           <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Top matches</p>
-          <h2 className="mt-2 font-display text-display-md">Hand-picked for you</h2>
+          <h2 className="mt-2 font-serif text-display-md">Hand-picked for you</h2>
         </div>
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           {matches.map((m) => (
@@ -147,7 +147,7 @@ function Dashboard() {
                   <p className="text-xs uppercase tracking-widest text-muted-foreground">
                     {m.level} · {m.partner}
                   </p>
-                  <h3 className="mt-2 font-display text-xl tracking-tight text-foreground">
+                  <h3 className="mt-2 font-serif text-xl tracking-tight text-foreground">
                     {m.name}
                   </h3>
                 </div>
@@ -179,7 +179,7 @@ function Dashboard() {
               <Sparkles className="size-5" />
             </span>
             <div className="flex-1">
-              <h3 className="font-display text-xl tracking-tight">Talk to an adviser</h3>
+              <h3 className="font-serif text-xl tracking-tight">Talk to an adviser</h3>
               <p className="mt-1 text-sm text-muted-foreground">
                 A Bridge Gateway adviser will call within 24 hours to walk you through your matches and the application process.
               </p>
