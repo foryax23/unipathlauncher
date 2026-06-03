@@ -20,5 +20,4 @@ export const COMPANY = {
   url: "https://www.bridgegatewayconsulting.com",
 } as const;
 
-export const phoneHref = (p: string) =>
-  `https://wa.me/${p.replace(/\D/g, "")}`;
+export const phoneHref = (p: string) => `tel:${p.replace(/\s+/g, "")}`;
