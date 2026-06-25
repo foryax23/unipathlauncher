@@ -16,6 +16,8 @@ const leadSchema = z.object({
   consent: z.literal(true),
   // Honeypot — must be empty. Bots fill every input.
   website: z.string().max(0).optional().or(z.literal("")),
+  // Optional Cloudflare Turnstile token from the widget.
+  turnstile_token: z.string().trim().max(4000).optional(),
   utm: z
     .object({
       source: z.string().max(120).optional(),
@@ -28,6 +30,61 @@ const leadSchema = z.object({
     .optional(),
 });
 
+const RATE_LIMIT_MAX = 5;
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+
+async function verifyTurnstile(token: string | undefined, ip: string | null): Promise<boolean> {
+  const secret = process.env.TURNSTILE_SECRET_KEY;
+  if (!secret) return true; // Not configured: skip verification gracefully.
+  if (!token) return false;
+  try {
+    const body = new URLSearchParams({ secret, response: token });
+    if (ip) body.append("remoteip", ip);
+    const res = await fetch(
+      "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+      { method: "POST", body },
+    );
+    const json = (await res.json()) as { success?: boolean };
+    return !!json.success;
+  } catch (err) {
+    console.error("turnstile verify failed", err);
+    return false;
+  }
+}
+
+async function checkRateLimit(ip: string | null): Promise<boolean> {
+  if (!ip) return true;
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const now = new Date();
+  const { data: existing } = await supabaseAdmin
+    .from("lead_rate_limits")
+    .select("ip,window_start,count")
+    .eq("ip", ip)
+    .maybeSingle();
+
+  if (!existing) {
+    await supabaseAdmin
+      .from("lead_rate_limits")
+      .insert({ ip, window_start: now.toISOString(), count: 1 });
+    return true;
+  }
+
+  const windowAge = now.getTime() - new Date(existing.window_start).getTime();
+  if (windowAge > RATE_LIMIT_WINDOW_MS) {
+    await supabaseAdmin
+      .from("lead_rate_limits")
+      .update({ window_start: now.toISOString(), count: 1, updated_at: now.toISOString() })
+      .eq("ip", ip);
+    return true;
+  }
+  if (existing.count >= RATE_LIMIT_MAX) return false;
+  await supabaseAdmin
+    .from("lead_rate_limits")
+    .update({ count: existing.count + 1, updated_at: now.toISOString() })
+    .eq("ip", ip);
+  return true;
+}
+
 export const submitLead = createServerFn({ method: "POST" })
   .inputValidator((input) => leadSchema.parse(input))
   .handler(async ({ data }) => {
@@ -36,12 +93,25 @@ export const submitLead = createServerFn({ method: "POST" })
       return { ok: true as const };
     }
 
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const ip = getRequestIP({ xForwardedFor: true }) ?? null;
     const userAgent = getRequestHeader("user-agent") ?? null;
+
+    // 1. Rate limit per IP
+    const allowed = await checkRateLimit(ip);
+    if (!allowed) {
+      throw new Error("Too many requests. Please try again in a minute.");
+    }
+
+    // 2. Turnstile (only enforced when secret is configured)
+    const verified = await verifyTurnstile(data.turnstile_token, ip);
+    if (!verified) {
+      throw new Error("Could not verify your request. Please try again.");
+    }
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const normalizedEmail = data.email.trim().toLowerCase();
 
-    // 24-hour duplicate guard: same email submitted recently is treated as success.
+    // 3. 24-hour duplicate guard
     const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     const { data: existing } = await supabaseAdmin
       .from("leads")
@@ -74,22 +144,11 @@ export const submitLead = createServerFn({ method: "POST" })
     return { ok: true as const };
   });
 
-async function assertAdminViaService(userId: string) {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data, error } = await supabaseAdmin
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId)
-    .eq("role", "admin")
-    .maybeSingle();
-  if (error) throw new Error("Could not verify your access.");
-  if (!data) throw new Error("Forbidden");
-}
-
 export const listLeads = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    await assertAdminViaService(context.userId);
+    const { assertAdmin } = await import("@/lib/auth/assert.server");
+    await assertAdmin(context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data, error } = await supabaseAdmin
       .from("leads")
@@ -114,7 +173,8 @@ export const updateLead = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => updateLeadSchema.parse(input))
   .handler(async ({ data, context }) => {
-    await assertAdminViaService(context.userId);
+    const { assertAdmin } = await import("@/lib/auth/assert.server");
+    await assertAdmin(context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { logAudit } = await import("@/lib/audit.server");
 
