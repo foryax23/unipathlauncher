@@ -141,6 +141,32 @@ export const submitLead = createServerFn({ method: "POST" })
       console.error("submitLead insert failed", error);
       throw new Error("Could not submit your details. Please try again.");
     }
+
+    // Fire-and-forget emails (won't block the response if the connector isn't linked)
+    try {
+      const { sendEmail } = await import("@/lib/email/send.server");
+      const { leadWelcomeEmail, leadAdminAlertEmail } = await import(
+        "@/lib/email/templates"
+      );
+      const fields = {
+        name: data.name,
+        email: normalizedEmail,
+        phone: data.phone,
+        city: data.city,
+        subject: data.subject,
+        study_level: data.study_level,
+        start_year: data.start_year,
+      };
+      const welcome = leadWelcomeEmail(fields);
+      await sendEmail({ to: normalizedEmail, subject: welcome.subject, html: welcome.html });
+      const adminTo = process.env.LEAD_NOTIFICATIONS_TO;
+      if (adminTo) {
+        const alert = leadAdminAlertEmail(fields);
+        await sendEmail({ to: adminTo, subject: alert.subject, html: alert.html });
+      }
+    } catch (err) {
+      console.error("lead email send failed (non-fatal)", err);
+    }
     return { ok: true as const };
   });
 
