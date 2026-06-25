@@ -128,7 +128,7 @@ export const updateLead = createServerFn({ method: "POST" })
 
     const { data: row, error } = await supabaseAdmin
       .from("leads")
-      .update(patch)
+      .update(patch as never)
       .eq("id", data.id)
       .select()
       .maybeSingle();
