@@ -19,7 +19,7 @@ export async function logAudit(entry: AuditEntry) {
       action: entry.action,
       target_type: entry.targetType ?? null,
       target_id: entry.targetId ?? null,
-      payload: entry.payload ?? null,
+      payload: (entry.payload ?? null) as never,
       ip: entry.ip ?? null,
     });
   } catch (err) {
