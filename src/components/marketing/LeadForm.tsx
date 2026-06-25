@@ -150,7 +150,21 @@ export function LeadForm({ preselectedSubject }: { preselectedSubject: string | 
       className="rounded-2xl border border-border bg-surface p-6 shadow-sm sm:p-10"
       noValidate
     >
+      {/* Honeypot — invisible to humans, irresistible to bots. */}
+      <input
+        type="text"
+        name="website"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        value={(data as unknown as { website?: string }).website ?? ""}
+        onChange={(e) =>
+          setData((d) => ({ ...d, website: e.target.value } as FormState))
+        }
+        className="absolute left-[-9999px] h-0 w-0 opacity-0"
+      />
       <Progress step={step} />
+
 
       {step === 0 && (
         <div className="mt-8 grid gap-5 sm:grid-cols-2">
