@@ -4,6 +4,7 @@ import { PROGRAMMES, COURSES } from "@/components/marketing/data/courses";
 import { Header } from "@/components/marketing/Header";
 import { Footer } from "@/components/marketing/Footer";
 import { Search, MapPin, GraduationCap } from "lucide-react";
+import { ShortlistButton } from "@/components/shortlist/ShortlistButton";
 
 export const Route = createFileRoute("/courses")({
   head: () => ({
