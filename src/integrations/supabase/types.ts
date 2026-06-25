@@ -14,57 +14,114 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit: {
+        Row: {
+          action: string
+          actor_email: string | null
+          actor_id: string | null
+          created_at: string
+          id: string
+          ip: string | null
+          payload: Json | null
+          target_id: string | null
+          target_type: string | null
+        }
+        Insert: {
+          action: string
+          actor_email?: string | null
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          ip?: string | null
+          payload?: Json | null
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Update: {
+          action?: string
+          actor_email?: string | null
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          ip?: string | null
+          payload?: Json | null
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Relationships: []
+      }
       leads: {
         Row: {
+          assigned_to: string | null
           city: string
           consent: boolean
           created_at: string
           email: string
           id: string
+          internal_notes: string | null
+          ip: string | null
           lat: number | null
           lng: number | null
           name: string
+          next_action_at: string | null
           phone: string
           reason: string | null
           source: string | null
           start_year: string
+          status: Database["public"]["Enums"]["lead_status"]
           study_level: string
           subject: string
+          user_agent: string | null
           user_id: string | null
+          utm: Json | null
         }
         Insert: {
+          assigned_to?: string | null
           city: string
           consent?: boolean
           created_at?: string
           email: string
           id?: string
+          internal_notes?: string | null
+          ip?: string | null
           lat?: number | null
           lng?: number | null
           name: string
+          next_action_at?: string | null
           phone: string
           reason?: string | null
           source?: string | null
           start_year: string
+          status?: Database["public"]["Enums"]["lead_status"]
           study_level: string
           subject: string
+          user_agent?: string | null
           user_id?: string | null
+          utm?: Json | null
         }
         Update: {
+          assigned_to?: string | null
           city?: string
           consent?: boolean
           created_at?: string
           email?: string
           id?: string
+          internal_notes?: string | null
+          ip?: string | null
           lat?: number | null
           lng?: number | null
           name?: string
+          next_action_at?: string | null
           phone?: string
           reason?: string | null
           source?: string | null
           start_year?: string
+          status?: Database["public"]["Enums"]["lead_status"]
           study_level?: string
           subject?: string
+          user_agent?: string | null
           user_id?: string | null
+          utm?: Json | null
         }
         Relationships: []
       }
@@ -128,6 +185,39 @@ export type Database = {
         }
         Relationships: []
       }
+      shortlists: {
+        Row: {
+          course_id: string
+          course_name: string | null
+          created_at: string
+          id: string
+          level: string | null
+          note: string | null
+          partner: string | null
+          user_id: string
+        }
+        Insert: {
+          course_id: string
+          course_name?: string | null
+          created_at?: string
+          id?: string
+          level?: string | null
+          note?: string | null
+          partner?: string | null
+          user_id: string
+        }
+        Update: {
+          course_id?: string
+          course_name?: string | null
+          created_at?: string
+          id?: string
+          level?: string | null
+          note?: string | null
+          partner?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -164,6 +254,13 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      lead_status:
+        | "new"
+        | "contacted"
+        | "qualified"
+        | "converted"
+        | "lost"
+        | "spam"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -292,6 +389,14 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      lead_status: [
+        "new",
+        "contacted",
+        "qualified",
+        "converted",
+        "lost",
+        "spam",
+      ],
     },
   },
 } as const
