@@ -50,6 +50,303 @@ export type Database = {
         }
         Relationships: []
       }
+      application_events: {
+        Row: {
+          actor_id: string | null
+          application_id: string
+          created_at: string
+          id: string
+          payload: Json
+          type: string
+        }
+        Insert: {
+          actor_id?: string | null
+          application_id: string
+          created_at?: string
+          id?: string
+          payload?: Json
+          type: string
+        }
+        Update: {
+          actor_id?: string | null
+          application_id?: string
+          created_at?: string
+          id?: string
+          payload?: Json
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_events_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      applications: {
+        Row: {
+          adviser_id: string | null
+          course_id: string
+          created_at: string
+          decision: string | null
+          decision_at: string | null
+          id: string
+          intake_id: string | null
+          notes: string | null
+          status: Database["public"]["Enums"]["application_status"]
+          submitted_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          adviser_id?: string | null
+          course_id: string
+          created_at?: string
+          decision?: string | null
+          decision_at?: string | null
+          id?: string
+          intake_id?: string | null
+          notes?: string | null
+          status?: Database["public"]["Enums"]["application_status"]
+          submitted_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          adviser_id?: string | null
+          course_id?: string
+          created_at?: string
+          decision?: string | null
+          decision_at?: string | null
+          id?: string
+          intake_id?: string | null
+          notes?: string | null
+          status?: Database["public"]["Enums"]["application_status"]
+          submitted_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "applications_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_intake_id_fkey"
+            columns: ["intake_id"]
+            isOneToOne: false
+            referencedRelation: "course_intakes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bookings: {
+        Row: {
+          adviser_id: string | null
+          channel: string
+          created_at: string
+          ends_at: string
+          id: string
+          notes: string | null
+          starts_at: string
+          status: Database["public"]["Enums"]["booking_status"]
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          adviser_id?: string | null
+          channel?: string
+          created_at?: string
+          ends_at: string
+          id?: string
+          notes?: string | null
+          starts_at: string
+          status?: Database["public"]["Enums"]["booking_status"]
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          adviser_id?: string | null
+          channel?: string
+          created_at?: string
+          ends_at?: string
+          id?: string
+          notes?: string | null
+          starts_at?: string
+          status?: Database["public"]["Enums"]["booking_status"]
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      course_intakes: {
+        Row: {
+          course_id: string
+          created_at: string
+          deadline_date: string | null
+          id: string
+          intake_date: string
+          seats_left: number | null
+          updated_at: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          deadline_date?: string | null
+          id?: string
+          intake_date: string
+          seats_left?: number | null
+          updated_at?: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          deadline_date?: string | null
+          id?: string
+          intake_date?: string
+          seats_left?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_intakes_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      courses: {
+        Row: {
+          created_at: string
+          description: string | null
+          duration_months: number | null
+          entry_requirements: Json
+          fee_gbp: number | null
+          id: string
+          intake_months: number[] | null
+          is_active: boolean
+          level: string
+          name: string
+          slug: string
+          subject: string
+          ucas_points: number | null
+          university_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          duration_months?: number | null
+          entry_requirements?: Json
+          fee_gbp?: number | null
+          id?: string
+          intake_months?: number[] | null
+          is_active?: boolean
+          level: string
+          name: string
+          slug: string
+          subject: string
+          ucas_points?: number | null
+          university_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          duration_months?: number | null
+          entry_requirements?: Json
+          fee_gbp?: number | null
+          id?: string
+          intake_months?: number[] | null
+          is_active?: boolean
+          level?: string
+          name?: string
+          slug?: string
+          subject?: string
+          ucas_points?: number | null
+          university_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "courses_university_id_fkey"
+            columns: ["university_id"]
+            isOneToOne: false
+            referencedRelation: "universities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      documents: {
+        Row: {
+          created_at: string
+          id: string
+          mime_type: string | null
+          original_name: string
+          size_bytes: number | null
+          storage_path: string
+          type: Database["public"]["Enums"]["document_type"]
+          updated_at: string
+          user_id: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mime_type?: string | null
+          original_name: string
+          size_bytes?: number | null
+          storage_path: string
+          type: Database["public"]["Enums"]["document_type"]
+          updated_at?: string
+          user_id: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mime_type?: string | null
+          original_name?: string
+          size_bytes?: number | null
+          storage_path?: string
+          type?: Database["public"]["Enums"]["document_type"]
+          updated_at?: string
+          user_id?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: []
+      }
+      lead_rate_limits: {
+        Row: {
+          count: number
+          ip: string
+          updated_at: string
+          window_start: string
+        }
+        Insert: {
+          count?: number
+          ip: string
+          updated_at?: string
+          window_start?: string
+        }
+        Update: {
+          count?: number
+          ip?: string
+          updated_at?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
       leads: {
         Row: {
           assigned_to: string | null
@@ -125,63 +422,122 @@ export type Database = {
         }
         Relationships: []
       }
+      messages: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          read_at: string | null
+          sender_id: string
+          thread_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          sender_id: string
+          thread_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          sender_id?: string
+          thread_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
+          achieved_grades: Json | null
           avatar_url: string | null
           city: string | null
           country: string | null
           created_at: string
+          date_of_birth: string | null
           email_verified_at: string | null
+          english_test: Json | null
           full_name: string | null
           id: string
           lat: number | null
           lng: number | null
+          marketing_consent_email: boolean
+          marketing_consent_sms: boolean
+          nationality: string | null
           onboarding_complete: boolean
           phone: string | null
+          predicted_grades: Json | null
           reason: string | null
           start_year: string | null
           study_level: string | null
           subject: string | null
           updated_at: string
           user_id: string
+          visa_status: string | null
         }
         Insert: {
+          achieved_grades?: Json | null
           avatar_url?: string | null
           city?: string | null
           country?: string | null
           created_at?: string
+          date_of_birth?: string | null
           email_verified_at?: string | null
+          english_test?: Json | null
           full_name?: string | null
           id?: string
           lat?: number | null
           lng?: number | null
+          marketing_consent_email?: boolean
+          marketing_consent_sms?: boolean
+          nationality?: string | null
           onboarding_complete?: boolean
           phone?: string | null
+          predicted_grades?: Json | null
           reason?: string | null
           start_year?: string | null
           study_level?: string | null
           subject?: string | null
           updated_at?: string
           user_id: string
+          visa_status?: string | null
         }
         Update: {
+          achieved_grades?: Json | null
           avatar_url?: string | null
           city?: string | null
           country?: string | null
           created_at?: string
+          date_of_birth?: string | null
           email_verified_at?: string | null
+          english_test?: Json | null
           full_name?: string | null
           id?: string
           lat?: number | null
           lng?: number | null
+          marketing_consent_email?: boolean
+          marketing_consent_sms?: boolean
+          nationality?: string | null
           onboarding_complete?: boolean
           phone?: string | null
+          predicted_grades?: Json | null
           reason?: string | null
           start_year?: string | null
           study_level?: string | null
           subject?: string | null
           updated_at?: string
           user_id?: string
+          visa_status?: string | null
         }
         Relationships: []
       }
@@ -218,6 +574,87 @@ export type Database = {
         }
         Relationships: []
       }
+      threads: {
+        Row: {
+          adviser_id: string | null
+          created_at: string
+          id: string
+          last_message_at: string | null
+          student_id: string
+          subject: string | null
+          updated_at: string
+        }
+        Insert: {
+          adviser_id?: string | null
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          student_id: string
+          subject?: string | null
+          updated_at?: string
+        }
+        Update: {
+          adviser_id?: string | null
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          student_id?: string
+          subject?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      universities: {
+        Row: {
+          city: string | null
+          country: string
+          created_at: string
+          description: string | null
+          id: string
+          is_partner: boolean
+          logo_url: string | null
+          name: string
+          ranking: number | null
+          region: string | null
+          slug: string
+          ucas_code: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          city?: string | null
+          country?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_partner?: boolean
+          logo_url?: string | null
+          name: string
+          ranking?: number | null
+          region?: string | null
+          slug: string
+          ucas_code?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          city?: string | null
+          country?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_partner?: boolean
+          logo_url?: string | null
+          name?: string
+          ranking?: number | null
+          region?: string | null
+          slug?: string
+          ucas_code?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -251,9 +688,32 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_staff: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      app_role: "admin" | "user"
+      app_role: "admin" | "user" | "adviser"
+      application_status:
+        | "draft"
+        | "submitted"
+        | "interview"
+        | "offer"
+        | "accepted"
+        | "rejected"
+        | "withdrawn"
+        | "enrolled"
+      booking_status:
+        | "requested"
+        | "confirmed"
+        | "cancelled"
+        | "completed"
+        | "no_show"
+      document_type:
+        | "passport"
+        | "transcript"
+        | "english_test"
+        | "personal_statement"
+        | "reference"
+        | "other"
       lead_status:
         | "new"
         | "contacted"
@@ -388,7 +848,32 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user"],
+      app_role: ["admin", "user", "adviser"],
+      application_status: [
+        "draft",
+        "submitted",
+        "interview",
+        "offer",
+        "accepted",
+        "rejected",
+        "withdrawn",
+        "enrolled",
+      ],
+      booking_status: [
+        "requested",
+        "confirmed",
+        "cancelled",
+        "completed",
+        "no_show",
+      ],
+      document_type: [
+        "passport",
+        "transcript",
+        "english_test",
+        "personal_statement",
+        "reference",
+        "other",
+      ],
       lead_status: [
         "new",
         "contacted",
