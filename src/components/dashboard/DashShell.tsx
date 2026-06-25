@@ -11,14 +11,14 @@ import {
   LogOut,
 } from "lucide-react";
 
-const NAV = [
+const NAV: Array<{ to: string; label: string; icon: typeof LayoutDashboard; exact?: boolean }> = [
   { to: "/dashboard", label: "Overview", icon: LayoutDashboard, exact: true },
   { to: "/dashboard/applications", label: "Applications", icon: FileText },
   { to: "/dashboard/shortlist", label: "Shortlist", icon: BookOpen },
   { to: "/dashboard/documents", label: "Documents", icon: FolderOpen },
   { to: "/dashboard/messages", label: "Messages", icon: MessageSquare },
   { to: "/dashboard/bookings", label: "Bookings", icon: CalendarClock },
-] as const;
+];
 
 export function DashShell({
   children,
