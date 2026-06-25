@@ -68,16 +68,24 @@ function Dashboard() {
       <header className="glass border-b border-border/50">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
           <Link to="/"><Logo /></Link>
-          <button
-            type="button"
-            onClick={async () => {
-              await supabase.auth.signOut();
-              navigate({ to: "/" });
-            }}
-            className="tap inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent/40 transition"
-          >
-            <LogOut className="size-4" /> Sign out
-          </button>
+          <div className="flex items-center gap-1">
+            <Link
+              to="/dashboard/shortlist"
+              className="tap inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent/40 transition"
+            >
+              <BookOpen className="size-4" /> Shortlist
+            </Link>
+            <button
+              type="button"
+              onClick={async () => {
+                await supabase.auth.signOut();
+                navigate({ to: "/" });
+              }}
+              className="tap inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent/40 transition"
+            >
+              <LogOut className="size-4" /> Sign out
+            </button>
+          </div>
         </div>
       </header>
 

@@ -132,5 +132,13 @@ export const sendPasswordReset = createServerFn({ method: "POST" })
       redirectTo: data.redirectTo,
     });
     if (error) throw new Error(error.message);
+    const { logAudit } = await import("@/lib/audit.server");
+    await logAudit({
+      actorId: context.userId,
+      action: "admin.password_reset",
+      targetType: "user",
+      targetId: data.email,
+      payload: { email: data.email },
+    });
     return { ok: true };
   });

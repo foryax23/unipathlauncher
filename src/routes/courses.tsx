@@ -4,6 +4,7 @@ import { PROGRAMMES, COURSES } from "@/components/marketing/data/courses";
 import { Header } from "@/components/marketing/Header";
 import { Footer } from "@/components/marketing/Footer";
 import { Search, MapPin, GraduationCap } from "lucide-react";
+import { ShortlistButton } from "@/components/shortlist/ShortlistButton";
 
 export const Route = createFileRoute("/courses")({
   head: () => ({
@@ -105,7 +106,7 @@ function CoursesPage() {
           </p>
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {filtered.map((p) => (
-              <article key={p.id} className="rounded-3xl border border-border bg-surface p-5 transition hover:-translate-y-0.5 hover:shadow-md">
+              <article key={p.id} className="rounded-3xl border border-border bg-surface p-5 transition hover:-translate-y-0.5 hover:shadow-md flex flex-col">
                 <p className="text-xs uppercase tracking-widest text-muted-foreground">
                   {p.level} · {p.partner}
                 </p>
@@ -114,6 +115,14 @@ function CoursesPage() {
                   <span className="inline-flex items-center gap-1"><MapPin className="size-3.5" />{p.cities.join(", ")}</span>
                   <span className="inline-flex items-center gap-1"><GraduationCap className="size-3.5" />{p.duration}</span>
                   <span>{p.modes.join(" · ")}</span>
+                </div>
+                <div className="mt-4 pt-4 border-t border-border/50">
+                  <ShortlistButton
+                    courseId={p.id}
+                    courseName={p.name}
+                    partner={p.partner}
+                    level={p.level}
+                  />
                 </div>
               </article>
             ))}
