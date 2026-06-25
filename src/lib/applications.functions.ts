@@ -52,6 +52,101 @@ export const createApplication = createServerFn({ method: "POST" })
     return { application: row };
   });
 
+export const createApplicationBySlug = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        slug: z.string().trim().min(1).max(160),
+        notes: z.string().trim().max(2000).optional(),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: course, error: ce } = await supabase
+      .from("courses")
+      .select("id")
+      .eq("slug", data.slug)
+      .eq("is_active", true)
+      .maybeSingle();
+    if (ce) throw new Error(ce.message);
+    if (!course) throw new Error("Course not found");
+
+    // De-dupe: if an active application exists already, return it
+    const { data: existing } = await supabase
+      .from("applications")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("course_id", course.id)
+      .not("status", "in", "(rejected,withdrawn)")
+      .maybeSingle();
+    if (existing) return { application: existing };
+
+    const { data: row, error } = await supabase
+      .from("applications")
+      .insert({
+        user_id: userId,
+        course_id: course.id,
+        notes: data.notes ?? null,
+        status: "draft",
+      })
+      .select()
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+
+    if (row) {
+      await supabase.from("application_events").insert({
+        application_id: row.id,
+        type: "created",
+        actor_id: userId,
+        payload: { source: "student" },
+      });
+    }
+    return { application: row };
+  });
+
+const notesSchema = z.object({
+  id: z.string().uuid(),
+  notes: z.string().trim().max(4000),
+});
+
+export const updateMyApplicationNotes = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => notesSchema.parse(input))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { error } = await supabase
+      .from("applications")
+      .update({ notes: data.notes })
+      .eq("id", data.id)
+      .eq("user_id", userId);
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
+
+export const withdrawApplication = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({ id: z.string().uuid() }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { error } = await supabase
+      .from("applications")
+      .update({ status: "withdrawn" })
+      .eq("id", data.id)
+      .eq("user_id", userId);
+    if (error) throw new Error(error.message);
+    await supabase.from("application_events").insert({
+      application_id: data.id,
+      type: "status.withdrawn",
+      actor_id: userId,
+      payload: { source: "student" },
+    });
+    return { ok: true as const };
+  });
+
 export const getApplication = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>

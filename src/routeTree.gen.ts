@@ -22,8 +22,15 @@ import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as UniversitiesSlugRouteImport } from './routes/universities.$slug'
+import { Route as CoursesSlugRouteImport } from './routes/courses.$slug'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDashboardShortlistRouteImport } from './routes/_authenticated/dashboard/shortlist'
+import { Route as AuthenticatedDashboardMessagesRouteImport } from './routes/_authenticated/dashboard/messages'
+import { Route as AuthenticatedDashboardDocumentsRouteImport } from './routes/_authenticated/dashboard/documents'
+import { Route as AuthenticatedDashboardBookingsRouteImport } from './routes/_authenticated/dashboard/bookings'
+import { Route as AuthenticatedDashboardApplicationsRouteImport } from './routes/_authenticated/dashboard/applications'
+import { Route as AuthenticatedDashboardApplicationsIdRouteImport } from './routes/_authenticated/dashboard/applications.$id'
 
 const VerifyEmailRoute = VerifyEmailRouteImport.update({
   id: '/verify-email',
@@ -89,6 +96,16 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UniversitiesSlugRoute = UniversitiesSlugRouteImport.update({
+  id: '/universities/$slug',
+  path: '/universities/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoursesSlugRoute = CoursesSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => CoursesRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -100,12 +117,42 @@ const AuthenticatedDashboardShortlistRoute =
     path: '/shortlist',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
+const AuthenticatedDashboardMessagesRoute =
+  AuthenticatedDashboardMessagesRouteImport.update({
+    id: '/messages',
+    path: '/messages',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
+const AuthenticatedDashboardDocumentsRoute =
+  AuthenticatedDashboardDocumentsRouteImport.update({
+    id: '/documents',
+    path: '/documents',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
+const AuthenticatedDashboardBookingsRoute =
+  AuthenticatedDashboardBookingsRouteImport.update({
+    id: '/bookings',
+    path: '/bookings',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
+const AuthenticatedDashboardApplicationsRoute =
+  AuthenticatedDashboardApplicationsRouteImport.update({
+    id: '/applications',
+    path: '/applications',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
+const AuthenticatedDashboardApplicationsIdRoute =
+  AuthenticatedDashboardApplicationsIdRouteImport.update({
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => AuthenticatedDashboardApplicationsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/cookies': typeof CookiesRoute
-  '/courses': typeof CoursesRoute
+  '/courses': typeof CoursesRouteWithChildren
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
@@ -115,13 +162,20 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/verify-email': typeof VerifyEmailRoute
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/courses/$slug': typeof CoursesSlugRoute
+  '/universities/$slug': typeof UniversitiesSlugRoute
+  '/dashboard/applications': typeof AuthenticatedDashboardApplicationsRouteWithChildren
+  '/dashboard/bookings': typeof AuthenticatedDashboardBookingsRoute
+  '/dashboard/documents': typeof AuthenticatedDashboardDocumentsRoute
+  '/dashboard/messages': typeof AuthenticatedDashboardMessagesRoute
   '/dashboard/shortlist': typeof AuthenticatedDashboardShortlistRoute
+  '/dashboard/applications/$id': typeof AuthenticatedDashboardApplicationsIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/cookies': typeof CookiesRoute
-  '/courses': typeof CoursesRoute
+  '/courses': typeof CoursesRouteWithChildren
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
@@ -131,7 +185,14 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/verify-email': typeof VerifyEmailRoute
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/courses/$slug': typeof CoursesSlugRoute
+  '/universities/$slug': typeof UniversitiesSlugRoute
+  '/dashboard/applications': typeof AuthenticatedDashboardApplicationsRouteWithChildren
+  '/dashboard/bookings': typeof AuthenticatedDashboardBookingsRoute
+  '/dashboard/documents': typeof AuthenticatedDashboardDocumentsRoute
+  '/dashboard/messages': typeof AuthenticatedDashboardMessagesRoute
   '/dashboard/shortlist': typeof AuthenticatedDashboardShortlistRoute
+  '/dashboard/applications/$id': typeof AuthenticatedDashboardApplicationsIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -139,7 +200,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/admin': typeof AdminRoute
   '/cookies': typeof CookiesRoute
-  '/courses': typeof CoursesRoute
+  '/courses': typeof CoursesRouteWithChildren
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
@@ -149,7 +210,14 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/verify-email': typeof VerifyEmailRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/courses/$slug': typeof CoursesSlugRoute
+  '/universities/$slug': typeof UniversitiesSlugRoute
+  '/_authenticated/dashboard/applications': typeof AuthenticatedDashboardApplicationsRouteWithChildren
+  '/_authenticated/dashboard/bookings': typeof AuthenticatedDashboardBookingsRoute
+  '/_authenticated/dashboard/documents': typeof AuthenticatedDashboardDocumentsRoute
+  '/_authenticated/dashboard/messages': typeof AuthenticatedDashboardMessagesRoute
   '/_authenticated/dashboard/shortlist': typeof AuthenticatedDashboardShortlistRoute
+  '/_authenticated/dashboard/applications/$id': typeof AuthenticatedDashboardApplicationsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -167,7 +235,14 @@ export interface FileRouteTypes {
     | '/terms'
     | '/verify-email'
     | '/dashboard'
+    | '/courses/$slug'
+    | '/universities/$slug'
+    | '/dashboard/applications'
+    | '/dashboard/bookings'
+    | '/dashboard/documents'
+    | '/dashboard/messages'
     | '/dashboard/shortlist'
+    | '/dashboard/applications/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -183,7 +258,14 @@ export interface FileRouteTypes {
     | '/terms'
     | '/verify-email'
     | '/dashboard'
+    | '/courses/$slug'
+    | '/universities/$slug'
+    | '/dashboard/applications'
+    | '/dashboard/bookings'
+    | '/dashboard/documents'
+    | '/dashboard/messages'
     | '/dashboard/shortlist'
+    | '/dashboard/applications/$id'
   id:
     | '__root__'
     | '/'
@@ -200,7 +282,14 @@ export interface FileRouteTypes {
     | '/terms'
     | '/verify-email'
     | '/_authenticated/dashboard'
+    | '/courses/$slug'
+    | '/universities/$slug'
+    | '/_authenticated/dashboard/applications'
+    | '/_authenticated/dashboard/bookings'
+    | '/_authenticated/dashboard/documents'
+    | '/_authenticated/dashboard/messages'
     | '/_authenticated/dashboard/shortlist'
+    | '/_authenticated/dashboard/applications/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -208,7 +297,7 @@ export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AdminRoute: typeof AdminRoute
   CookiesRoute: typeof CookiesRoute
-  CoursesRoute: typeof CoursesRoute
+  CoursesRoute: typeof CoursesRouteWithChildren
   LoginRoute: typeof LoginRoute
   OnboardingRoute: typeof OnboardingRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -217,6 +306,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
   VerifyEmailRoute: typeof VerifyEmailRoute
+  UniversitiesSlugRoute: typeof UniversitiesSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -312,6 +402,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/universities/$slug': {
+      id: '/universities/$slug'
+      path: '/universities/$slug'
+      fullPath: '/universities/$slug'
+      preLoaderRoute: typeof UniversitiesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/courses/$slug': {
+      id: '/courses/$slug'
+      path: '/$slug'
+      fullPath: '/courses/$slug'
+      preLoaderRoute: typeof CoursesSlugRouteImport
+      parentRoute: typeof CoursesRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -326,15 +430,74 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardShortlistRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
     }
+    '/_authenticated/dashboard/messages': {
+      id: '/_authenticated/dashboard/messages'
+      path: '/messages'
+      fullPath: '/dashboard/messages'
+      preLoaderRoute: typeof AuthenticatedDashboardMessagesRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
+    '/_authenticated/dashboard/documents': {
+      id: '/_authenticated/dashboard/documents'
+      path: '/documents'
+      fullPath: '/dashboard/documents'
+      preLoaderRoute: typeof AuthenticatedDashboardDocumentsRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
+    '/_authenticated/dashboard/bookings': {
+      id: '/_authenticated/dashboard/bookings'
+      path: '/bookings'
+      fullPath: '/dashboard/bookings'
+      preLoaderRoute: typeof AuthenticatedDashboardBookingsRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
+    '/_authenticated/dashboard/applications': {
+      id: '/_authenticated/dashboard/applications'
+      path: '/applications'
+      fullPath: '/dashboard/applications'
+      preLoaderRoute: typeof AuthenticatedDashboardApplicationsRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
+    '/_authenticated/dashboard/applications/$id': {
+      id: '/_authenticated/dashboard/applications/$id'
+      path: '/$id'
+      fullPath: '/dashboard/applications/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardApplicationsIdRouteImport
+      parentRoute: typeof AuthenticatedDashboardApplicationsRoute
+    }
   }
 }
 
+interface AuthenticatedDashboardApplicationsRouteChildren {
+  AuthenticatedDashboardApplicationsIdRoute: typeof AuthenticatedDashboardApplicationsIdRoute
+}
+
+const AuthenticatedDashboardApplicationsRouteChildren: AuthenticatedDashboardApplicationsRouteChildren =
+  {
+    AuthenticatedDashboardApplicationsIdRoute:
+      AuthenticatedDashboardApplicationsIdRoute,
+  }
+
+const AuthenticatedDashboardApplicationsRouteWithChildren =
+  AuthenticatedDashboardApplicationsRoute._addFileChildren(
+    AuthenticatedDashboardApplicationsRouteChildren,
+  )
+
 interface AuthenticatedDashboardRouteChildren {
+  AuthenticatedDashboardApplicationsRoute: typeof AuthenticatedDashboardApplicationsRouteWithChildren
+  AuthenticatedDashboardBookingsRoute: typeof AuthenticatedDashboardBookingsRoute
+  AuthenticatedDashboardDocumentsRoute: typeof AuthenticatedDashboardDocumentsRoute
+  AuthenticatedDashboardMessagesRoute: typeof AuthenticatedDashboardMessagesRoute
   AuthenticatedDashboardShortlistRoute: typeof AuthenticatedDashboardShortlistRoute
 }
 
 const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
   {
+    AuthenticatedDashboardApplicationsRoute:
+      AuthenticatedDashboardApplicationsRouteWithChildren,
+    AuthenticatedDashboardBookingsRoute: AuthenticatedDashboardBookingsRoute,
+    AuthenticatedDashboardDocumentsRoute: AuthenticatedDashboardDocumentsRoute,
+    AuthenticatedDashboardMessagesRoute: AuthenticatedDashboardMessagesRoute,
     AuthenticatedDashboardShortlistRoute: AuthenticatedDashboardShortlistRoute,
   }
 
@@ -355,12 +518,23 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
   AuthenticatedRouteChildren,
 )
 
+interface CoursesRouteChildren {
+  CoursesSlugRoute: typeof CoursesSlugRoute
+}
+
+const CoursesRouteChildren: CoursesRouteChildren = {
+  CoursesSlugRoute: CoursesSlugRoute,
+}
+
+const CoursesRouteWithChildren =
+  CoursesRoute._addFileChildren(CoursesRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AdminRoute: AdminRoute,
   CookiesRoute: CookiesRoute,
-  CoursesRoute: CoursesRoute,
+  CoursesRoute: CoursesRouteWithChildren,
   LoginRoute: LoginRoute,
   OnboardingRoute: OnboardingRoute,
   PrivacyRoute: PrivacyRoute,
@@ -369,6 +543,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
   VerifyEmailRoute: VerifyEmailRoute,
+  UniversitiesSlugRoute: UniversitiesSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
