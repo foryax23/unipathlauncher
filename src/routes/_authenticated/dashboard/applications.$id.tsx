@@ -139,6 +139,14 @@ function AppDetail() {
             </Link>
           )}
 
+          <Link
+            to="/dashboard/applications/$id/submit"
+            params={{ id: app.id }}
+            className="tap block rounded-full bg-gold px-5 py-3 text-center text-sm font-medium text-gold-foreground hover:opacity-90 transition"
+          >
+            {app.status === "draft" ? "Complete & submit application →" : "Edit application details →"}
+          </Link>
+
           {app.status !== "withdrawn" && app.status !== "enrolled" && (
             <button
               type="button"

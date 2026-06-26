@@ -21,6 +21,7 @@ const createSchema = z
     ends_at: z.string().datetime(),
     channel: z.enum(["video", "phone", "in_person"]).default("video"),
     notes: z.string().trim().max(2000).optional(),
+    adviser_id: z.string().uuid().optional(),
   })
   .refine((d) => new Date(d.ends_at) > new Date(d.starts_at), {
     message: "End time must be after start time",
@@ -36,6 +37,7 @@ export const requestBooking = createServerFn({ method: "POST" })
       .from("bookings")
       .insert({
         student_id: userId,
+        adviser_id: data.adviser_id ?? null,
         starts_at: data.starts_at,
         ends_at: data.ends_at,
         channel: data.channel,
