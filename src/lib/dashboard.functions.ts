@@ -13,8 +13,8 @@ export const getDashboardOverview = createServerFn({ method: "GET" })
       supabase.from("shortlists").select("id,course_id,course_name,partner,level,created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(8),
       supabase.from("documents").select("id,type").eq("user_id", userId),
       supabase.from("applications").select("id,status,created_at,updated_at").eq("user_id", userId).order("updated_at", { ascending: false }).limit(8),
-      supabase.from("bookings").select("id,starts_at,status,channel").eq("user_id", userId).order("starts_at", { ascending: false }).limit(5),
-      supabase.from("application_events").select("id,application_id,kind,note,created_at").order("created_at", { ascending: false }).limit(15),
+      supabase.from("bookings").select("id,starts_at,status,channel").eq("student_id", userId).order("starts_at", { ascending: false }).limit(5),
+      supabase.from("application_events").select("id,application_id,type,payload,created_at").order("created_at", { ascending: false }).limit(15),
     ]);
 
     const profile = profileRes.data ?? null;
