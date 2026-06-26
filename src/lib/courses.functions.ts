@@ -63,7 +63,7 @@ export const getCourseBySlug = createServerFn({ method: "GET" })
     const { data: course, error } = await supabase
       .from("courses")
       .select(
-        "*,universities!inner(id,slug,name,city,region,country,logo_url,is_partner,ranking,website,description),course_intakes(id,intake_date,deadline_date,seats_left)",
+        "id,slug,name,level,subject,description,duration_months,fee_gbp,intake_months,entry_requirements,university_id,is_active,created_at,updated_at,universities!inner(id,slug,name,city,region,country,logo_url,is_partner,ranking,website,description),course_intakes(id,intake_date,deadline_date,seats_left)",
       )
       .eq("slug", data.slug)
       .eq("is_active", true)
