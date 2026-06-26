@@ -1,57 +1,90 @@
+# Phase 3 — Staff workspace, applications & operations
 
-# Phase 2 — Student Workspace + Public Catalogue
+Phase 2 gave students a workspace and the public a real catalogue. Phase 3 turns the back-office on: advisers and admins get the tools to actually run the pipeline, students get a guided submission flow, and both sides get a shared notification surface.
 
-Phase 1 shipped the schema and server-functions. Phase 2 makes them visible and usable: students get a real workspace, public visitors get SSR-indexable course/university pages, and the marketing site stops lying about a "match" feature that has no backing data.
+## 1. Admin & adviser workspace (`/admin/*`)
 
-## What ships
+A dedicated staff shell, gated by `assertStaff` in `beforeLoad` (admins + advisers) — separate from the student `/dashboard`.
 
-### 1. Public catalogue (SSR + SEO)
-- `/courses/$slug` — server-loaded `getCourseBySlug`, full course detail, intakes list, "Save to shortlist", "Start application" CTA (auth-gated). Per-route `head()` with title/description/og from course + university. JSON-LD `Course` schema.
-- `/universities/$slug` — `getUniversityBySlug`, hero with logo + city + ranking, partner badge, list of that uni's courses with shortlist buttons. JSON-LD `EducationalOrganization`.
-- `/courses` page swapped from static TS list to `listCourses` (paginated, filterable by level/subject/search). URL-driven filters via `validateSearch` + `loaderDeps`.
-- Dynamic `sitemap.xml` — extend the existing sitemap route to include every active course + every university slug.
+- `/admin` — overview: counts by application status, new leads (24h), unread staff threads, today's bookings.
+- `/admin/leads` — table of `leads`: filter by status/source/assignee, full-text on name/email, bulk assign, status transitions (new → contacted → qualified → applying → enrolled / lost), convert-to-application action, internal notes. Writes go through `updateLead` with audit logging.
+- `/admin/applications` — Kanban board across statuses (draft, submitted, interview, offer, accepted, rejected, withdrawn, enrolled). Drag-to-move via `@dnd-kit` calls `updateApplicationStatus` which writes an `application_events` row. Card shows student, course, university, days-in-status. Column virtualisation for >50 cards.
+- `/admin/applications/$id` — full detail with timeline, status changer, staff-only notes, attached documents (read via signed URL), student profile snapshot, message-student button (creates/opens thread).
+- `/admin/students/$userId` — staff view of a student: profile, shortlist, applications, documents, bookings, message history. Adviser assignment dropdown.
+- `/admin/inbox` — every thread the staff member owns or is assigned to. Same realtime hook as `/dashboard/messages`, plus a "claim" button on unassigned threads.
+- `/admin/bookings` — calendar week view of all bookings, filterable by adviser, confirm/decline/reschedule actions.
+- `/admin/audit` (admin only) — paginated `admin_audit` log with actor + entity + before/after diff.
 
-### 2. Student workspace (under `/_authenticated/dashboard/*`)
-All routes use the `_authenticated` gate already in the project.
+Permissions: admins see everything; advisers see only rows where they are `assignee_id` (leads) or the application's `assignee_id`, plus unassigned. Enforced in the new `*.functions.ts` via RLS-checked queries, not client filters.
 
-- `/dashboard/applications` — list of my applications, status pill, university logo, course, last-updated. Empty state CTAs to `/courses`.
-- `/dashboard/applications/$id` — detail view: course header, status timeline from `application_events`, notes editor (autosave), withdraw button. Read-only fields managed by adviser.
-- `/dashboard/documents` — vault. Drag-drop upload (calls `requestUploadUrl` → PUT to signed URL → `confirmDocument`). Type picker (passport / transcript / english_test / personal_statement / reference / other), file list with size, verified badge, signed-download, delete.
-- `/dashboard/messages` — split layout: thread list left, conversation right. Realtime via Supabase channel subscription on `messages` filtered by `thread_id`. "New message" composer creates thread + initial message via `startThread`. Read-receipts via `markThreadRead` on focus.
-- `/dashboard/bookings` — upcoming/past tabs. "Request a call" dialog with date/time + channel (video/phone/in-person) + notes. Cancel button on requested/confirmed bookings.
-- Dashboard home gains tiles: Applications count, Unread messages, Documents missing, Next booking.
+## 2. Application wizard (student side)
 
-### 3. Start-application flow
-- "Start application" button on `/courses/$slug` and on the shortlist row.
-- Calls `createApplication({ course_id, intake_id? })`, then `router.navigate({ to: "/dashboard/applications/$id" })`.
-- If unauthenticated, redirect to `/login?redirect=/courses/<slug>?action=apply`; on return, auto-trigger the apply mutation.
+Replaces the bare "Start application" mutation with a guided submission:
 
-### 4. Onboarding per-step autosave
-- `onboarding.tsx` already collects 6 steps in local state. Add `useEffect` per step calling `updateMyProfile` with the partial. Debounced 600ms. Shows a small "Saved" pill in the corner. Survives refresh — initial values hydrated from `getMyProfile`.
+- `/dashboard/applications/$id/submit` — 4 steps:
+  1. Personal & contact (prefilled from profile)
+  2. Academic history (prior qualifications, grades, English proficiency)
+  3. Document attach (multi-select from vault, or upload inline via `useUpload`)
+  4. Review & submit (read-only diff, confirms `status: submitted`, writes `status.submitted` event, fires admin-notification email)
+- Per-step autosave to `applications.application_data` (jsonb) via a new `updateMyApplicationData` server fn. Resume-where-you-left-off.
+- Validation with Zod schemas shared between client and server fn.
 
-### 5. Plumbing
-- `useRealtimeMessages(threadId)` hook — Supabase `channel().on("postgres_changes", …)` subscription.
-- `useUpload()` hook — fetch signed URL, PUT file, confirm; exposes progress.
-- `StatusPill` shared component for application status (color-coded against design tokens, no hardcoded hex).
-- All new server-fn calls use the canonical TanStack Query loader pattern (`ensureQueryData` + `useSuspenseQuery`).
+## 3. Adviser availability + booking calendar
 
-## Out of scope (Phase 3)
-- Admin Kanban board, adviser inbox, student profile workspace for staff
-- Application wizard (multi-step submission form with document attach + review)
-- Booking calendar with adviser availability windows
-- Notifications center / in-app bell
+Today bookings are free-form datetimes. Phase 3 adds real scheduling:
 
-## Technical notes
-- Public catalogue routes use the existing publishable-key publicClient pattern — no auth bearer required, RLS allows `anon` SELECT on `universities` / `courses` (already in Phase 1 migration).
-- All `_authenticated/dashboard/*` loaders are safe to call protected server fns — the managed gate runs `beforeLoad` first.
-- Realtime requires the `messages` table in the `supabase_realtime` publication — one-line migration to add it.
-- No new external connectors needed. Resend/Turnstile from Phase 1 remain optional.
+- New table `adviser_availability` (adviser_id, weekday, start_time, end_time, timezone).
+- New table `adviser_time_off` (adviser_id, starts_at, ends_at, reason).
+- `listAvailableSlots({ adviser_id?, date_from, date_to })` server fn computes free 30-min slots = availability − existing bookings − time-off.
+- Student `/dashboard/bookings` request flow becomes a slot picker (date strip → available times) instead of arbitrary datetime input. Optional adviser preference dropdown.
+- Adviser availability editor at `/admin/availability` — weekly grid + time-off list.
 
-## Execution order (one chat turn each)
-1. Tiny migration: add `messages` to realtime publication.
-2. Public catalogue: `/courses` rewrite + `/courses/$slug` + `/universities/$slug` + sitemap extension.
-3. Student applications routes (list + detail) + Start-application flow.
-4. Documents vault route + `useUpload` hook.
-5. Messages route + realtime hook.
-6. Bookings route + request dialog.
-7. Onboarding autosave + dashboard tiles.
+## 4. Notifications
+
+Server-driven, surfaced in both shells.
+
+- New table `notifications` (user_id, kind, title, body, link, read_at, created_at). RLS scoped to `auth.uid()`.
+- Emit on: application status change, new message, new booking, booking confirmed/cancelled, new lead (staff), new document uploaded (staff).
+- `NotificationBell` in header (student + admin shells): unread count badge, dropdown list, "mark all read", links navigate to the entity.
+- Realtime via Supabase channel on `notifications` filtered by `user_id`.
+- Optional email digest (uses Phase 1 Resend gateway) — opt-in in profile settings, daily summary of unread.
+
+## 5. Plumbing & shared
+
+- `src/components/admin/AdminShell.tsx` — sidebar nav, staff identity chip, role badge.
+- `src/lib/admin/leads.functions.ts` and `src/lib/admin/applications.functions.ts` — all staff endpoints behind `assertStaff` / `assertAdmin`, every mutation writes to `admin_audit`.
+- `src/hooks/use-notifications.ts` — realtime + query integration.
+- `@dnd-kit/core` + `@dnd-kit/sortable` for the Kanban board.
+- Shared `<KanbanCard>`, `<StaffTable>`, `<SlotPicker>` components.
+
+## Migrations (single batch, requires approval)
+
+```text
+- adviser_availability  (table + RLS: staff read self/all, admin write)
+- adviser_time_off      (table + RLS: staff read self, write self)
+- notifications         (table + RLS: owner read/update, service insert)
+- applications.application_data jsonb  (column add)
+- leads.assignee_id, leads.internal_notes  (column add if missing)
+- realtime publication: add notifications
+- GRANTs for every new table
+```
+
+## Out of scope (Phase 4)
+
+- Payments / commission tracking
+- Adviser performance reports & analytics dashboards
+- Public university adviser-marketplace listings
+- Mobile push notifications (web push)
+- Bulk email campaigns
+
+## Execution order (one turn each)
+
+1. Migrations + types regen.
+2. Staff shell + `/admin` overview + `/admin/leads`.
+3. `/admin/applications` Kanban + detail + audit page.
+4. `/admin/students/$userId` + `/admin/inbox`.
+5. Adviser availability tables, editor, slot-picker rewrite of student bookings, `/admin/bookings` calendar.
+6. Application wizard (4 steps, autosave, submit transition).
+7. Notifications: table, emitters in existing server fns, bell component, realtime hook, optional email digest.
+
+This is large. I'll execute it phase-step by phase-step across turns — you approve this overall plan and we go.
