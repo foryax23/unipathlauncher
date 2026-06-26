@@ -23,7 +23,7 @@ export const listAllApplications = createServerFn({ method: "POST" })
       )
       .order("created_at", { ascending: false })
       .limit(500);
-    if (data.status && data.status !== "all") q = q.eq("status", data.status);
+    if (data.status && data.status !== "all") q = q.eq("status", data.status as never);
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
 
