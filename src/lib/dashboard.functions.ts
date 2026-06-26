@@ -105,10 +105,11 @@ export const getDashboardOverview = createServerFn({ method: "GET" })
     type Activity = { id: string; kind: string; title: string; at: string; href?: string };
     const activity: Activity[] = [];
     for (const e of events) {
+      const payload = (e.payload ?? {}) as { note?: string };
       activity.push({
         id: `evt-${e.id}`,
-        kind: e.kind,
-        title: e.note ?? humanizeEvent(e.kind),
+        kind: e.type,
+        title: payload.note ?? humanizeEvent(e.type),
         at: e.created_at,
         href: e.application_id ? `/dashboard/applications/${e.application_id}` : undefined,
       });
@@ -117,7 +118,7 @@ export const getDashboardOverview = createServerFn({ method: "GET" })
       activity.push({
         id: `bk-${b.id}`,
         kind: "booking",
-        title: `Adviser ${b.channel} call ${b.status === "scheduled" ? "scheduled" : b.status}`,
+        title: `Adviser ${b.channel} call ${b.status === "confirmed" ? "confirmed" : b.status}`,
         at: b.starts_at,
         href: "/dashboard/bookings",
       });
