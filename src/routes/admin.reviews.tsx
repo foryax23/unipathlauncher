@@ -18,7 +18,7 @@ const queryFor = (status: "pending" | "published" | "rejected" | "all") =>
 export const Route = createFileRoute("/admin/reviews")({
   beforeLoad: async () => {
     const r = await getMyAdminStatus();
-    if (!r.isStaff) throw redirect({ to: "/dashboard" });
+    if (!r.isAdmin) throw redirect({ to: "/dashboard" });
   },
   loader: ({ context }) => context.queryClient.ensureQueryData(queryFor("pending")),
   head: () => ({ meta: [{ title: "Reviews · Admin" }, { name: "robots", content: "noindex,nofollow" }] }),
