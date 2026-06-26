@@ -23,8 +23,8 @@ export const Route = createFileRoute("/universities/$slug")({
   loader: async ({ context, params }) => {
     const res = await context.queryClient.ensureQueryData(uniQuery(params.slug));
     if (!res.university) throw notFound();
-    await context.queryClient.ensureQueryData(reviewsQuery(res.university.id));
-    return res;
+    const rev = await context.queryClient.ensureQueryData(reviewsQuery(res.university.id));
+    return { ...res, reviewSummary: { avgRating: rev.avgRating, count: rev.count } };
   },
   head: ({ loaderData }) => {
     const u = loaderData?.university;
