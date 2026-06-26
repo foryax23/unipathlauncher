@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Logo } from "./Logo";
 import { ThemeToggle } from "./ThemeToggle";
+import { CommandPalette } from "@/components/search/CommandPalette";
 
 const NAV = [
   { href: "/courses", label: "Courses" },
@@ -39,6 +40,7 @@ export function Header() {
           </nav>
 
           <div className="relative flex items-center gap-1.5">
+            <CommandPalette />
             <ThemeToggle />
             <Link
               to="/login"

@@ -2,6 +2,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { Logo } from "@/components/marketing/Logo";
 import { supabase } from "@/integrations/supabase/client";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { CommandPalette } from "@/components/search/CommandPalette";
 import {
   BookOpen,
   FileText,
@@ -51,6 +52,7 @@ export function DashShell({
             ))}
           </nav>
           <div className="flex items-center gap-1">
+            <CommandPalette />
             <NotificationBell />
             <button
               type="button"
