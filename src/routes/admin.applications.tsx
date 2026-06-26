@@ -61,7 +61,7 @@ function AdminApplicationsPage() {
 
   const move = async (id: string, status: string) => {
     const prev = apps;
-    setApps((cur) => cur?.map((a) => (a.id === id ? { ...a, status } : a)) ?? cur);
+    setApps((cur) => cur?.map((a) => (a.id === id ? ({ ...a, status: status as App["status"] }) : a)) ?? cur);
     try {
       await updateStatus({ data: { id, status: status as never } });
       toast.success(`Moved to ${status}`);
