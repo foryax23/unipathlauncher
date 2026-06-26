@@ -44,8 +44,9 @@ function AppDetail() {
   const { data } = useSuspenseQuery(appQuery(params.id));
   const qc = useQueryClient();
   const app = data.application!;
-  const c = (app as { courses?: { name?: string; level?: string; subject?: string; slug?: string; universities?: { name?: string; city?: string; slug?: string } } }).courses;
+  const c = (app as { courses?: { id?: string; name?: string; level?: string; subject?: string; slug?: string; universities?: { id?: string; name?: string; city?: string; slug?: string } } }).courses;
   const uni = c?.universities;
+  const canReview = (app.status === "accepted" || app.status === "enrolled") && uni?.id;
 
   const [notes, setNotes] = useState(app.notes ?? "");
   const saveNotes = useServerFn(updateMyApplicationNotes);
