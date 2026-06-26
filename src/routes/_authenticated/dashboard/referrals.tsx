@@ -27,7 +27,7 @@ function ReferralsPage() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    getMine({ data: {} })
+    getMine()
       .then((r) => {
         setPrimary(r.primary as Primary);
         setConversions(r.conversions);

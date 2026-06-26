@@ -37,7 +37,7 @@ function MetricsPage() {
   const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
-    load({ data: {} })
+    load()
       .then((r) => setM(r as Metrics))
       .catch((e) => setErr(e instanceof Error ? e.message : "Failed"));
   }, [load]);
@@ -69,8 +69,9 @@ function MetricsPage() {
           </section>
 
           <section className="mt-8 grid gap-6 lg:grid-cols-2">
-            <FunnelCard title="Lead funnel" rows={m?.leadFunnel ?? []} />
-            <FunnelCard title="Application funnel" rows={m?.appFunnel ?? []} />
+            <FunnelCard title="Lead funnel" rows={normaliseFunnel(m?.leadFunnel)} />
+            <FunnelCard title="Application funnel" rows={normaliseFunnel(m?.appFunnel)} />
+
           </section>
 
           <section className="mt-8">
