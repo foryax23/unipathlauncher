@@ -147,6 +147,65 @@ export const withdrawApplication = createServerFn({ method: "POST" })
     return { ok: true as const };
   });
 
+const dataSchema = z.object({
+  id: z.string().uuid(),
+  application_data: z.record(z.unknown()),
+});
+
+export const updateMyApplicationData = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => dataSchema.parse(input))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { error } = await supabase
+      .from("applications")
+      .update({ application_data: data.application_data as never })
+      .eq("id", data.id)
+      .eq("user_id", userId);
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
+
+export const submitMyApplication = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({ id: z.string().uuid(), application_data: z.record(z.unknown()).optional() }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const patch: Record<string, unknown> = {
+      status: "submitted",
+      submitted_at: new Date().toISOString(),
+    };
+    if (data.application_data) patch.application_data = data.application_data;
+    const { data: row, error } = await supabase
+      .from("applications")
+      .update(patch as never)
+      .eq("id", data.id)
+      .eq("user_id", userId)
+      .select("id,user_id,course_id")
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!row) throw new Error("Not found");
+
+    await supabase.from("application_events").insert({
+      application_id: data.id,
+      type: "status.submitted",
+      actor_id: userId,
+      payload: { source: "student" },
+    });
+
+    const { notifyStaff } = await import("@/lib/notifications.server");
+    await notifyStaff({
+      kind: "application.submitted",
+      title: "New application submitted",
+      body: "A student has submitted an application for review.",
+      link: `/admin/applications/${data.id}`,
+    });
+
+    return { ok: true as const };
+  });
+
 export const getApplication = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
