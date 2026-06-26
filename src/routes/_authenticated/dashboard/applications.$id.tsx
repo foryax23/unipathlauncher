@@ -108,6 +108,17 @@ function AppDetail() {
           </ol>
         </section>
 
+        {canReview && uni?.id && (
+          <section className="lg:col-span-2">
+            <ReviewForm
+              universityId={uni.id}
+              universityName={uni.name ?? "this university"}
+              courseId={c?.id ?? null}
+              onSuccess={() => qc.invalidateQueries({ queryKey: ["application", app.id] })}
+            />
+          </section>
+        )}
+
         <aside className="space-y-4">
           <div className="glass rounded-3xl p-5">
             <p className="text-xs uppercase tracking-widest text-muted-foreground">Notes</p>
