@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { queryOptions, useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { queryOptions, useSuspenseQuery, useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { listMyBookings, requestBooking, cancelBooking } from "@/lib/bookings.functions";
+import { listAvailableSlots } from "@/lib/availability.functions";
 import { DashShell } from "@/components/dashboard/DashShell";
-import { CalendarClock, Video, Phone, MapPin, X } from "lucide-react";
+import { CalendarClock, Video, Phone, MapPin, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 
 const bookingsQuery = queryOptions({
@@ -23,33 +24,53 @@ export const Route = createFileRoute("/_authenticated/dashboard/bookings")({
   component: BookingsPage,
 });
 
-function defaultSlot() {
-  const d = new Date();
-  d.setDate(d.getDate() + 1);
-  d.setMinutes(0, 0, 0);
-  d.setHours(14);
-  return d.toISOString().slice(0, 16);
+function startOfWeek(d: Date) {
+  const x = new Date(d);
+  x.setUTCHours(0, 0, 0, 0);
+  const day = x.getUTCDay();
+  x.setUTCDate(x.getUTCDate() - day);
+  return x;
 }
+function addDays(d: Date, n: number) { const x = new Date(d); x.setUTCDate(x.getUTCDate() + n); return x; }
+function isoDate(d: Date) { return d.toISOString().slice(0, 10); }
 
 function BookingsPage() {
   const { data } = useSuspenseQuery(bookingsQuery);
   const qc = useQueryClient();
   const requestFn = useServerFn(requestBooking);
   const cancelFn = useServerFn(cancelBooking);
+  const slotsFn = useServerFn(listAvailableSlots);
 
-  const [start, setStart] = useState(defaultSlot());
-  const [duration, setDuration] = useState(30);
+  const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
+  const weekEnd = useMemo(() => addDays(weekStart, 6), [weekStart]);
+  const [pickedDay, setPickedDay] = useState<string>(() => isoDate(new Date()));
+  const [picked, setPicked] = useState<{ starts_at: string; ends_at: string; adviser_id: string } | null>(null);
   const [channel, setChannel] = useState<"video" | "phone" | "in_person">("video");
   const [notes, setNotes] = useState("");
 
+  const slotsQ = useQuery({
+    queryKey: ["slots", isoDate(weekStart), isoDate(weekEnd)],
+    queryFn: () => slotsFn({ data: { date_from: isoDate(weekStart), date_to: isoDate(weekEnd), slot_minutes: 30 } }),
+  });
+
+  const slotsByDay = useMemo(() => {
+    const m = new Map<string, Array<{ starts_at: string; ends_at: string; adviser_id: string }>>();
+    for (const s of slotsQ.data?.slots ?? []) {
+      const d = s.starts_at.slice(0, 10);
+      if (!m.has(d)) m.set(d, []);
+      m.get(d)!.push(s);
+    }
+    return m;
+  }, [slotsQ.data]);
+
   const req = useMutation({
     mutationFn: () => {
-      const startsAt = new Date(start);
-      const endsAt = new Date(startsAt.getTime() + duration * 60_000);
+      if (!picked) throw new Error("Pick a slot");
       return requestFn({
         data: {
-          starts_at: startsAt.toISOString(),
-          ends_at: endsAt.toISOString(),
+          starts_at: picked.starts_at,
+          ends_at: picked.ends_at,
+          adviser_id: picked.adviser_id,
           channel,
           notes: notes || undefined,
         },
@@ -58,6 +79,8 @@ function BookingsPage() {
     onSuccess: () => {
       toast.success("Booking requested — we'll confirm shortly");
       qc.invalidateQueries({ queryKey: ["bookings"] });
+      qc.invalidateQueries({ queryKey: ["slots"] });
+      setPicked(null);
       setNotes("");
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not request"),
@@ -68,76 +91,104 @@ function BookingsPage() {
     onSuccess: () => {
       toast.success("Booking cancelled");
       qc.invalidateQueries({ queryKey: ["bookings"] });
+      qc.invalidateQueries({ queryKey: ["slots"] });
     },
   });
 
   const channelIcon = (c: string) =>
     c === "video" ? <Video className="size-3.5" /> : c === "phone" ? <Phone className="size-3.5" /> : <MapPin className="size-3.5" />;
 
+  const daySlots = slotsByDay.get(pickedDay) ?? [];
+
   return (
     <DashShell eyebrow="Calls" title="Adviser bookings">
-      <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
-        <form
-          onSubmit={(e) => { e.preventDefault(); req.mutate(); }}
-          className="glass-strong rounded-3xl p-6 space-y-4"
-        >
-          <p className="font-serif text-xl">Request a slot</p>
-          <label className="block text-sm">
-            <span className="text-xs uppercase tracking-widest text-muted-foreground">When</span>
-            <input
-              type="datetime-local"
-              required
-              value={start}
-              onChange={(e) => setStart(e.target.value)}
-              min={new Date().toISOString().slice(0, 16)}
-              className="mt-1 w-full rounded-full border border-border bg-background/60 px-4 py-2 text-sm"
-            />
-          </label>
-          <div className="grid grid-cols-2 gap-3">
-            <label className="block text-sm">
-              <span className="text-xs uppercase tracking-widest text-muted-foreground">Duration</span>
-              <select
-                value={duration}
-                onChange={(e) => setDuration(Number(e.target.value))}
-                className="mt-1 w-full rounded-full border border-border bg-background/60 px-4 py-2 text-sm"
-              >
-                <option value={15}>15 minutes</option>
-                <option value={30}>30 minutes</option>
-                <option value={45}>45 minutes</option>
-                <option value={60}>60 minutes</option>
-              </select>
-            </label>
+      <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
+        <div className="glass-strong rounded-3xl p-6 space-y-5">
+          <div className="flex items-center justify-between">
+            <p className="font-serif text-xl">Pick a slot</p>
+            <div className="flex items-center gap-1">
+              <button type="button" onClick={() => setWeekStart(addDays(weekStart, -7))} className="tap inline-flex h-9 w-9 items-center justify-center rounded-full border border-border hover:bg-accent/40"><ChevronLeft className="size-4" /></button>
+              <button type="button" onClick={() => setWeekStart(addDays(weekStart, 7))} className="tap inline-flex h-9 w-9 items-center justify-center rounded-full border border-border hover:bg-accent/40"><ChevronRight className="size-4" /></button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-7 gap-2">
+            {Array.from({ length: 7 }).map((_, i) => {
+              const d = addDays(weekStart, i);
+              const key = isoDate(d);
+              const count = slotsByDay.get(key)?.length ?? 0;
+              const active = pickedDay === key;
+              const past = d < new Date(new Date().toDateString());
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  disabled={past}
+                  onClick={() => { setPickedDay(key); setPicked(null); }}
+                  className={`tap rounded-2xl border px-1.5 py-2 text-center transition ${active ? "border-gold bg-gold/15" : "border-border hover:bg-accent/40"} ${past ? "opacity-40 cursor-not-allowed" : ""}`}
+                >
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{d.toLocaleDateString("en-GB", { weekday: "short", timeZone: "UTC" })}</p>
+                  <p className="mt-0.5 font-serif text-lg leading-none">{d.getUTCDate()}</p>
+                  <p className="mt-1 text-[10px] text-muted-foreground">{count ? `${count} free` : "—"}</p>
+                </button>
+              );
+            })}
+          </div>
+
+          <div>
+            <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Available times</p>
+            {slotsQ.isLoading ? (
+              <p className="text-sm text-muted-foreground">Loading…</p>
+            ) : daySlots.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No slots on this day. Pick another.</p>
+            ) : (
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                {daySlots.map((s) => {
+                  const t = new Date(s.starts_at);
+                  const label = t.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "UTC" });
+                  const sel = picked?.starts_at === s.starts_at && picked?.adviser_id === s.adviser_id;
+                  return (
+                    <button
+                      key={`${s.adviser_id}_${s.starts_at}`}
+                      type="button"
+                      onClick={() => setPicked(s)}
+                      className={`tap rounded-full border px-3 py-2 text-sm transition ${sel ? "border-gold bg-gold text-gold-foreground" : "border-border hover:bg-accent/40"}`}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <label className="block text-sm">
               <span className="text-xs uppercase tracking-widest text-muted-foreground">Channel</span>
-              <select
-                value={channel}
-                onChange={(e) => setChannel(e.target.value as typeof channel)}
-                className="mt-1 w-full rounded-full border border-border bg-background/60 px-4 py-2 text-sm"
-              >
+              <select value={channel} onChange={(e) => setChannel(e.target.value as typeof channel)}
+                className="mt-1 w-full rounded-full border border-border bg-background/60 px-4 py-2 text-sm">
                 <option value="video">Video call</option>
                 <option value="phone">Phone</option>
                 <option value="in_person">In person</option>
               </select>
             </label>
+            <label className="block text-sm sm:row-span-2">
+              <span className="text-xs uppercase tracking-widest text-muted-foreground">Notes</span>
+              <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} maxLength={2000}
+                className="mt-1 w-full rounded-2xl border border-border bg-background/60 p-3 text-sm" />
+            </label>
           </div>
-          <label className="block text-sm">
-            <span className="text-xs uppercase tracking-widest text-muted-foreground">Anything we should know?</span>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={3}
-              maxLength={2000}
-              className="mt-1 w-full rounded-2xl border border-border bg-background/60 p-3 text-sm"
-            />
-          </label>
+
           <button
-            type="submit"
-            disabled={req.isPending}
-            className="tap inline-flex items-center gap-2 rounded-full bg-gold px-5 py-2.5 text-sm font-medium text-gold-foreground hover:opacity-90 transition"
+            type="button"
+            onClick={() => req.mutate()}
+            disabled={!picked || req.isPending}
+            className="tap inline-flex items-center gap-2 rounded-full bg-gold px-5 py-2.5 text-sm font-medium text-gold-foreground hover:opacity-90 transition disabled:opacity-50"
           >
-            <CalendarClock className="size-4" /> {req.isPending ? "Requesting…" : "Request booking"}
+            <CalendarClock className="size-4" />
+            {picked ? `Request ${new Date(picked.starts_at).toLocaleString("en-GB", { weekday: "short", hour: "2-digit", minute: "2-digit" })}` : "Pick a slot"}
           </button>
-        </form>
+        </div>
 
         <section>
           <p className="text-xs uppercase tracking-widest text-muted-foreground">Your bookings</p>
@@ -150,10 +201,7 @@ function BookingsPage() {
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="font-serif text-lg">
-                        {new Date(b.starts_at).toLocaleString(undefined, {
-                          weekday: "short", month: "short", day: "numeric",
-                          hour: "2-digit", minute: "2-digit",
-                        })}
+                        {new Date(b.starts_at).toLocaleString(undefined, { weekday: "short", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
                       </p>
                       <p className="mt-1 inline-flex items-center gap-1.5 rounded-full border border-border bg-surface/60 px-2.5 py-0.5 text-xs">
                         {channelIcon(b.channel)} {b.channel.replace("_", " ")}
@@ -163,9 +211,7 @@ function BookingsPage() {
                       {b.status}
                     </span>
                   </div>
-                  {b.notes && (
-                    <p className="mt-2 text-sm text-muted-foreground">{b.notes}</p>
-                  )}
+                  {b.notes && <p className="mt-2 text-sm text-muted-foreground">{b.notes}</p>}
                   {b.status !== "cancelled" && new Date(b.starts_at) > new Date() && (
                     <button
                       type="button"
