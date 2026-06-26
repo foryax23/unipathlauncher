@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Logo } from "./Logo";
 import { ThemeToggle } from "./ThemeToggle";
+import { CommandPalette } from "@/components/search/CommandPalette";
 
 const NAV = [
   { href: "/courses", label: "Courses" },
