@@ -125,6 +125,12 @@ function Kpi({ icon, label, value, sub }: { icon: React.ReactNode; label: string
   );
 }
 
+function normaliseFunnel(rows: Array<{ status: string | null; n: number | null; day: string | null }> | undefined) {
+  return (rows ?? [])
+    .filter((r) => r.status != null)
+    .map((r) => ({ status: r.status as string, n: Number(r.n ?? 0), day: r.day ?? "" }));
+}
+
 function FunnelCard({ title, rows }: { title: string; rows: Array<{ status: string; n: number; day: string }> }) {
   const byStatus = new Map<string, number>();
   for (const r of rows) byStatus.set(r.status, (byStatus.get(r.status) ?? 0) + Number(r.n));
