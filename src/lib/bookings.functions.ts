@@ -45,6 +45,15 @@ export const requestBooking = createServerFn({ method: "POST" })
       .select()
       .maybeSingle();
     if (error) throw new Error(error.message);
+
+    const { notifyStaff } = await import("@/lib/notifications.server");
+    await notifyStaff({
+      kind: "booking.requested",
+      title: "New call request",
+      body: `${new Date(data.starts_at).toLocaleString("en-GB")} · ${data.channel}`,
+      link: "/admin/applications",
+    });
+
     return { booking: row };
   });
 

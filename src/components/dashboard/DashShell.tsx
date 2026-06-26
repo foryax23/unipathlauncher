@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Logo } from "@/components/marketing/Logo";
 import { supabase } from "@/integrations/supabase/client";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import {
   BookOpen,
   FileText,
@@ -49,16 +50,19 @@ export function DashShell({
               </Link>
             ))}
           </nav>
-          <button
-            type="button"
-            onClick={async () => {
-              await supabase.auth.signOut();
-              navigate({ to: "/" });
-            }}
-            className="tap inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent/40 transition"
-          >
-            <LogOut className="size-4" /> <span className="hidden sm:inline">Sign out</span>
-          </button>
+          <div className="flex items-center gap-1">
+            <NotificationBell />
+            <button
+              type="button"
+              onClick={async () => {
+                await supabase.auth.signOut();
+                navigate({ to: "/" });
+              }}
+              className="tap inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent/40 transition"
+            >
+              <LogOut className="size-4" /> <span className="hidden sm:inline">Sign out</span>
+            </button>
+          </div>
         </div>
         <nav className="md:hidden flex items-center gap-1 overflow-x-auto px-3 pb-2 -mt-1">
           {NAV.map((n) => (
