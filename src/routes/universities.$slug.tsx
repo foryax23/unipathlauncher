@@ -74,6 +74,7 @@ function UniversityPage() {
   const params = Route.useParams();
   const { data } = useSuspenseQuery(uniQuery(params.slug));
   const u = data.university!;
+  const { data: rev } = useSuspenseQuery(reviewsQuery(u.id));
   return (
     <div className="min-h-screen hero-warm">
       <header className="glass border-b border-border/50">
