@@ -5,6 +5,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { getCourseBySlug } from "@/lib/courses.functions";
 import { createApplicationBySlug } from "@/lib/applications.functions";
+import { listPublishedReviews } from "@/lib/reviews.functions";
+import { ReviewsSection } from "@/components/reviews/ReviewsSection";
 import { ShortlistButton } from "@/components/shortlist/ShortlistButton";
 import { Logo } from "@/components/marketing/Logo";
 import { Footer } from "@/components/marketing/Footer";
@@ -18,11 +20,18 @@ const courseQuery = (slug: string) =>
     queryFn: () => getCourseBySlug({ data: { slug } }),
   });
 
+const reviewsQuery = (courseId: string) =>
+  queryOptions({
+    queryKey: ["reviews", "course", courseId],
+    queryFn: () => listPublishedReviews({ data: { courseId, limit: 20 } }),
+  });
+
 export const Route = createFileRoute("/courses/$slug")({
   loader: async ({ context, params }) => {
     const res = await context.queryClient.ensureQueryData(courseQuery(params.slug));
     if (!res.course) throw notFound();
-    return res;
+    const rev = await context.queryClient.ensureQueryData(reviewsQuery(res.course.id));
+    return { ...res, reviewSummary: { avgRating: rev.avgRating, count: rev.count } };
   },
   head: ({ loaderData }) => {
     const c = loaderData?.course;
