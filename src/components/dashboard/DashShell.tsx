@@ -52,6 +52,7 @@ export function DashShell({
             ))}
           </nav>
           <div className="flex items-center gap-1">
+            <CommandPalette />
             <NotificationBell />
             <button
               type="button"
