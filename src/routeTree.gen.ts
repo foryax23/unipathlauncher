@@ -25,6 +25,7 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UniversitiesSlugRouteImport } from './routes/universities.$slug'
 import { Route as CoursesSlugRouteImport } from './routes/courses.$slug'
+import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as AdminReviewsRouteImport } from './routes/admin.reviews'
 import { Route as AdminMetricsRouteImport } from './routes/admin.metrics'
 import { Route as AdminLeadsRouteImport } from './routes/admin.leads'
@@ -121,6 +122,11 @@ const CoursesSlugRoute = CoursesSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => CoursesRoute,
 } as any)
+const BlogSlugRoute = BlogSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => BlogRoute,
+} as any)
 const AdminReviewsRoute = AdminReviewsRouteImport.update({
   id: '/reviews',
   path: '/reviews',
@@ -213,7 +219,7 @@ const AuthenticatedDashboardApplicationsIdSubmitRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
-  '/blog': typeof BlogRoute
+  '/blog': typeof BlogRouteWithChildren
   '/cookies': typeof CookiesRoute
   '/courses': typeof CoursesRouteWithChildren
   '/login': typeof LoginRoute
@@ -231,6 +237,7 @@ export interface FileRoutesByFullPath {
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/metrics': typeof AdminMetricsRoute
   '/admin/reviews': typeof AdminReviewsRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/courses/$slug': typeof CoursesSlugRoute
   '/universities/$slug': typeof UniversitiesSlugRoute
   '/dashboard/applications': typeof AuthenticatedDashboardApplicationsRouteWithChildren
@@ -246,7 +253,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
-  '/blog': typeof BlogRoute
+  '/blog': typeof BlogRouteWithChildren
   '/cookies': typeof CookiesRoute
   '/courses': typeof CoursesRouteWithChildren
   '/login': typeof LoginRoute
@@ -264,6 +271,7 @@ export interface FileRoutesByTo {
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/metrics': typeof AdminMetricsRoute
   '/admin/reviews': typeof AdminReviewsRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/courses/$slug': typeof CoursesSlugRoute
   '/universities/$slug': typeof UniversitiesSlugRoute
   '/dashboard/applications': typeof AuthenticatedDashboardApplicationsRouteWithChildren
@@ -281,7 +289,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
-  '/blog': typeof BlogRoute
+  '/blog': typeof BlogRouteWithChildren
   '/cookies': typeof CookiesRoute
   '/courses': typeof CoursesRouteWithChildren
   '/login': typeof LoginRoute
@@ -299,6 +307,7 @@ export interface FileRoutesById {
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/metrics': typeof AdminMetricsRoute
   '/admin/reviews': typeof AdminReviewsRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/courses/$slug': typeof CoursesSlugRoute
   '/universities/$slug': typeof UniversitiesSlugRoute
   '/_authenticated/dashboard/applications': typeof AuthenticatedDashboardApplicationsRouteWithChildren
@@ -334,6 +343,7 @@ export interface FileRouteTypes {
     | '/admin/leads'
     | '/admin/metrics'
     | '/admin/reviews'
+    | '/blog/$slug'
     | '/courses/$slug'
     | '/universities/$slug'
     | '/dashboard/applications'
@@ -367,6 +377,7 @@ export interface FileRouteTypes {
     | '/admin/leads'
     | '/admin/metrics'
     | '/admin/reviews'
+    | '/blog/$slug'
     | '/courses/$slug'
     | '/universities/$slug'
     | '/dashboard/applications'
@@ -401,6 +412,7 @@ export interface FileRouteTypes {
     | '/admin/leads'
     | '/admin/metrics'
     | '/admin/reviews'
+    | '/blog/$slug'
     | '/courses/$slug'
     | '/universities/$slug'
     | '/_authenticated/dashboard/applications'
@@ -418,7 +430,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
-  BlogRoute: typeof BlogRoute
+  BlogRoute: typeof BlogRouteWithChildren
   CookiesRoute: typeof CookiesRoute
   CoursesRoute: typeof CoursesRouteWithChildren
   LoginRoute: typeof LoginRoute
@@ -545,6 +557,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/courses/$slug'
       preLoaderRoute: typeof CoursesSlugRouteImport
       parentRoute: typeof CoursesRoute
+    }
+    '/blog/$slug': {
+      id: '/blog/$slug'
+      path: '/$slug'
+      fullPath: '/blog/$slug'
+      preLoaderRoute: typeof BlogSlugRouteImport
+      parentRoute: typeof BlogRoute
     }
     '/admin/reviews': {
       id: '/admin/reviews'
@@ -759,6 +778,16 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface BlogRouteChildren {
+  BlogSlugRoute: typeof BlogSlugRoute
+}
+
+const BlogRouteChildren: BlogRouteChildren = {
+  BlogSlugRoute: BlogSlugRoute,
+}
+
+const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
+
 interface CoursesRouteChildren {
   CoursesSlugRoute: typeof CoursesSlugRoute
 }
@@ -774,7 +803,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,
-  BlogRoute: BlogRoute,
+  BlogRoute: BlogRouteWithChildren,
   CookiesRoute: CookiesRoute,
   CoursesRoute: CoursesRouteWithChildren,
   LoginRoute: LoginRoute,
