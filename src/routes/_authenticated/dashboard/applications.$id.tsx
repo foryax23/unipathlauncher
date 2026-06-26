@@ -9,6 +9,7 @@ import {
 } from "@/lib/applications.functions";
 import { DashShell } from "@/components/dashboard/DashShell";
 import { StatusPill } from "@/components/dashboard/StatusPill";
+import { ReviewForm } from "@/components/reviews/ReviewForm";
 import { toast } from "sonner";
 import { ArrowLeft, Save, Trash2 } from "lucide-react";
 
