@@ -1,17 +1,19 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { getMyProfile } from "@/lib/profile.functions";
-import { PROGRAMMES, COURSES, CAMPUSES } from "@/components/marketing/data/courses";
+import { getDashboardOverview } from "@/lib/dashboard.functions";
 import { supabase } from "@/integrations/supabase/client";
-import { GraduationCap, MapPin, Sparkles, LogOut, BookOpen, Phone } from "lucide-react";
+import {
+  GraduationCap, MapPin, Sparkles, LogOut, BookOpen, Phone,
+  Check, ChevronRight, FileText, Calendar, Activity, Star, ArrowRight,
+} from "lucide-react";
 import { Logo } from "@/components/marketing/Logo";
 import { VerifyEmailBanner } from "@/components/dashboard/VerifyEmailBanner";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
-      { title: "Your shortlist · Bridge Gateway" },
+      { title: "Your dashboard · Bridge Gateway" },
       { name: "description", content: "Your personalised UK university shortlist and adviser updates." },
       { name: "robots", content: "noindex,nofollow" },
       { property: "og:url", content: "/dashboard" },
@@ -21,37 +23,28 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
   component: Dashboard,
 });
 
-type Profile = {
-  full_name: string | null;
-  subject: string | null;
-  study_level: string | null;
-  city: string | null;
-  lat: number | null;
-  lng: number | null;
-  onboarding_complete: boolean;
-  email_verified_at: string | null;
-};
+type Overview = Awaited<ReturnType<typeof getDashboardOverview>>;
 
 function Dashboard() {
   const navigate = useNavigate();
-  const fetchProfile = useServerFn(getMyProfile);
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const fetchOverview = useServerFn(getDashboardOverview);
+  const [data, setData] = useState<Overview | null>(null);
   const [email, setEmail] = useState<string>("");
 
   useEffect(() => {
     (async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setEmail(session?.user.email ?? "");
-      const r = await fetchProfile({});
+      const r = await fetchOverview();
       if (!r.profile?.onboarding_complete) {
         navigate({ to: "/onboarding" });
         return;
       }
-      setProfile(r.profile as Profile);
+      setData(r);
     })();
   }, []);
 
-  if (!profile) {
+  if (!data) {
     return (
       <div className="min-h-screen hero-warm flex items-center justify-center">
         <p className="text-muted-foreground">Loading…</p>
@@ -59,34 +52,30 @@ function Dashboard() {
     );
   }
 
-  const matches = rankMatches(profile);
-  const subjectTitle = COURSES.find((c) => c.id === profile.subject)?.title ?? "any subject";
-  const firstName = profile.full_name?.trim().split(" ")[0] ?? "there";
+  const { profile, checklist, completionPct, completed, total, nextStep, recommendations, activity, counts } = data;
+  const firstName = profile?.full_name?.trim().split(" ")[0] ?? "there";
 
   return (
     <div className="min-h-screen hero-warm safe-top">
-      <header className="glass border-b border-border/50">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
+      <header className="glass border-b border-border/50 sticky top-0 z-30">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <Link to="/"><Logo /></Link>
           <div className="flex items-center gap-1">
-            <Link
-              to="/dashboard/shortlist"
-              className="tap inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent/40 transition"
-            >
+            <Link to="/dashboard/shortlist" className="tap inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent/40 transition">
               <BookOpen className="size-4" /> Shortlist
             </Link>
-            <Link
-              to="/dashboard/referrals"
-              className="tap inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent/40 transition"
-            >
-              <BookOpen className="size-4" /> Refer
+            <Link to="/dashboard/applications" className="tap inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent/40 transition">
+              <FileText className="size-4" /> Applications
+            </Link>
+            <Link to="/dashboard/bookings" className="tap inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent/40 transition">
+              <Calendar className="size-4" /> Bookings
+            </Link>
+            <Link to="/dashboard/referrals" className="tap inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent/40 transition">
+              <Sparkles className="size-4" /> Refer
             </Link>
             <button
               type="button"
-              onClick={async () => {
-                await supabase.auth.signOut();
-                navigate({ to: "/" });
-              }}
+              onClick={async () => { await supabase.auth.signOut(); navigate({ to: "/" }); }}
               className="tap inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent/40 transition"
             >
               <LogOut className="size-4" /> Sign out
@@ -95,113 +84,159 @@ function Dashboard() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-4 py-10 pb-24">
+      <main className="mx-auto max-w-6xl px-4 py-10 pb-24">
         {email && (
           <div className="mb-6">
-            <VerifyEmailBanner email={email} verifiedAt={profile.email_verified_at} />
+            <VerifyEmailBanner email={email} verifiedAt={profile?.email_verified_at ?? null} />
           </div>
         )}
 
-        {/* Hero */}
-        <section className="glass-strong rounded-3xl p-7 sm:p-10 shadow-xl">
-          <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
-            Your personalised shortlist
-          </p>
-          <h1 className="mt-4 font-serif text-display-lg text-foreground leading-tight">
-            Hi{" "}
-            <span className="font-chalk text-gold/90 align-baseline">
-              {firstName}
-            </span>
-            <svg viewBox="0 0 200 12" className="block h-3 w-48 text-gold/60 -mt-1">
-              <path d="M4 7 C 40 2, 80 11, 120 5 S 190 7, 196 5" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" />
-            </svg>
-            <span className="block mt-2">
-              here are the best {subjectTitle.toLowerCase()} routes for you.
-            </span>
-          </h1>
-          <p className="mt-4 text-muted-foreground">
-            Based on {profile.study_level} level near {profile.city ?? "your location"}.
-          </p>
-          <div className="mt-6 flex flex-wrap gap-2">
-            <Link
-              to="/onboarding"
-              className="tap rounded-full border border-border bg-surface/60 px-5 py-2.5 text-sm hover:bg-accent transition"
-            >
-              Edit preferences
-            </Link>
-            <Link
-              to="/courses"
-              className="tap rounded-full bg-gold px-5 py-2.5 text-sm font-medium text-gold-foreground hover:opacity-90 transition shadow-lg"
-            >
-              Browse full catalogue
-            </Link>
+        {/* Hero + completion */}
+        <section className="grid gap-5 lg:grid-cols-3">
+          <div className="lg:col-span-2 glass-strong rounded-3xl p-7 sm:p-10 shadow-xl">
+            <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Welcome back</p>
+            <h1 className="mt-3 font-serif text-display-md text-foreground leading-tight">
+              Hi <span className="font-chalk text-gold/90">{firstName}</span> — let's move your application forward.
+            </h1>
+            {nextStep ? (
+              <Link
+                to={nextStep.href}
+                className="mt-6 inline-flex items-center gap-2 rounded-full bg-gold px-5 py-2.5 text-sm font-medium text-gold-foreground hover:opacity-90 transition shadow-lg"
+              >
+                Next: {nextStep.label} <ArrowRight className="size-4" />
+              </Link>
+            ) : (
+              <p className="mt-4 text-sm text-muted-foreground">Your profile is complete — adviser will be in touch.</p>
+            )}
+            <div className="mt-6 flex flex-wrap gap-3 text-sm">
+              <CountChip icon={<BookOpen className="size-3.5" />} label="Shortlist" n={counts.shortlist} />
+              <CountChip icon={<FileText className="size-3.5" />} label="Applications" n={counts.applications} />
+              <CountChip icon={<FileText className="size-3.5" />} label="Documents" n={counts.documents} />
+              <CountChip icon={<Calendar className="size-3.5" />} label="Bookings" n={counts.bookings} />
+            </div>
+          </div>
+
+          <div className="glass-strong rounded-3xl p-6 shadow-xl">
+            <div className="flex items-center justify-between">
+              <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Profile</p>
+              <span className="text-xs text-muted-foreground">{completed}/{total}</span>
+            </div>
+            <p className="mt-2 font-serif text-3xl">{completionPct}<span className="text-xl text-muted-foreground">%</span></p>
+            <div className="mt-3 h-2 w-full rounded-full bg-border overflow-hidden">
+              <div className="h-full bg-gold transition-all" style={{ width: `${completionPct}%` }} />
+            </div>
+            <ul className="mt-4 space-y-1.5">
+              {checklist.map((c) => (
+                <li key={c.key}>
+                  <Link to={c.href} className="group flex items-center gap-2 rounded-xl px-2 py-1.5 text-sm hover:bg-accent/40 transition">
+                    <span className={`inline-flex size-5 items-center justify-center rounded-full ${c.done ? "bg-gold text-gold-foreground" : "bg-border text-muted-foreground"}`}>
+                      {c.done && <Check className="size-3" />}
+                    </span>
+                    <span className={c.done ? "line-through text-muted-foreground" : "text-foreground"}>{c.label}</span>
+                    {!c.done && <ChevronRight className="ml-auto size-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition" />}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
 
-        {/* Snapshot chips */}
-        <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <SnapshotChip icon={<BookOpen className="size-4" />} label="Subject" value={subjectTitle} />
-          <SnapshotChip icon={<GraduationCap className="size-4" />} label="Level" value={profile.study_level ?? "—"} />
-          <SnapshotChip icon={<MapPin className="size-4" />} label="Near" value={profile.city ?? "—"} />
-        </div>
+        {/* Recommendations */}
+        <section className="mt-12">
+          <div className="flex items-end justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Recommended for you</p>
+              <h2 className="mt-1 font-serif text-display-sm">Courses we think you'll love</h2>
+            </div>
+            <Link to="/courses" className="text-sm text-gold hover:underline">Browse catalogue →</Link>
+          </div>
+          {recommendations.length === 0 ? (
+            <div className="mt-6 glass rounded-3xl p-6 text-sm text-muted-foreground">
+              Tell us your subject and study level in <Link to="/onboarding" className="text-gold underline">onboarding</Link> to unlock tailored recommendations.
+            </div>
+          ) : (
+            <div className="mt-6 grid gap-4 md:grid-cols-3">
+              {recommendations.map((r) => (
+                <Link
+                  key={r.id}
+                  to="/courses/$slug"
+                  params={{ slug: r.slug }}
+                  className="group glass rounded-3xl p-5 transition hover:-translate-y-0.5 hover:shadow-xl flex flex-col"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      {r.university.logo_url ? (
+                        <img src={r.university.logo_url} alt="" className="size-8 rounded-lg object-contain bg-white p-0.5" />
+                      ) : (
+                        <span className="inline-flex size-8 items-center justify-center rounded-lg bg-gold/15 text-gold"><GraduationCap className="size-4" /></span>
+                      )}
+                      <div className="min-w-0">
+                        <p className="text-xs uppercase tracking-widest text-muted-foreground truncate">{r.university.name}</p>
+                        {r.university.is_partner && <p className="text-[10px] text-gold">Partner university</p>}
+                      </div>
+                    </div>
+                    <span className="shrink-0 rounded-full bg-gold/20 px-2 py-0.5 text-xs font-medium text-gold-foreground dark:text-gold">
+                      {Math.round(r.score)}%
+                    </span>
+                  </div>
+                  <h3 className="mt-3 font-serif text-lg text-foreground line-clamp-2">{r.name}</h3>
+                  <div className="mt-auto pt-4 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                    <span className="inline-flex items-center gap-1"><Star className="size-3 text-gold" />{r.level}</span>
+                    {r.university.city && <span className="inline-flex items-center gap-1"><MapPin className="size-3 text-gold" />{r.university.city}</span>}
+                    {r.duration_months && <span>{r.duration_months} mo</span>}
+                    {r.fee_gbp != null && <span>£{r.fee_gbp.toLocaleString()}</span>}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </section>
 
-        {/* Top matches */}
-        <div className="mt-12">
-          <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Top matches</p>
-          <h2 className="mt-2 font-serif text-display-md">Hand-picked for you</h2>
-        </div>
-        <div className="mt-6 grid gap-4 md:grid-cols-2">
-          {matches.map((m) => (
-            <article
-              key={m.id}
-              className="group glass rounded-3xl p-6 transition hover:-translate-y-0.5 hover:shadow-xl"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-xs uppercase tracking-widest text-muted-foreground">
-                    {m.level} · {m.partner}
-                  </p>
-                  <h3 className="mt-2 font-serif text-xl tracking-tight text-foreground">
-                    {m.name}
-                  </h3>
-                </div>
-                <span className="shrink-0 rounded-full bg-gold/20 px-2.5 py-1 text-xs font-medium text-gold-foreground dark:text-gold">
-                  {Math.round(m.score)}% match
-                </span>
-              </div>
-              <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-muted-foreground">
-                <span className="inline-flex items-center gap-1"><MapPin className="size-3.5 text-gold" />{m.cities.join(", ")}</span>
-                <span className="text-border">·</span>
-                <span className="inline-flex items-center gap-1"><GraduationCap className="size-3.5 text-gold" />{m.duration}</span>
-                <span className="text-border">·</span>
-                <span>{m.modes.join(" · ")}</span>
-                {m.km !== null && (
-                  <>
-                    <span className="text-border">·</span>
-                    <span className="font-mono">{Math.round(m.km)} km away</span>
-                  </>
-                )}
-              </div>
-            </article>
-          ))}
-        </div>
+        {/* Activity + Adviser */}
+        <section className="mt-12 grid gap-5 lg:grid-cols-3">
+          <div className="lg:col-span-2 glass-strong rounded-3xl p-6 sm:p-8 shadow-lg">
+            <div className="flex items-center justify-between">
+              <h3 className="font-serif text-xl tracking-tight inline-flex items-center gap-2">
+                <Activity className="size-5 text-gold" /> Recent activity
+              </h3>
+            </div>
+            {activity.length === 0 ? (
+              <p className="mt-3 text-sm text-muted-foreground">No activity yet. Save a course or start an application to see updates here.</p>
+            ) : (
+              <ul className="mt-4 divide-y divide-border/60">
+                {activity.map((a) => {
+                  const inner = (
+                    <div className="flex items-start gap-3 py-3">
+                      <span className="mt-1 size-2 rounded-full bg-gold shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-foreground line-clamp-2">{a.title}</p>
+                        <p className="text-[11px] text-muted-foreground capitalize">{a.kind.replace(/_/g, " ")} · {new Date(a.at).toLocaleString("en-GB")}</p>
+                      </div>
+                      {a.href && <ChevronRight className="size-4 text-muted-foreground" />}
+                    </div>
+                  );
+                  return (
+                    <li key={a.id}>
+                      {a.href ? <Link to={a.href} className="block hover:bg-accent/30 rounded-xl px-2 -mx-2">{inner}</Link> : <div className="px-2 -mx-2">{inner}</div>}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
 
-        {/* Adviser card */}
-        <section className="mt-12 glass-strong rounded-3xl p-6 sm:p-8 shadow-lg">
-          <div className="flex items-start gap-4">
-            <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-2xl bg-gold/20 text-gold">
+          <div className="glass-strong rounded-3xl p-6 shadow-lg flex flex-col">
+            <span className="inline-flex size-11 items-center justify-center rounded-2xl bg-gold/20 text-gold">
               <Sparkles className="size-5" />
             </span>
-            <div className="flex-1">
-              <h3 className="font-serif text-xl tracking-tight">Talk to an adviser</h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                A Bridge Gateway adviser will call within 24 hours to walk you through your matches and the application process.
-              </p>
-              <div className="mt-4 inline-flex items-center gap-2 text-xs text-muted-foreground">
-                <Phone className="size-3.5 text-gold" />
-                We'll reach out on the number you shared during sign-up.
-              </div>
-            </div>
+            <h3 className="mt-3 font-serif text-xl tracking-tight">Talk to an adviser</h3>
+            <p className="mt-2 text-sm text-muted-foreground">Book a 1:1 call with a Bridge Gateway adviser to walk through your matches.</p>
+            <Link
+              to="/dashboard/bookings"
+              className="mt-5 inline-flex items-center justify-center gap-2 rounded-full bg-gold px-4 py-2 text-sm font-medium text-gold-foreground hover:opacity-90 transition shadow"
+            >
+              <Phone className="size-4" /> Book a call
+            </Link>
           </div>
         </section>
       </main>
@@ -209,45 +244,12 @@ function Dashboard() {
   );
 }
 
-function SnapshotChip({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+function CountChip({ icon, label, n }: { icon: React.ReactNode; label: string; n: number }) {
   return (
-    <div className="glass rounded-2xl px-4 py-3 flex items-center gap-3">
-      <span className="inline-flex size-8 items-center justify-center rounded-xl bg-gold/15 text-gold">{icon}</span>
-      <div className="min-w-0">
-        <p className="text-[10px] uppercase tracking-widest text-muted-foreground">{label}</p>
-        <p className="truncate text-sm font-medium text-foreground">{value}</p>
-      </div>
-    </div>
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface/60 px-3 py-1 text-xs">
+      <span className="text-gold">{icon}</span>
+      <span className="font-medium">{n}</span>
+      <span className="text-muted-foreground">{label}</span>
+    </span>
   );
-}
-
-function rankMatches(p: Profile) {
-  const haversine = (la1: number, ln1: number, la2: number, ln2: number) => {
-    const R = 6371;
-    const dLat = ((la2 - la1) * Math.PI) / 180;
-    const dLng = ((ln2 - ln1) * Math.PI) / 180;
-    const a = Math.sin(dLat / 2) ** 2 + Math.cos((la1 * Math.PI) / 180) * Math.cos((la2 * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
-    return 2 * R * Math.asin(Math.sqrt(a));
-  };
-  return PROGRAMMES.map((prog) => {
-    let score = 0;
-    if (prog.subject === p.subject) score += 60;
-    if (p.study_level && prog.level === p.study_level) score += 30;
-    let km: number | null = null;
-    if (p.lat != null && p.lng != null) {
-      const dists = prog.cities
-        .map((c) => CAMPUSES.find((x) => x.city === c))
-        .filter(Boolean)
-        .map((c) => haversine(p.lat!, p.lng!, c!.lat, c!.lng));
-      km = dists.length ? Math.min(...dists) : null;
-      if (km !== null) {
-        if (km < 30) score += 10;
-        else if (km < 100) score += 6;
-        else if (km < 300) score += 2;
-      }
-    }
-    return { ...prog, score, km };
-  })
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 6);
 }
