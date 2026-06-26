@@ -19,6 +19,7 @@ import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as CoursesRouteImport } from './routes/courses'
 import { Route as CookiesRouteImport } from './routes/cookies'
+import { Route as BlogRouteImport } from './routes/blog'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
@@ -89,6 +90,11 @@ const CoursesRoute = CoursesRouteImport.update({
 const CookiesRoute = CookiesRouteImport.update({
   id: '/cookies',
   path: '/cookies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogRoute = BlogRouteImport.update({
+  id: '/blog',
+  path: '/blog',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -207,6 +213,7 @@ const AuthenticatedDashboardApplicationsIdSubmitRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/blog': typeof BlogRoute
   '/cookies': typeof CookiesRoute
   '/courses': typeof CoursesRouteWithChildren
   '/login': typeof LoginRoute
@@ -239,6 +246,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/blog': typeof BlogRoute
   '/cookies': typeof CookiesRoute
   '/courses': typeof CoursesRouteWithChildren
   '/login': typeof LoginRoute
@@ -273,6 +281,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
+  '/blog': typeof BlogRoute
   '/cookies': typeof CookiesRoute
   '/courses': typeof CoursesRouteWithChildren
   '/login': typeof LoginRoute
@@ -307,6 +316,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/blog'
     | '/cookies'
     | '/courses'
     | '/login'
@@ -339,6 +349,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
+    | '/blog'
     | '/cookies'
     | '/courses'
     | '/login'
@@ -372,6 +383,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/admin'
+    | '/blog'
     | '/cookies'
     | '/courses'
     | '/login'
@@ -406,6 +418,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
+  BlogRoute: typeof BlogRoute
   CookiesRoute: typeof CookiesRoute
   CoursesRoute: typeof CoursesRouteWithChildren
   LoginRoute: typeof LoginRoute
@@ -489,6 +502,13 @@ declare module '@tanstack/react-router' {
       path: '/cookies'
       fullPath: '/cookies'
       preLoaderRoute: typeof CookiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog': {
+      id: '/blog'
+      path: '/blog'
+      fullPath: '/blog'
+      preLoaderRoute: typeof BlogRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -754,6 +774,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,
+  BlogRoute: BlogRoute,
   CookiesRoute: CookiesRoute,
   CoursesRoute: CoursesRouteWithChildren,
   LoginRoute: LoginRoute,

@@ -1,13 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Header } from "@/components/marketing/Header";
 import { Footer } from "@/components/marketing/Footer";
-import { listPosts, listTags } from "@/lib/blog";
+import { listPosts, listTags, type PostMeta } from "@/lib/blog";
 import { Calendar, Clock, Tag } from "lucide-react";
 
 const BASE = "https://bridgegatewayconsulting.com";
 
 export const Route = createFileRoute("/blog")({
-  loader: () => ({ posts: listPosts(), tags: listTags() }),
+  loader: (): { posts: PostMeta[]; tags: string[] } => ({ posts: listPosts(), tags: listTags() }),
   head: () => ({
     meta: [
       { title: "Insights & guides · Bridge Gateway blog" },
