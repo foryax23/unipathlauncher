@@ -149,6 +149,8 @@ function UniversityPage() {
             <li className="text-sm text-muted-foreground">No live courses listed yet.</li>
           )}
         </ul>
+
+        <ReviewsSection reviews={rev.reviews} avgRating={rev.avgRating} count={rev.count} />
       </main>
       <Footer />
     </div>
