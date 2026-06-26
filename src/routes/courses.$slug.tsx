@@ -94,6 +94,7 @@ function CoursePage() {
   const params = Route.useParams();
   const { data } = useSuspenseQuery(courseQuery(params.slug));
   const course = data.course!;
+  const { data: rev } = useSuspenseQuery(reviewsQuery(course.id));
   const uni = course.universities as {
     id: string;
     slug: string;
