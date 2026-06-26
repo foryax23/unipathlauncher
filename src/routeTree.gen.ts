@@ -36,6 +36,7 @@ import { Route as AuthenticatedDashboardDocumentsRouteImport } from './routes/_a
 import { Route as AuthenticatedDashboardBookingsRouteImport } from './routes/_authenticated/dashboard/bookings'
 import { Route as AuthenticatedDashboardApplicationsRouteImport } from './routes/_authenticated/dashboard/applications'
 import { Route as AuthenticatedDashboardApplicationsIdRouteImport } from './routes/_authenticated/dashboard/applications.$id'
+import { Route as AuthenticatedDashboardApplicationsIdSubmitRouteImport } from './routes/_authenticated/dashboard/applications.$id.submit'
 
 const VerifyEmailRoute = VerifyEmailRouteImport.update({
   id: '/verify-email',
@@ -177,6 +178,12 @@ const AuthenticatedDashboardApplicationsIdRoute =
     path: '/$id',
     getParentRoute: () => AuthenticatedDashboardApplicationsRoute,
   } as any)
+const AuthenticatedDashboardApplicationsIdSubmitRoute =
+  AuthenticatedDashboardApplicationsIdSubmitRouteImport.update({
+    id: '/submit',
+    path: '/submit',
+    getParentRoute: () => AuthenticatedDashboardApplicationsIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -204,7 +211,8 @@ export interface FileRoutesByFullPath {
   '/dashboard/messages': typeof AuthenticatedDashboardMessagesRoute
   '/dashboard/shortlist': typeof AuthenticatedDashboardShortlistRoute
   '/admin/applications/$id': typeof AdminApplicationsIdRoute
-  '/dashboard/applications/$id': typeof AuthenticatedDashboardApplicationsIdRoute
+  '/dashboard/applications/$id': typeof AuthenticatedDashboardApplicationsIdRouteWithChildren
+  '/dashboard/applications/$id/submit': typeof AuthenticatedDashboardApplicationsIdSubmitRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -232,7 +240,8 @@ export interface FileRoutesByTo {
   '/dashboard/messages': typeof AuthenticatedDashboardMessagesRoute
   '/dashboard/shortlist': typeof AuthenticatedDashboardShortlistRoute
   '/admin/applications/$id': typeof AdminApplicationsIdRoute
-  '/dashboard/applications/$id': typeof AuthenticatedDashboardApplicationsIdRoute
+  '/dashboard/applications/$id': typeof AuthenticatedDashboardApplicationsIdRouteWithChildren
+  '/dashboard/applications/$id/submit': typeof AuthenticatedDashboardApplicationsIdSubmitRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -262,7 +271,8 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/messages': typeof AuthenticatedDashboardMessagesRoute
   '/_authenticated/dashboard/shortlist': typeof AuthenticatedDashboardShortlistRoute
   '/admin/applications/$id': typeof AdminApplicationsIdRoute
-  '/_authenticated/dashboard/applications/$id': typeof AuthenticatedDashboardApplicationsIdRoute
+  '/_authenticated/dashboard/applications/$id': typeof AuthenticatedDashboardApplicationsIdRouteWithChildren
+  '/_authenticated/dashboard/applications/$id/submit': typeof AuthenticatedDashboardApplicationsIdSubmitRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -293,6 +303,7 @@ export interface FileRouteTypes {
     | '/dashboard/shortlist'
     | '/admin/applications/$id'
     | '/dashboard/applications/$id'
+    | '/dashboard/applications/$id/submit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -321,6 +332,7 @@ export interface FileRouteTypes {
     | '/dashboard/shortlist'
     | '/admin/applications/$id'
     | '/dashboard/applications/$id'
+    | '/dashboard/applications/$id/submit'
   id:
     | '__root__'
     | '/'
@@ -350,6 +362,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/shortlist'
     | '/admin/applications/$id'
     | '/_authenticated/dashboard/applications/$id'
+    | '/_authenticated/dashboard/applications/$id/submit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -560,17 +573,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardApplicationsIdRouteImport
       parentRoute: typeof AuthenticatedDashboardApplicationsRoute
     }
+    '/_authenticated/dashboard/applications/$id/submit': {
+      id: '/_authenticated/dashboard/applications/$id/submit'
+      path: '/submit'
+      fullPath: '/dashboard/applications/$id/submit'
+      preLoaderRoute: typeof AuthenticatedDashboardApplicationsIdSubmitRouteImport
+      parentRoute: typeof AuthenticatedDashboardApplicationsIdRoute
+    }
   }
 }
 
+interface AuthenticatedDashboardApplicationsIdRouteChildren {
+  AuthenticatedDashboardApplicationsIdSubmitRoute: typeof AuthenticatedDashboardApplicationsIdSubmitRoute
+}
+
+const AuthenticatedDashboardApplicationsIdRouteChildren: AuthenticatedDashboardApplicationsIdRouteChildren =
+  {
+    AuthenticatedDashboardApplicationsIdSubmitRoute:
+      AuthenticatedDashboardApplicationsIdSubmitRoute,
+  }
+
+const AuthenticatedDashboardApplicationsIdRouteWithChildren =
+  AuthenticatedDashboardApplicationsIdRoute._addFileChildren(
+    AuthenticatedDashboardApplicationsIdRouteChildren,
+  )
+
 interface AuthenticatedDashboardApplicationsRouteChildren {
-  AuthenticatedDashboardApplicationsIdRoute: typeof AuthenticatedDashboardApplicationsIdRoute
+  AuthenticatedDashboardApplicationsIdRoute: typeof AuthenticatedDashboardApplicationsIdRouteWithChildren
 }
 
 const AuthenticatedDashboardApplicationsRouteChildren: AuthenticatedDashboardApplicationsRouteChildren =
   {
     AuthenticatedDashboardApplicationsIdRoute:
-      AuthenticatedDashboardApplicationsIdRoute,
+      AuthenticatedDashboardApplicationsIdRouteWithChildren,
   }
 
 const AuthenticatedDashboardApplicationsRouteWithChildren =

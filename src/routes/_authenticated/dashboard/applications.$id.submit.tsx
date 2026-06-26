@@ -190,8 +190,8 @@ function WizardPage() {
                       >
                         <FileText className="size-4 text-muted-foreground" />
                         <div className="min-w-0 flex-1">
-                          <p className="text-sm font-medium truncate">{d.title ?? d.filename}</p>
-                          <p className="text-xs text-muted-foreground truncate">{d.kind ?? "Document"}</p>
+                          <p className="text-sm font-medium truncate">{d.original_name}</p>
+                          <p className="text-xs text-muted-foreground truncate capitalize">{d.type.replace(/_/g, " ")}</p>
                         </div>
                         {sel && <Check className="size-4 text-gold" />}
                       </button>
