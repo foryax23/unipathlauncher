@@ -24,7 +24,12 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UniversitiesSlugRouteImport } from './routes/universities.$slug'
 import { Route as CoursesSlugRouteImport } from './routes/courses.$slug'
+import { Route as AdminLeadsRouteImport } from './routes/admin.leads'
+import { Route as AdminAvailabilityRouteImport } from './routes/admin.availability'
+import { Route as AdminAuditRouteImport } from './routes/admin.audit'
+import { Route as AdminApplicationsRouteImport } from './routes/admin.applications'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AdminApplicationsIdRouteImport } from './routes/admin.applications.$id'
 import { Route as AuthenticatedDashboardShortlistRouteImport } from './routes/_authenticated/dashboard/shortlist'
 import { Route as AuthenticatedDashboardMessagesRouteImport } from './routes/_authenticated/dashboard/messages'
 import { Route as AuthenticatedDashboardDocumentsRouteImport } from './routes/_authenticated/dashboard/documents'
@@ -106,10 +111,35 @@ const CoursesSlugRoute = CoursesSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => CoursesRoute,
 } as any)
+const AdminLeadsRoute = AdminLeadsRouteImport.update({
+  id: '/leads',
+  path: '/leads',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAvailabilityRoute = AdminAvailabilityRouteImport.update({
+  id: '/availability',
+  path: '/availability',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAuditRoute = AdminAuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminApplicationsRoute = AdminApplicationsRouteImport.update({
+  id: '/applications',
+  path: '/applications',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AdminApplicationsIdRoute = AdminApplicationsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AdminApplicationsRoute,
 } as any)
 const AuthenticatedDashboardShortlistRoute =
   AuthenticatedDashboardShortlistRouteImport.update({
@@ -150,7 +180,7 @@ const AuthenticatedDashboardApplicationsIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/cookies': typeof CookiesRoute
   '/courses': typeof CoursesRouteWithChildren
   '/login': typeof LoginRoute
@@ -162,6 +192,10 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/verify-email': typeof VerifyEmailRoute
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/admin/applications': typeof AdminApplicationsRouteWithChildren
+  '/admin/audit': typeof AdminAuditRoute
+  '/admin/availability': typeof AdminAvailabilityRoute
+  '/admin/leads': typeof AdminLeadsRoute
   '/courses/$slug': typeof CoursesSlugRoute
   '/universities/$slug': typeof UniversitiesSlugRoute
   '/dashboard/applications': typeof AuthenticatedDashboardApplicationsRouteWithChildren
@@ -169,11 +203,12 @@ export interface FileRoutesByFullPath {
   '/dashboard/documents': typeof AuthenticatedDashboardDocumentsRoute
   '/dashboard/messages': typeof AuthenticatedDashboardMessagesRoute
   '/dashboard/shortlist': typeof AuthenticatedDashboardShortlistRoute
+  '/admin/applications/$id': typeof AdminApplicationsIdRoute
   '/dashboard/applications/$id': typeof AuthenticatedDashboardApplicationsIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/cookies': typeof CookiesRoute
   '/courses': typeof CoursesRouteWithChildren
   '/login': typeof LoginRoute
@@ -185,6 +220,10 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/verify-email': typeof VerifyEmailRoute
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/admin/applications': typeof AdminApplicationsRouteWithChildren
+  '/admin/audit': typeof AdminAuditRoute
+  '/admin/availability': typeof AdminAvailabilityRoute
+  '/admin/leads': typeof AdminLeadsRoute
   '/courses/$slug': typeof CoursesSlugRoute
   '/universities/$slug': typeof UniversitiesSlugRoute
   '/dashboard/applications': typeof AuthenticatedDashboardApplicationsRouteWithChildren
@@ -192,13 +231,14 @@ export interface FileRoutesByTo {
   '/dashboard/documents': typeof AuthenticatedDashboardDocumentsRoute
   '/dashboard/messages': typeof AuthenticatedDashboardMessagesRoute
   '/dashboard/shortlist': typeof AuthenticatedDashboardShortlistRoute
+  '/admin/applications/$id': typeof AdminApplicationsIdRoute
   '/dashboard/applications/$id': typeof AuthenticatedDashboardApplicationsIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/cookies': typeof CookiesRoute
   '/courses': typeof CoursesRouteWithChildren
   '/login': typeof LoginRoute
@@ -210,6 +250,10 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/verify-email': typeof VerifyEmailRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/admin/applications': typeof AdminApplicationsRouteWithChildren
+  '/admin/audit': typeof AdminAuditRoute
+  '/admin/availability': typeof AdminAvailabilityRoute
+  '/admin/leads': typeof AdminLeadsRoute
   '/courses/$slug': typeof CoursesSlugRoute
   '/universities/$slug': typeof UniversitiesSlugRoute
   '/_authenticated/dashboard/applications': typeof AuthenticatedDashboardApplicationsRouteWithChildren
@@ -217,6 +261,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/documents': typeof AuthenticatedDashboardDocumentsRoute
   '/_authenticated/dashboard/messages': typeof AuthenticatedDashboardMessagesRoute
   '/_authenticated/dashboard/shortlist': typeof AuthenticatedDashboardShortlistRoute
+  '/admin/applications/$id': typeof AdminApplicationsIdRoute
   '/_authenticated/dashboard/applications/$id': typeof AuthenticatedDashboardApplicationsIdRoute
 }
 export interface FileRouteTypes {
@@ -235,6 +280,10 @@ export interface FileRouteTypes {
     | '/terms'
     | '/verify-email'
     | '/dashboard'
+    | '/admin/applications'
+    | '/admin/audit'
+    | '/admin/availability'
+    | '/admin/leads'
     | '/courses/$slug'
     | '/universities/$slug'
     | '/dashboard/applications'
@@ -242,6 +291,7 @@ export interface FileRouteTypes {
     | '/dashboard/documents'
     | '/dashboard/messages'
     | '/dashboard/shortlist'
+    | '/admin/applications/$id'
     | '/dashboard/applications/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -258,6 +308,10 @@ export interface FileRouteTypes {
     | '/terms'
     | '/verify-email'
     | '/dashboard'
+    | '/admin/applications'
+    | '/admin/audit'
+    | '/admin/availability'
+    | '/admin/leads'
     | '/courses/$slug'
     | '/universities/$slug'
     | '/dashboard/applications'
@@ -265,6 +319,7 @@ export interface FileRouteTypes {
     | '/dashboard/documents'
     | '/dashboard/messages'
     | '/dashboard/shortlist'
+    | '/admin/applications/$id'
     | '/dashboard/applications/$id'
   id:
     | '__root__'
@@ -282,6 +337,10 @@ export interface FileRouteTypes {
     | '/terms'
     | '/verify-email'
     | '/_authenticated/dashboard'
+    | '/admin/applications'
+    | '/admin/audit'
+    | '/admin/availability'
+    | '/admin/leads'
     | '/courses/$slug'
     | '/universities/$slug'
     | '/_authenticated/dashboard/applications'
@@ -289,13 +348,14 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/documents'
     | '/_authenticated/dashboard/messages'
     | '/_authenticated/dashboard/shortlist'
+    | '/admin/applications/$id'
     | '/_authenticated/dashboard/applications/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
-  AdminRoute: typeof AdminRoute
+  AdminRoute: typeof AdminRouteWithChildren
   CookiesRoute: typeof CookiesRoute
   CoursesRoute: typeof CoursesRouteWithChildren
   LoginRoute: typeof LoginRoute
@@ -416,12 +476,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CoursesSlugRouteImport
       parentRoute: typeof CoursesRoute
     }
+    '/admin/leads': {
+      id: '/admin/leads'
+      path: '/leads'
+      fullPath: '/admin/leads'
+      preLoaderRoute: typeof AdminLeadsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/availability': {
+      id: '/admin/availability'
+      path: '/availability'
+      fullPath: '/admin/availability'
+      preLoaderRoute: typeof AdminAvailabilityRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/audit': {
+      id: '/admin/audit'
+      path: '/audit'
+      fullPath: '/admin/audit'
+      preLoaderRoute: typeof AdminAuditRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/applications': {
+      id: '/admin/applications'
+      path: '/applications'
+      fullPath: '/admin/applications'
+      preLoaderRoute: typeof AdminApplicationsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRoute
+    }
+    '/admin/applications/$id': {
+      id: '/admin/applications/$id'
+      path: '/$id'
+      fullPath: '/admin/applications/$id'
+      preLoaderRoute: typeof AdminApplicationsIdRouteImport
+      parentRoute: typeof AdminApplicationsRoute
     }
     '/_authenticated/dashboard/shortlist': {
       id: '/_authenticated/dashboard/shortlist'
@@ -518,6 +613,33 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
   AuthenticatedRouteChildren,
 )
 
+interface AdminApplicationsRouteChildren {
+  AdminApplicationsIdRoute: typeof AdminApplicationsIdRoute
+}
+
+const AdminApplicationsRouteChildren: AdminApplicationsRouteChildren = {
+  AdminApplicationsIdRoute: AdminApplicationsIdRoute,
+}
+
+const AdminApplicationsRouteWithChildren =
+  AdminApplicationsRoute._addFileChildren(AdminApplicationsRouteChildren)
+
+interface AdminRouteChildren {
+  AdminApplicationsRoute: typeof AdminApplicationsRouteWithChildren
+  AdminAuditRoute: typeof AdminAuditRoute
+  AdminAvailabilityRoute: typeof AdminAvailabilityRoute
+  AdminLeadsRoute: typeof AdminLeadsRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminApplicationsRoute: AdminApplicationsRouteWithChildren,
+  AdminAuditRoute: AdminAuditRoute,
+  AdminAvailabilityRoute: AdminAvailabilityRoute,
+  AdminLeadsRoute: AdminLeadsRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 interface CoursesRouteChildren {
   CoursesSlugRoute: typeof CoursesSlugRoute
 }
@@ -532,7 +654,7 @@ const CoursesRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
-  AdminRoute: AdminRoute,
+  AdminRoute: AdminRouteWithChildren,
   CookiesRoute: CookiesRoute,
   CoursesRoute: CoursesRouteWithChildren,
   LoginRoute: LoginRoute,
@@ -548,13 +670,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

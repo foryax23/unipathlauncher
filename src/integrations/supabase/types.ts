@@ -50,6 +50,66 @@ export type Database = {
         }
         Relationships: []
       }
+      adviser_availability: {
+        Row: {
+          adviser_id: string
+          created_at: string
+          end_time: string
+          id: string
+          start_time: string
+          timezone: string
+          updated_at: string
+          weekday: number
+        }
+        Insert: {
+          adviser_id: string
+          created_at?: string
+          end_time: string
+          id?: string
+          start_time: string
+          timezone?: string
+          updated_at?: string
+          weekday: number
+        }
+        Update: {
+          adviser_id?: string
+          created_at?: string
+          end_time?: string
+          id?: string
+          start_time?: string
+          timezone?: string
+          updated_at?: string
+          weekday?: number
+        }
+        Relationships: []
+      }
+      adviser_time_off: {
+        Row: {
+          adviser_id: string
+          created_at: string
+          ends_at: string
+          id: string
+          reason: string | null
+          starts_at: string
+        }
+        Insert: {
+          adviser_id: string
+          created_at?: string
+          ends_at: string
+          id?: string
+          reason?: string | null
+          starts_at: string
+        }
+        Update: {
+          adviser_id?: string
+          created_at?: string
+          ends_at?: string
+          id?: string
+          reason?: string | null
+          starts_at?: string
+        }
+        Relationships: []
+      }
       application_events: {
         Row: {
           actor_id: string | null
@@ -88,6 +148,7 @@ export type Database = {
       applications: {
         Row: {
           adviser_id: string | null
+          application_data: Json
           course_id: string
           created_at: string
           decision: string | null
@@ -102,6 +163,7 @@ export type Database = {
         }
         Insert: {
           adviser_id?: string | null
+          application_data?: Json
           course_id: string
           created_at?: string
           decision?: string | null
@@ -116,6 +178,7 @@ export type Database = {
         }
         Update: {
           adviser_id?: string | null
+          application_data?: Json
           course_id?: string
           created_at?: string
           decision?: string | null
@@ -456,6 +519,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          kind: string
+          link: string | null
+          read_at: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          link?: string | null
+          read_at?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          link?: string | null
+          read_at?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {

@@ -251,5 +251,16 @@ export const updateApplicationStatus = createServerFn({ method: "POST" })
       payload: patch,
     });
 
+    if (row?.user_id) {
+      const { notifyUser } = await import("@/lib/notifications.server");
+      await notifyUser({
+        userId: row.user_id,
+        kind: "application.status",
+        title: `Application ${data.status}`,
+        body: data.decision ?? `Your application status was updated to ${data.status}.`,
+        link: "/dashboard/applications",
+      });
+    }
+
     return { application: row };
   });

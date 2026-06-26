@@ -90,6 +90,26 @@ export const postMessage = createServerFn({ method: "POST" })
       .from("threads")
       .update({ last_message_at: new Date().toISOString() })
       .eq("id", data.thread_id);
+
+    // Notify the other participant.
+    const { data: thread } = await supabase
+      .from("threads")
+      .select("student_id,adviser_id,subject")
+      .eq("id", data.thread_id)
+      .maybeSingle();
+    if (thread) {
+      const recipientId = thread.student_id === userId ? thread.adviser_id : thread.student_id;
+      if (recipientId) {
+        const { notifyUser } = await import("@/lib/notifications.server");
+        await notifyUser({
+          userId: recipientId,
+          kind: "message.new",
+          title: thread.subject ?? "New message",
+          body: data.body.slice(0, 140),
+          link: "/dashboard/messages",
+        });
+      }
+    }
     return { message: msg };
   });
 
