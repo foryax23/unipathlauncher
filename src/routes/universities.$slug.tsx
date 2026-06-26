@@ -1,6 +1,8 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { getUniversityBySlug } from "@/lib/universities.functions";
+import { listPublishedReviews } from "@/lib/reviews.functions";
+import { ReviewsSection } from "@/components/reviews/ReviewsSection";
 import { Logo } from "@/components/marketing/Logo";
 import { Footer } from "@/components/marketing/Footer";
 import { ArrowRight, MapPin, ExternalLink } from "lucide-react";
@@ -11,10 +13,17 @@ const uniQuery = (slug: string) =>
     queryFn: () => getUniversityBySlug({ data: { slug } }),
   });
 
+const reviewsQuery = (universityId: string) =>
+  queryOptions({
+    queryKey: ["reviews", "uni", universityId],
+    queryFn: () => listPublishedReviews({ data: { universityId, limit: 20 } }),
+  });
+
 export const Route = createFileRoute("/universities/$slug")({
   loader: async ({ context, params }) => {
     const res = await context.queryClient.ensureQueryData(uniQuery(params.slug));
     if (!res.university) throw notFound();
+    await context.queryClient.ensureQueryData(reviewsQuery(res.university.id));
     return res;
   },
   head: ({ loaderData }) => {
