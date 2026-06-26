@@ -274,6 +274,8 @@ function CoursePage() {
             </div>
           </aside>
         </div>
+
+        <ReviewsSection reviews={rev.reviews} avgRating={rev.avgRating} count={rev.count} />
       </main>
 
       <Footer />
