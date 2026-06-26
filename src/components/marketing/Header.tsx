@@ -7,7 +7,7 @@ const NAV = [
   { href: "/courses", label: "Courses" },
   { href: "/#how", label: "How it works" },
   { href: "/#destinations", label: "Destinations" },
-  { href: "/#stories", label: "Stories" },
+  { href: "/blog", label: "Journal" },
 ];
 
 export function Header() {

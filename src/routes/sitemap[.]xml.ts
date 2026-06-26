@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
+import { listPosts } from "@/lib/blog";
 
 const BASE_URL = "https://bridgegatewayconsulting.com";
 
@@ -19,12 +20,23 @@ export const Route = createFileRoute("/sitemap.xml")({
         const entries: SitemapEntry[] = [
           { path: "/", changefreq: "weekly", priority: "1.0" },
           { path: "/courses", changefreq: "weekly", priority: "0.9" },
+          { path: "/blog", changefreq: "weekly", priority: "0.8" },
           { path: "/onboarding", changefreq: "monthly", priority: "0.7" },
           { path: "/login", changefreq: "yearly", priority: "0.3" },
           { path: "/privacy", changefreq: "yearly", priority: "0.3" },
           { path: "/terms", changefreq: "yearly", priority: "0.3" },
           { path: "/cookies", changefreq: "yearly", priority: "0.3" },
         ];
+
+        for (const p of listPosts()) {
+          entries.push({
+            path: `/blog/${p.slug}`,
+            changefreq: "monthly",
+            priority: "0.7",
+            lastmod: p.published,
+          });
+        }
+
 
         // Pull dynamic slugs from the catalogue
         try {
