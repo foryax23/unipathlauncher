@@ -40,6 +40,7 @@ export function Header() {
           </nav>
 
           <div className="relative flex items-center gap-1.5">
+            <CommandPalette />
             <ThemeToggle />
             <Link
               to="/login"
