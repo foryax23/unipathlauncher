@@ -1,90 +1,100 @@
-# Phase 3 — Staff workspace, applications & operations
+# Phase 4 — Analytics, engagement & growth
 
-Phase 2 gave students a workspace and the public a real catalogue. Phase 3 turns the back-office on: advisers and admins get the tools to actually run the pipeline, students get a guided submission flow, and both sides get a shared notification surface.
+Phases 1–3 stood up the catalogue, student workspace, staff workspace, application wizard, scheduling, and notifications. Phase 4 turns the platform from "functional" into "compounding": staff get visibility into pipeline health, students get nudges and recommendations that lift conversion, and marketing gets the loops (referrals, reviews, content) that fill the top of the funnel.
 
-## 1. Admin & adviser workspace (`/admin/*`)
+Phase 4 is deliberately scoped without payments — paid services / commission tracking is its own phase once we lock pricing.
 
-A dedicated staff shell, gated by `assertStaff` in `beforeLoad` (admins + advisers) — separate from the student `/dashboard`.
+## 1. Staff analytics dashboard (`/admin`)
 
-- `/admin` — overview: counts by application status, new leads (24h), unread staff threads, today's bookings.
-- `/admin/leads` — table of `leads`: filter by status/source/assignee, full-text on name/email, bulk assign, status transitions (new → contacted → qualified → applying → enrolled / lost), convert-to-application action, internal notes. Writes go through `updateLead` with audit logging.
-- `/admin/applications` — Kanban board across statuses (draft, submitted, interview, offer, accepted, rejected, withdrawn, enrolled). Drag-to-move via `@dnd-kit` calls `updateApplicationStatus` which writes an `application_events` row. Card shows student, course, university, days-in-status. Column virtualisation for >50 cards.
-- `/admin/applications/$id` — full detail with timeline, status changer, staff-only notes, attached documents (read via signed URL), student profile snapshot, message-student button (creates/opens thread).
-- `/admin/students/$userId` — staff view of a student: profile, shortlist, applications, documents, bookings, message history. Adviser assignment dropdown.
-- `/admin/inbox` — every thread the staff member owns or is assigned to. Same realtime hook as `/dashboard/messages`, plus a "claim" button on unassigned threads.
-- `/admin/bookings` — calendar week view of all bookings, filterable by adviser, confirm/decline/reschedule actions.
-- `/admin/audit` (admin only) — paginated `admin_audit` log with actor + entity + before/after diff.
+The current `/admin` is a thin shell. Replace it with a real overview powered by SQL views.
 
-Permissions: admins see everything; advisers see only rows where they are `assignee_id` (leads) or the application's `assignee_id`, plus unassigned. Enforced in the new `*.functions.ts` via RLS-checked queries, not client filters.
+- KPI strip: new leads (7d / 30d), conversion lead→application, applications submitted, offers, accepted, time-to-first-response.
+- Pipeline funnel chart (Recharts) — counts at each `application_status` over the selected range.
+- Lead source breakdown (donut) using `leads.utm_source` and `leads.referrer`.
+- Adviser workload table — open leads, open applications, avg response time per adviser.
+- Date-range picker (7/30/90 days, custom) drives every widget.
+- Backed by `admin_metrics.functions.ts` calling SQL views (`v_lead_funnel`, `v_application_funnel`, `v_adviser_workload`) so heavy aggregation lives in Postgres, not the worker.
 
-## 2. Application wizard (student side)
+## 2. Student engagement loop
 
-Replaces the bare "Start application" mutation with a guided submission:
+Move students from "signed up" to "submitted" with structured nudges.
 
-- `/dashboard/applications/$id/submit` — 4 steps:
-  1. Personal & contact (prefilled from profile)
-  2. Academic history (prior qualifications, grades, English proficiency)
-  3. Document attach (multi-select from vault, or upload inline via `useUpload`)
-  4. Review & submit (read-only diff, confirms `status: submitted`, writes `status.submitted` event, fires admin-notification email)
-- Per-step autosave to `applications.application_data` (jsonb) via a new `updateMyApplicationData` server fn. Resume-where-you-left-off.
-- Validation with Zod schemas shared between client and server fn.
+- **Profile completion meter** on `/dashboard` — checklist (contact, academic history, English test, documents, first shortlist, first booking). Drives the next-best-action card.
+- **Smart shortlist suggestions** — recommend 3 courses based on onboarding answers (level, subjects, locations, start date). New `recommendCourses` server fn querying `courses` joined with `universities`, scored on subject/location/level match.
+- **Activity feed** card — last 5 events from `application_events` + `notifications` summarised.
+- **Email nudges** (Resend templates, throttled): 24h after signup without onboarding, 48h after onboarding without shortlist, 72h after shortlist without application, abandoned-wizard reminder if `application_data` is non-empty but status still `draft` after 3 days. Driven by a daily cron route `/api/public/cron/engagement` (verified by header secret).
+- Each nudge respects an `email_preferences` jsonb on `profiles` with per-channel opt-outs and a one-click unsubscribe link.
 
-## 3. Adviser availability + booking calendar
+## 3. Reviews & social proof
 
-Today bookings are free-form datetimes. Phase 3 adds real scheduling:
+- New table `reviews` (student_id, university_id, course_id?, rating 1–5, body, status). RLS: students write own, public read `status = 'published'`.
+- Students prompted to review after application reaches `accepted`/`enrolled`.
+- Aggregate rating shown on `/universities/$slug` and `/courses/$slug`. JSON-LD `AggregateRating` for SEO.
+- Staff moderation queue at `/admin/reviews` — approve, reject, reply.
 
-- New table `adviser_availability` (adviser_id, weekday, start_time, end_time, timezone).
-- New table `adviser_time_off` (adviser_id, starts_at, ends_at, reason).
-- `listAvailableSlots({ adviser_id?, date_from, date_to })` server fn computes free 30-min slots = availability − existing bookings − time-off.
-- Student `/dashboard/bookings` request flow becomes a slot picker (date strip → available times) instead of arbitrary datetime input. Optional adviser preference dropdown.
-- Adviser availability editor at `/admin/availability` — weekly grid + time-off list.
+## 4. Referrals
 
-## 4. Notifications
+- New table `referrals` (referrer_user_id, code unique, referred_user_id?, status, created_at, converted_at).
+- `/dashboard/refer` page: personal code + share links (WhatsApp, copy). Tracking via `?ref=` on landing → cookie → attribution at signup.
+- Reward ledger column on `profiles.referral_credit` (int, GBP pence) — incremented when referred user reaches `accepted`. Redemption is manual for now (staff action via `/admin/students/$id`).
 
-Server-driven, surfaced in both shells.
+## 5. Content & SEO surface
 
-- New table `notifications` (user_id, kind, title, body, link, read_at, created_at). RLS scoped to `auth.uid()`.
-- Emit on: application status change, new message, new booking, booking confirmed/cancelled, new lead (staff), new document uploaded (staff).
-- `NotificationBell` in header (student + admin shells): unread count badge, dropdown list, "mark all read", links navigate to the entity.
-- Realtime via Supabase channel on `notifications` filtered by `user_id`.
-- Optional email digest (uses Phase 1 Resend gateway) — opt-in in profile settings, daily summary of unread.
+- `/blog` powered by Markdown files in `src/content/blog/*.md` parsed at build (no DB). Each post has frontmatter (title, description, slug, cover, tags, published).
+- Per-post route with proper `head()` (title, meta description, OG, canonical, `Article` JSON-LD, `datePublished`).
+- `/blog` index + tag pages.
+- Auto-generated `/sitemap.xml` extended with blog posts, course slugs, university slugs from DB at build/request.
+- Reading-time + "next post" recirculation.
 
-## 5. Plumbing & shared
+## 6. Search
 
-- `src/components/admin/AdminShell.tsx` — sidebar nav, staff identity chip, role badge.
-- `src/lib/admin/leads.functions.ts` and `src/lib/admin/applications.functions.ts` — all staff endpoints behind `assertStaff` / `assertAdmin`, every mutation writes to `admin_audit`.
-- `src/hooks/use-notifications.ts` — realtime + query integration.
-- `@dnd-kit/core` + `@dnd-kit/sortable` for the Kanban board.
-- Shared `<KanbanCard>`, `<StaffTable>`, `<SlotPicker>` components.
+- Postgres `tsvector` index on `courses(title, subject_area, description)` and `universities(name, city)`.
+- New `searchCatalogue({ q, limit })` server fn returning interleaved courses + universities.
+- Global header search (cmd-K palette using `cmdk`, already in shadcn): jumps to course/university/blog post. Available on marketing + dashboard shells.
+
+## 7. Observability & quality
+
+- Server-side error capture: extend `src/lib/error-capture.ts` to POST sampled errors to `app_errors` table (kind, message, stack, route, user_id?, created_at). RLS: staff read.
+- `/admin/errors` simple list, last 200, ack button.
+- Lightweight per-route hit logging (route, status, ms, user_id?) sampled at 10%, written via a request middleware to `request_logs` (partitioned by day, retention 14d via cron).
+
+## 8. Plumbing
+
+- New components: `KpiCard`, `FunnelChart`, `DateRangePicker`, `ProfileCompletion`, `RecommendationCard`, `ReviewForm`, `ReferralCard`, `CommandPalette`, `BlogCard`.
+- New server fns: `admin_metrics.functions.ts`, `recommendations.functions.ts`, `reviews.functions.ts`, `referrals.functions.ts`, `search.functions.ts`, `blog.functions.ts` (build-time helper).
+- Cron entry: `src/routes/api/public/cron.engagement.ts` (HMAC header check, idempotent per user/day).
 
 ## Migrations (single batch, requires approval)
 
 ```text
-- adviser_availability  (table + RLS: staff read self/all, admin write)
-- adviser_time_off      (table + RLS: staff read self, write self)
-- notifications         (table + RLS: owner read/update, service insert)
-- applications.application_data jsonb  (column add)
-- leads.assignee_id, leads.internal_notes  (column add if missing)
-- realtime publication: add notifications
-- GRANTs for every new table
+- reviews             (table + RLS: owner write, public read published, staff moderate)
+- referrals           (table + RLS: owner read own, staff read all)
+- app_errors          (table + RLS: staff read, service insert)
+- request_logs        (table + service insert; daily cleanup)
+- profiles.email_preferences jsonb default '{}'
+- profiles.referral_credit int default 0
+- profiles.referred_by uuid nullable
+- tsvector indexes on courses + universities + triggers to maintain
+- SQL views: v_lead_funnel, v_application_funnel, v_adviser_workload
+- GRANTs for every new table; realtime publication unchanged
 ```
-
-## Out of scope (Phase 4)
-
-- Payments / commission tracking
-- Adviser performance reports & analytics dashboards
-- Public university adviser-marketplace listings
-- Mobile push notifications (web push)
-- Bulk email campaigns
 
 ## Execution order (one turn each)
 
 1. Migrations + types regen.
-2. Staff shell + `/admin` overview + `/admin/leads`.
-3. `/admin/applications` Kanban + detail + audit page.
-4. `/admin/students/$userId` + `/admin/inbox`.
-5. Adviser availability tables, editor, slot-picker rewrite of student bookings, `/admin/bookings` calendar.
-6. Application wizard (4 steps, autosave, submit transition).
-7. Notifications: table, emitters in existing server fns, bell component, realtime hook, optional email digest.
+2. SQL views + `admin_metrics.functions.ts` + new `/admin` overview with KPI strip, funnel, source breakdown, workload table.
+3. Reviews: table, student form on accepted apps, public render on uni/course pages with JSON-LD, `/admin/reviews` moderation.
+4. Recommendations + profile completion + activity feed on `/dashboard`.
+5. Referrals (page, attribution cookie, signup capture, admin column).
+6. Search: tsvector + `searchCatalogue` + command palette in both shells.
+7. Blog: markdown loader, `/blog` + post route, sitemap extension.
+8. Engagement cron + email templates + opt-out + unsubscribe route.
+9. Error capture + `/admin/errors` + request log sampling + retention cron.
 
-This is large. I'll execute it phase-step by phase-step across turns — you approve this overall plan and we go.
+## Out of scope (future)
+
+- Stripe payments + commission tracking + invoicing.
+- Web push notifications.
+- AI essay/personal-statement assistant (separate dedicated phase).
+- A/B testing infrastructure.
+- Multi-language i18n.

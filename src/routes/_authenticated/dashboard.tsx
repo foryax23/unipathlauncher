@@ -75,6 +75,12 @@ function Dashboard() {
             >
               <BookOpen className="size-4" /> Shortlist
             </Link>
+            <Link
+              to="/dashboard/referrals"
+              className="tap inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent/40 transition"
+            >
+              <BookOpen className="size-4" /> Refer
+            </Link>
             <button
               type="button"
               onClick={async () => {

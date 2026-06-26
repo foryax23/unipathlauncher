@@ -24,6 +24,7 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UniversitiesSlugRouteImport } from './routes/universities.$slug'
 import { Route as CoursesSlugRouteImport } from './routes/courses.$slug'
+import { Route as AdminMetricsRouteImport } from './routes/admin.metrics'
 import { Route as AdminLeadsRouteImport } from './routes/admin.leads'
 import { Route as AdminAvailabilityRouteImport } from './routes/admin.availability'
 import { Route as AdminAuditRouteImport } from './routes/admin.audit'
@@ -31,6 +32,7 @@ import { Route as AdminApplicationsRouteImport } from './routes/admin.applicatio
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AdminApplicationsIdRouteImport } from './routes/admin.applications.$id'
 import { Route as AuthenticatedDashboardShortlistRouteImport } from './routes/_authenticated/dashboard/shortlist'
+import { Route as AuthenticatedDashboardReferralsRouteImport } from './routes/_authenticated/dashboard/referrals'
 import { Route as AuthenticatedDashboardMessagesRouteImport } from './routes/_authenticated/dashboard/messages'
 import { Route as AuthenticatedDashboardDocumentsRouteImport } from './routes/_authenticated/dashboard/documents'
 import { Route as AuthenticatedDashboardBookingsRouteImport } from './routes/_authenticated/dashboard/bookings'
@@ -112,6 +114,11 @@ const CoursesSlugRoute = CoursesSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => CoursesRoute,
 } as any)
+const AdminMetricsRoute = AdminMetricsRouteImport.update({
+  id: '/metrics',
+  path: '/metrics',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminLeadsRoute = AdminLeadsRouteImport.update({
   id: '/leads',
   path: '/leads',
@@ -146,6 +153,12 @@ const AuthenticatedDashboardShortlistRoute =
   AuthenticatedDashboardShortlistRouteImport.update({
     id: '/shortlist',
     path: '/shortlist',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
+const AuthenticatedDashboardReferralsRoute =
+  AuthenticatedDashboardReferralsRouteImport.update({
+    id: '/referrals',
+    path: '/referrals',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
 const AuthenticatedDashboardMessagesRoute =
@@ -203,12 +216,14 @@ export interface FileRoutesByFullPath {
   '/admin/audit': typeof AdminAuditRoute
   '/admin/availability': typeof AdminAvailabilityRoute
   '/admin/leads': typeof AdminLeadsRoute
+  '/admin/metrics': typeof AdminMetricsRoute
   '/courses/$slug': typeof CoursesSlugRoute
   '/universities/$slug': typeof UniversitiesSlugRoute
   '/dashboard/applications': typeof AuthenticatedDashboardApplicationsRouteWithChildren
   '/dashboard/bookings': typeof AuthenticatedDashboardBookingsRoute
   '/dashboard/documents': typeof AuthenticatedDashboardDocumentsRoute
   '/dashboard/messages': typeof AuthenticatedDashboardMessagesRoute
+  '/dashboard/referrals': typeof AuthenticatedDashboardReferralsRoute
   '/dashboard/shortlist': typeof AuthenticatedDashboardShortlistRoute
   '/admin/applications/$id': typeof AdminApplicationsIdRoute
   '/dashboard/applications/$id': typeof AuthenticatedDashboardApplicationsIdRouteWithChildren
@@ -232,12 +247,14 @@ export interface FileRoutesByTo {
   '/admin/audit': typeof AdminAuditRoute
   '/admin/availability': typeof AdminAvailabilityRoute
   '/admin/leads': typeof AdminLeadsRoute
+  '/admin/metrics': typeof AdminMetricsRoute
   '/courses/$slug': typeof CoursesSlugRoute
   '/universities/$slug': typeof UniversitiesSlugRoute
   '/dashboard/applications': typeof AuthenticatedDashboardApplicationsRouteWithChildren
   '/dashboard/bookings': typeof AuthenticatedDashboardBookingsRoute
   '/dashboard/documents': typeof AuthenticatedDashboardDocumentsRoute
   '/dashboard/messages': typeof AuthenticatedDashboardMessagesRoute
+  '/dashboard/referrals': typeof AuthenticatedDashboardReferralsRoute
   '/dashboard/shortlist': typeof AuthenticatedDashboardShortlistRoute
   '/admin/applications/$id': typeof AdminApplicationsIdRoute
   '/dashboard/applications/$id': typeof AuthenticatedDashboardApplicationsIdRouteWithChildren
@@ -263,12 +280,14 @@ export interface FileRoutesById {
   '/admin/audit': typeof AdminAuditRoute
   '/admin/availability': typeof AdminAvailabilityRoute
   '/admin/leads': typeof AdminLeadsRoute
+  '/admin/metrics': typeof AdminMetricsRoute
   '/courses/$slug': typeof CoursesSlugRoute
   '/universities/$slug': typeof UniversitiesSlugRoute
   '/_authenticated/dashboard/applications': typeof AuthenticatedDashboardApplicationsRouteWithChildren
   '/_authenticated/dashboard/bookings': typeof AuthenticatedDashboardBookingsRoute
   '/_authenticated/dashboard/documents': typeof AuthenticatedDashboardDocumentsRoute
   '/_authenticated/dashboard/messages': typeof AuthenticatedDashboardMessagesRoute
+  '/_authenticated/dashboard/referrals': typeof AuthenticatedDashboardReferralsRoute
   '/_authenticated/dashboard/shortlist': typeof AuthenticatedDashboardShortlistRoute
   '/admin/applications/$id': typeof AdminApplicationsIdRoute
   '/_authenticated/dashboard/applications/$id': typeof AuthenticatedDashboardApplicationsIdRouteWithChildren
@@ -294,12 +313,14 @@ export interface FileRouteTypes {
     | '/admin/audit'
     | '/admin/availability'
     | '/admin/leads'
+    | '/admin/metrics'
     | '/courses/$slug'
     | '/universities/$slug'
     | '/dashboard/applications'
     | '/dashboard/bookings'
     | '/dashboard/documents'
     | '/dashboard/messages'
+    | '/dashboard/referrals'
     | '/dashboard/shortlist'
     | '/admin/applications/$id'
     | '/dashboard/applications/$id'
@@ -323,12 +344,14 @@ export interface FileRouteTypes {
     | '/admin/audit'
     | '/admin/availability'
     | '/admin/leads'
+    | '/admin/metrics'
     | '/courses/$slug'
     | '/universities/$slug'
     | '/dashboard/applications'
     | '/dashboard/bookings'
     | '/dashboard/documents'
     | '/dashboard/messages'
+    | '/dashboard/referrals'
     | '/dashboard/shortlist'
     | '/admin/applications/$id'
     | '/dashboard/applications/$id'
@@ -353,12 +376,14 @@ export interface FileRouteTypes {
     | '/admin/audit'
     | '/admin/availability'
     | '/admin/leads'
+    | '/admin/metrics'
     | '/courses/$slug'
     | '/universities/$slug'
     | '/_authenticated/dashboard/applications'
     | '/_authenticated/dashboard/bookings'
     | '/_authenticated/dashboard/documents'
     | '/_authenticated/dashboard/messages'
+    | '/_authenticated/dashboard/referrals'
     | '/_authenticated/dashboard/shortlist'
     | '/admin/applications/$id'
     | '/_authenticated/dashboard/applications/$id'
@@ -489,6 +514,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CoursesSlugRouteImport
       parentRoute: typeof CoursesRoute
     }
+    '/admin/metrics': {
+      id: '/admin/metrics'
+      path: '/metrics'
+      fullPath: '/admin/metrics'
+      preLoaderRoute: typeof AdminMetricsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/leads': {
       id: '/admin/leads'
       path: '/leads'
@@ -536,6 +568,13 @@ declare module '@tanstack/react-router' {
       path: '/shortlist'
       fullPath: '/dashboard/shortlist'
       preLoaderRoute: typeof AuthenticatedDashboardShortlistRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
+    '/_authenticated/dashboard/referrals': {
+      id: '/_authenticated/dashboard/referrals'
+      path: '/referrals'
+      fullPath: '/dashboard/referrals'
+      preLoaderRoute: typeof AuthenticatedDashboardReferralsRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
     }
     '/_authenticated/dashboard/messages': {
@@ -618,6 +657,7 @@ interface AuthenticatedDashboardRouteChildren {
   AuthenticatedDashboardBookingsRoute: typeof AuthenticatedDashboardBookingsRoute
   AuthenticatedDashboardDocumentsRoute: typeof AuthenticatedDashboardDocumentsRoute
   AuthenticatedDashboardMessagesRoute: typeof AuthenticatedDashboardMessagesRoute
+  AuthenticatedDashboardReferralsRoute: typeof AuthenticatedDashboardReferralsRoute
   AuthenticatedDashboardShortlistRoute: typeof AuthenticatedDashboardShortlistRoute
 }
 
@@ -628,6 +668,7 @@ const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
     AuthenticatedDashboardBookingsRoute: AuthenticatedDashboardBookingsRoute,
     AuthenticatedDashboardDocumentsRoute: AuthenticatedDashboardDocumentsRoute,
     AuthenticatedDashboardMessagesRoute: AuthenticatedDashboardMessagesRoute,
+    AuthenticatedDashboardReferralsRoute: AuthenticatedDashboardReferralsRoute,
     AuthenticatedDashboardShortlistRoute: AuthenticatedDashboardShortlistRoute,
   }
 
@@ -664,6 +705,7 @@ interface AdminRouteChildren {
   AdminAuditRoute: typeof AdminAuditRoute
   AdminAvailabilityRoute: typeof AdminAvailabilityRoute
   AdminLeadsRoute: typeof AdminLeadsRoute
+  AdminMetricsRoute: typeof AdminMetricsRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
@@ -671,6 +713,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAuditRoute: AdminAuditRoute,
   AdminAvailabilityRoute: AdminAvailabilityRoute,
   AdminLeadsRoute: AdminLeadsRoute,
+  AdminMetricsRoute: AdminMetricsRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
@@ -705,13 +748,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

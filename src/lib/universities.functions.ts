@@ -38,7 +38,7 @@ export const getUniversityBySlug = createServerFn({ method: "GET" })
     const supabase = publicClient();
     const { data: uni, error: ue } = await supabase
       .from("universities")
-      .select("*")
+      .select("id,slug,name,city,region,country,logo_url,is_partner,ranking,website,description,created_at,updated_at")
       .eq("slug", data.slug)
       .maybeSingle();
     if (ue) throw new Error(ue.message);

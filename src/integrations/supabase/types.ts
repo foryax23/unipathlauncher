@@ -110,6 +110,42 @@ export type Database = {
         }
         Relationships: []
       }
+      app_errors: {
+        Row: {
+          acknowledged_at: string | null
+          context: Json
+          created_at: string
+          id: string
+          kind: string
+          message: string
+          route: string | null
+          stack: string | null
+          user_id: string | null
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          context?: Json
+          created_at?: string
+          id?: string
+          kind: string
+          message: string
+          route?: string | null
+          stack?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          acknowledged_at?: string | null
+          context?: Json
+          created_at?: string
+          id?: string
+          kind?: string
+          message?: string
+          route?: string | null
+          stack?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       application_events: {
         Row: {
           actor_id: string | null
@@ -297,6 +333,7 @@ export type Database = {
           is_active: boolean
           level: string
           name: string
+          search_tsv: unknown
           slug: string
           subject: string
           ucas_points: number | null
@@ -314,6 +351,7 @@ export type Database = {
           is_active?: boolean
           level: string
           name: string
+          search_tsv?: unknown
           slug: string
           subject: string
           ucas_points?: number | null
@@ -331,6 +369,7 @@ export type Database = {
           is_active?: boolean
           level?: string
           name?: string
+          search_tsv?: unknown
           slug?: string
           subject?: string
           ucas_points?: number | null
@@ -561,6 +600,7 @@ export type Database = {
           country: string | null
           created_at: string
           date_of_birth: string | null
+          email_preferences: Json
           email_verified_at: string | null
           english_test: Json | null
           full_name: string | null
@@ -574,6 +614,8 @@ export type Database = {
           phone: string | null
           predicted_grades: Json | null
           reason: string | null
+          referral_credit: number
+          referred_by: string | null
           start_year: string | null
           study_level: string | null
           subject: string | null
@@ -588,6 +630,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           date_of_birth?: string | null
+          email_preferences?: Json
           email_verified_at?: string | null
           english_test?: Json | null
           full_name?: string | null
@@ -601,6 +644,8 @@ export type Database = {
           phone?: string | null
           predicted_grades?: Json | null
           reason?: string | null
+          referral_credit?: number
+          referred_by?: string | null
           start_year?: string | null
           study_level?: string | null
           subject?: string | null
@@ -615,6 +660,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           date_of_birth?: string | null
+          email_preferences?: Json
           email_verified_at?: string | null
           english_test?: Json | null
           full_name?: string | null
@@ -628,6 +674,8 @@ export type Database = {
           phone?: string | null
           predicted_grades?: Json | null
           reason?: string | null
+          referral_credit?: number
+          referred_by?: string | null
           start_year?: string | null
           study_level?: string | null
           subject?: string | null
@@ -636,6 +684,129 @@ export type Database = {
           visa_status?: string | null
         }
         Relationships: []
+      }
+      referrals: {
+        Row: {
+          code: string
+          converted_at: string | null
+          created_at: string
+          id: string
+          referred_user_id: string | null
+          referrer_user_id: string
+          reward_pence: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          converted_at?: string | null
+          created_at?: string
+          id?: string
+          referred_user_id?: string | null
+          referrer_user_id: string
+          reward_pence?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          converted_at?: string | null
+          created_at?: string
+          id?: string
+          referred_user_id?: string | null
+          referrer_user_id?: string
+          reward_pence?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      request_logs: {
+        Row: {
+          created_at: string
+          duration_ms: number
+          id: number
+          method: string
+          route: string
+          status: number
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          duration_ms: number
+          id?: number
+          method: string
+          route: string
+          status: number
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          duration_ms?: number
+          id?: number
+          method?: string
+          route?: string
+          status?: number
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      reviews: {
+        Row: {
+          body: string
+          course_id: string | null
+          created_at: string
+          id: string
+          rating: number
+          staff_reply: string | null
+          status: string
+          student_id: string
+          title: string | null
+          university_id: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          course_id?: string | null
+          created_at?: string
+          id?: string
+          rating: number
+          staff_reply?: string | null
+          status?: string
+          student_id: string
+          title?: string | null
+          university_id: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          course_id?: string | null
+          created_at?: string
+          id?: string
+          rating?: number
+          staff_reply?: string | null
+          status?: string
+          student_id?: string
+          title?: string | null
+          university_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_university_id_fkey"
+            columns: ["university_id"]
+            isOneToOne: false
+            referencedRelation: "universities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       shortlists: {
         Row: {
@@ -712,6 +883,7 @@ export type Database = {
           name: string
           ranking: number | null
           region: string | null
+          search_tsv: unknown
           slug: string
           ucas_code: string | null
           updated_at: string
@@ -728,6 +900,7 @@ export type Database = {
           name: string
           ranking?: number | null
           region?: string | null
+          search_tsv?: unknown
           slug: string
           ucas_code?: string | null
           updated_at?: string
@@ -744,6 +917,7 @@ export type Database = {
           name?: string
           ranking?: number | null
           region?: string | null
+          search_tsv?: unknown
           slug?: string
           ucas_code?: string | null
           updated_at?: string
@@ -774,7 +948,43 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      v_adviser_workload: {
+        Row: {
+          adviser_id: string | null
+          open_applications: number | null
+          open_leads: number | null
+          upcoming_bookings: number | null
+        }
+        Insert: {
+          adviser_id?: string | null
+          open_applications?: never
+          open_leads?: never
+          upcoming_bookings?: never
+        }
+        Update: {
+          adviser_id?: string | null
+          open_applications?: never
+          open_leads?: never
+          upcoming_bookings?: never
+        }
+        Relationships: []
+      }
+      v_application_funnel: {
+        Row: {
+          day: string | null
+          n: number | null
+          status: string | null
+        }
+        Relationships: []
+      }
+      v_lead_funnel: {
+        Row: {
+          day: string | null
+          n: number | null
+          status: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
