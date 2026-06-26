@@ -69,16 +69,16 @@ type Slot = { adviser_id: string; starts_at: string; ends_at: string };
 export const listAvailableSlots = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => slotSchema.parse(input))
-  .handler(async ({ data, context }) => {
-    const { supabase } = context;
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const start = new Date(`${data.date_from}T00:00:00.000Z`);
     const end = new Date(`${data.date_to}T23:59:59.999Z`);
 
     const [avRes, offRes, bkRes] = await Promise.all([
-      supabase.from("adviser_availability").select("adviser_id,weekday,start_time,end_time"),
-      supabase.from("adviser_time_off").select("adviser_id,starts_at,ends_at")
+      supabaseAdmin.from("adviser_availability").select("adviser_id,weekday,start_time,end_time"),
+      supabaseAdmin.from("adviser_time_off").select("adviser_id,starts_at,ends_at")
         .lte("starts_at", end.toISOString()).gte("ends_at", start.toISOString()),
-      supabase.from("bookings").select("adviser_id,starts_at,ends_at")
+      supabaseAdmin.from("bookings").select("adviser_id,starts_at,ends_at")
         .not("adviser_id", "is", null)
         .neq("status", "cancelled")
         .gte("starts_at", start.toISOString()).lte("starts_at", end.toISOString()),
