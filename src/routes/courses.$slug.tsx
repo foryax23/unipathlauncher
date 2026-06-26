@@ -40,7 +40,8 @@ export const Route = createFileRoute("/courses/$slug")({
     const title = `${c.name} at ${uni?.name ?? "UK University"} · Bridge Gateway`;
     const description = `${c.level ?? "Undergraduate"} ${c.subject ?? ""} at ${uni?.name ?? "the UK"}. Apply with Bridge Gateway Consulting.`;
     const url = `https://bridgegatewayconsulting.com/courses/${c.slug}`;
-    const jsonLd = {
+    const summary = loaderData?.reviewSummary;
+    const jsonLd: Record<string, unknown> = {
       "@context": "https://schema.org",
       "@type": "Course",
       name: c.name,
@@ -52,6 +53,15 @@ export const Route = createFileRoute("/courses/$slug")({
       },
       url,
     };
+    if (summary && summary.count > 0 && summary.avgRating != null) {
+      jsonLd.aggregateRating = {
+        "@type": "AggregateRating",
+        ratingValue: summary.avgRating,
+        reviewCount: summary.count,
+        bestRating: 5,
+        worstRating: 1,
+      };
+    }
     return {
       meta: [
         { title },
