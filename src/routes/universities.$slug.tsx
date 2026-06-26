@@ -1,6 +1,8 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { getUniversityBySlug } from "@/lib/universities.functions";
+import { listPublishedReviews } from "@/lib/reviews.functions";
+import { ReviewsSection } from "@/components/reviews/ReviewsSection";
 import { Logo } from "@/components/marketing/Logo";
 import { Footer } from "@/components/marketing/Footer";
 import { ArrowRight, MapPin, ExternalLink } from "lucide-react";
@@ -11,11 +13,18 @@ const uniQuery = (slug: string) =>
     queryFn: () => getUniversityBySlug({ data: { slug } }),
   });
 
+const reviewsQuery = (universityId: string) =>
+  queryOptions({
+    queryKey: ["reviews", "uni", universityId],
+    queryFn: () => listPublishedReviews({ data: { universityId, limit: 20 } }),
+  });
+
 export const Route = createFileRoute("/universities/$slug")({
   loader: async ({ context, params }) => {
     const res = await context.queryClient.ensureQueryData(uniQuery(params.slug));
     if (!res.university) throw notFound();
-    return res;
+    const rev = await context.queryClient.ensureQueryData(reviewsQuery(res.university.id));
+    return { ...res, reviewSummary: { avgRating: rev.avgRating, count: rev.count } };
   },
   head: ({ loaderData }) => {
     const u = loaderData?.university;
@@ -23,13 +32,23 @@ export const Route = createFileRoute("/universities/$slug")({
     const title = `${u.name} · Apply with Bridge Gateway`;
     const description = u.description ?? `Explore ${u.name} courses and apply with Bridge Gateway Consulting.`;
     const url = `https://bridgegatewayconsulting.com/universities/${u.slug}`;
-    const jsonLd = {
+    const summary = loaderData?.reviewSummary;
+    const jsonLd: Record<string, unknown> = {
       "@context": "https://schema.org",
       "@type": "CollegeOrUniversity",
       name: u.name,
       url,
       address: u.city,
     };
+    if (summary && summary.count > 0 && summary.avgRating != null) {
+      jsonLd.aggregateRating = {
+        "@type": "AggregateRating",
+        ratingValue: summary.avgRating,
+        reviewCount: summary.count,
+        bestRating: 5,
+        worstRating: 1,
+      };
+    }
     return {
       meta: [
         { title },
@@ -55,6 +74,7 @@ function UniversityPage() {
   const params = Route.useParams();
   const { data } = useSuspenseQuery(uniQuery(params.slug));
   const u = data.university!;
+  const { data: rev } = useSuspenseQuery(reviewsQuery(u.id));
   return (
     <div className="min-h-screen hero-warm">
       <header className="glass border-b border-border/50">
@@ -129,6 +149,8 @@ function UniversityPage() {
             <li className="text-sm text-muted-foreground">No live courses listed yet.</li>
           )}
         </ul>
+
+        <ReviewsSection reviews={rev.reviews} avgRating={rev.avgRating} count={rev.count} />
       </main>
       <Footer />
     </div>

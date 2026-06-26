@@ -24,6 +24,7 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UniversitiesSlugRouteImport } from './routes/universities.$slug'
 import { Route as CoursesSlugRouteImport } from './routes/courses.$slug'
+import { Route as AdminReviewsRouteImport } from './routes/admin.reviews'
 import { Route as AdminMetricsRouteImport } from './routes/admin.metrics'
 import { Route as AdminLeadsRouteImport } from './routes/admin.leads'
 import { Route as AdminAvailabilityRouteImport } from './routes/admin.availability'
@@ -113,6 +114,11 @@ const CoursesSlugRoute = CoursesSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
   getParentRoute: () => CoursesRoute,
+} as any)
+const AdminReviewsRoute = AdminReviewsRouteImport.update({
+  id: '/reviews',
+  path: '/reviews',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AdminMetricsRoute = AdminMetricsRouteImport.update({
   id: '/metrics',
@@ -217,6 +223,7 @@ export interface FileRoutesByFullPath {
   '/admin/availability': typeof AdminAvailabilityRoute
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/metrics': typeof AdminMetricsRoute
+  '/admin/reviews': typeof AdminReviewsRoute
   '/courses/$slug': typeof CoursesSlugRoute
   '/universities/$slug': typeof UniversitiesSlugRoute
   '/dashboard/applications': typeof AuthenticatedDashboardApplicationsRouteWithChildren
@@ -248,6 +255,7 @@ export interface FileRoutesByTo {
   '/admin/availability': typeof AdminAvailabilityRoute
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/metrics': typeof AdminMetricsRoute
+  '/admin/reviews': typeof AdminReviewsRoute
   '/courses/$slug': typeof CoursesSlugRoute
   '/universities/$slug': typeof UniversitiesSlugRoute
   '/dashboard/applications': typeof AuthenticatedDashboardApplicationsRouteWithChildren
@@ -281,6 +289,7 @@ export interface FileRoutesById {
   '/admin/availability': typeof AdminAvailabilityRoute
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/metrics': typeof AdminMetricsRoute
+  '/admin/reviews': typeof AdminReviewsRoute
   '/courses/$slug': typeof CoursesSlugRoute
   '/universities/$slug': typeof UniversitiesSlugRoute
   '/_authenticated/dashboard/applications': typeof AuthenticatedDashboardApplicationsRouteWithChildren
@@ -314,6 +323,7 @@ export interface FileRouteTypes {
     | '/admin/availability'
     | '/admin/leads'
     | '/admin/metrics'
+    | '/admin/reviews'
     | '/courses/$slug'
     | '/universities/$slug'
     | '/dashboard/applications'
@@ -345,6 +355,7 @@ export interface FileRouteTypes {
     | '/admin/availability'
     | '/admin/leads'
     | '/admin/metrics'
+    | '/admin/reviews'
     | '/courses/$slug'
     | '/universities/$slug'
     | '/dashboard/applications'
@@ -377,6 +388,7 @@ export interface FileRouteTypes {
     | '/admin/availability'
     | '/admin/leads'
     | '/admin/metrics'
+    | '/admin/reviews'
     | '/courses/$slug'
     | '/universities/$slug'
     | '/_authenticated/dashboard/applications'
@@ -513,6 +525,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/courses/$slug'
       preLoaderRoute: typeof CoursesSlugRouteImport
       parentRoute: typeof CoursesRoute
+    }
+    '/admin/reviews': {
+      id: '/admin/reviews'
+      path: '/reviews'
+      fullPath: '/admin/reviews'
+      preLoaderRoute: typeof AdminReviewsRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/admin/metrics': {
       id: '/admin/metrics'
@@ -706,6 +725,7 @@ interface AdminRouteChildren {
   AdminAvailabilityRoute: typeof AdminAvailabilityRoute
   AdminLeadsRoute: typeof AdminLeadsRoute
   AdminMetricsRoute: typeof AdminMetricsRoute
+  AdminReviewsRoute: typeof AdminReviewsRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
@@ -714,6 +734,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAvailabilityRoute: AdminAvailabilityRoute,
   AdminLeadsRoute: AdminLeadsRoute,
   AdminMetricsRoute: AdminMetricsRoute,
+  AdminReviewsRoute: AdminReviewsRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)

@@ -9,6 +9,7 @@ import {
 } from "@/lib/applications.functions";
 import { DashShell } from "@/components/dashboard/DashShell";
 import { StatusPill } from "@/components/dashboard/StatusPill";
+import { ReviewForm } from "@/components/reviews/ReviewForm";
 import { toast } from "sonner";
 import { ArrowLeft, Save, Trash2 } from "lucide-react";
 
@@ -43,8 +44,9 @@ function AppDetail() {
   const { data } = useSuspenseQuery(appQuery(params.id));
   const qc = useQueryClient();
   const app = data.application!;
-  const c = (app as { courses?: { name?: string; level?: string; subject?: string; slug?: string; universities?: { name?: string; city?: string; slug?: string } } }).courses;
+  const c = (app as { courses?: { id?: string; name?: string; level?: string; subject?: string; slug?: string; universities?: { id?: string; name?: string; city?: string; slug?: string } } }).courses;
   const uni = c?.universities;
+  const canReview = (app.status === "accepted" || app.status === "enrolled") && uni?.id;
 
   const [notes, setNotes] = useState(app.notes ?? "");
   const saveNotes = useServerFn(updateMyApplicationNotes);
@@ -105,6 +107,17 @@ function AppDetail() {
             )}
           </ol>
         </section>
+
+        {canReview && uni?.id && (
+          <section className="lg:col-span-2">
+            <ReviewForm
+              universityId={uni.id}
+              universityName={uni.name ?? "this university"}
+              courseId={c?.id ?? null}
+              onSuccess={() => qc.invalidateQueries({ queryKey: ["application", app.id] })}
+            />
+          </section>
+        )}
 
         <aside className="space-y-4">
           <div className="glass rounded-3xl p-5">

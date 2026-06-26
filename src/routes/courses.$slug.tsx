@@ -5,6 +5,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { getCourseBySlug } from "@/lib/courses.functions";
 import { createApplicationBySlug } from "@/lib/applications.functions";
+import { listPublishedReviews } from "@/lib/reviews.functions";
+import { ReviewsSection } from "@/components/reviews/ReviewsSection";
 import { ShortlistButton } from "@/components/shortlist/ShortlistButton";
 import { Logo } from "@/components/marketing/Logo";
 import { Footer } from "@/components/marketing/Footer";
@@ -18,11 +20,18 @@ const courseQuery = (slug: string) =>
     queryFn: () => getCourseBySlug({ data: { slug } }),
   });
 
+const reviewsQuery = (courseId: string) =>
+  queryOptions({
+    queryKey: ["reviews", "course", courseId],
+    queryFn: () => listPublishedReviews({ data: { courseId, limit: 20 } }),
+  });
+
 export const Route = createFileRoute("/courses/$slug")({
   loader: async ({ context, params }) => {
     const res = await context.queryClient.ensureQueryData(courseQuery(params.slug));
     if (!res.course) throw notFound();
-    return res;
+    const rev = await context.queryClient.ensureQueryData(reviewsQuery(res.course.id));
+    return { ...res, reviewSummary: { avgRating: rev.avgRating, count: rev.count } };
   },
   head: ({ loaderData }) => {
     const c = loaderData?.course;
@@ -31,7 +40,8 @@ export const Route = createFileRoute("/courses/$slug")({
     const title = `${c.name} at ${uni?.name ?? "UK University"} · Bridge Gateway`;
     const description = `${c.level ?? "Undergraduate"} ${c.subject ?? ""} at ${uni?.name ?? "the UK"}. Apply with Bridge Gateway Consulting.`;
     const url = `https://bridgegatewayconsulting.com/courses/${c.slug}`;
-    const jsonLd = {
+    const summary = loaderData?.reviewSummary;
+    const jsonLd: Record<string, unknown> = {
       "@context": "https://schema.org",
       "@type": "Course",
       name: c.name,
@@ -43,6 +53,15 @@ export const Route = createFileRoute("/courses/$slug")({
       },
       url,
     };
+    if (summary && summary.count > 0 && summary.avgRating != null) {
+      jsonLd.aggregateRating = {
+        "@type": "AggregateRating",
+        ratingValue: summary.avgRating,
+        reviewCount: summary.count,
+        bestRating: 5,
+        worstRating: 1,
+      };
+    }
     return {
       meta: [
         { title },
@@ -75,6 +94,7 @@ function CoursePage() {
   const params = Route.useParams();
   const { data } = useSuspenseQuery(courseQuery(params.slug));
   const course = data.course!;
+  const { data: rev } = useSuspenseQuery(reviewsQuery(course.id));
   const uni = course.universities as {
     id: string;
     slug: string;
@@ -254,6 +274,8 @@ function CoursePage() {
             </div>
           </aside>
         </div>
+
+        <ReviewsSection reviews={rev.reviews} avgRating={rev.avgRating} count={rev.count} />
       </main>
 
       <Footer />

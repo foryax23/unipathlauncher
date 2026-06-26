@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   CalendarClock,
   LogOut,
+  Star,
 } from "lucide-react";
 
 type NavItem = { to: string; label: string; icon: typeof LayoutDashboard; exact?: boolean };
@@ -17,6 +18,7 @@ const NAV: NavItem[] = [
   { to: "/admin", label: "Overview", icon: LayoutDashboard, exact: true },
   { to: "/admin/applications", label: "Applications", icon: FileText },
   { to: "/admin/leads", label: "Leads", icon: Inbox },
+  { to: "/admin/reviews", label: "Reviews", icon: Star },
   { to: "/admin/availability", label: "Availability", icon: CalendarClock },
   { to: "/admin/audit", label: "Audit", icon: ShieldCheck },
 ];
