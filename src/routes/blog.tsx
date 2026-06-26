@@ -30,7 +30,7 @@ export const Route = createFileRoute("/blog")({
 });
 
 function BlogIndex() {
-  const { posts, tags } = Route.useLoaderData();
+  const { posts, tags } = Route.useLoaderData() as { posts: PostMeta[]; tags: string[] };
 
   return (
     <>
