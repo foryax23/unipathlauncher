@@ -428,6 +428,27 @@ export type Database = {
         }
         Relationships: []
       }
+      email_nudges: {
+        Row: {
+          id: string
+          kind: string
+          sent_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          kind: string
+          sent_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          kind?: string
+          sent_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       lead_rate_limits: {
         Row: {
           count: number
