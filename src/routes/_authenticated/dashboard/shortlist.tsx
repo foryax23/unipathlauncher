@@ -23,7 +23,7 @@ export const Route = createFileRoute("/_authenticated/dashboard/shortlist")({
   component: ShortlistPage,
   errorComponent: ({ error }) => (
     <div className="hero-warm min-h-screen p-10 text-muted-foreground">
-      Couldn't load your shortlist: {error.message}
+      Couldn't load your shortlist: {error instanceof Error ? error.message : "Unknown error"}
     </div>
   ),
   notFoundComponent: () => <div className="p-10">Not found.</div>,
